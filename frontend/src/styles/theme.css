@@ -1,0 +1,14 @@
+/* Theme chung (Minh Trọng phụ trách): ghi đè biến Bootstrap tại đây. */
+:root {
+  --bs-primary: #4f46e5;
+  --bs-primary-rgb: 79, 70, 229;
+  --bs-link-color: #4338ca;
+  --bs-link-hover-color: #3730a3;
+}
+.btn-primary {
+  --bs-btn-bg: #4f46e5; --bs-btn-border-color: #4f46e5;
+  --bs-btn-hover-bg: #4338ca; --bs-btn-hover-border-color: #4338ca;
+  --bs-btn-active-bg: #3730a3; --bs-btn-active-border-color: #3730a3;
+}
+body { background: #f8f9fb; }
+main { min-height: calc(100vh - 56px - 72px); }

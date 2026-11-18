@@ -20,10 +20,11 @@ Cần Node ≥ 20 (backend dùng `--env-file`).
 
 `SUPABASE_SERVICE_ROLE_KEY` chỉ đặt ở backend.
 
-## Triển khai (Vercel, SRS 6.1)
+## Triển khai (Vercel, một dự án nhiều service)
 
-Hai dự án từ cùng repo, Root Directory lần lượt `frontend` và `backend`. Biến môi trường backend: xem `backend/.env.example`; frontend: `VITE_*`.
-Cron `/api/health` chạy hằng ngày (`backend/vercel.json`) để Supabase không tạm dừng.
+Một dự án Vercel, một domain, cấu hình ở `vercel.json` gốc: service `backend` (Express, `backend/src/app.js`) nhận `/api/*`, service `frontend` (Vite) nhận phần còn lại. Chạy cả hai cục bộ bằng `vercel dev`.
+Biến môi trường đặt một lần trên dự án: xem `backend/.env.example` (frontend chỉ dùng `VITE_*`).
+Cron `/api/health` chạy hằng ngày để Supabase không tạm dừng.
 
 ## Phân công module
 

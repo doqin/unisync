@@ -1,6 +1,6 @@
 import { supabase } from './supabase.js';
 
-const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+const BASE = import.meta.env.VITE_API_URL ?? '/api'; // cùng domain: Vercel chuyển /api/* tới service backend;
 
 export class ApiError extends Error {
   constructor(status, message, details) { super(message); this.status = status; this.details = details; }

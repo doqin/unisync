@@ -5,8 +5,11 @@
 //        { group_id, title, description?, file_name, mime_type?, file_size }
 //   2. Express kiểm tra thành viên đã duyệt của nhóm học phần, phần mở rộng/MIME, kích thước ≤ 10 MB
 //      → 201 { path, token, signed_url, content_type }
-//   3. Client tải thẳng lên Storage:
-//        supabase.storage.from('documents').uploadToSignedUrl(path, token, file, { contentType: content_type })
+//   3. Client tải thẳng lên Storage, bọc tệp lại với MIME chuẩn do bước 2 trả về:
+//        const body = new Blob([file], { type: content_type });
+//        supabase.storage.from('documents').uploadToSignedUrl(path, token, body)
+//      (Với Blob/File, supabase-js BỎ QUA option `contentType` và dùng `file.type`; trình duyệt có thể để
+//      `file.type` rỗng với DOCX/PPTX → bucket từ chối "application/octet-stream is not supported".)
 //   4. Client xác nhận:         POST /api/documents
 //        { path, group_id, title, description? }
 //      Express kiểm tra tệp thật (kích thước, MIME, magic bytes), sai thì xóa tệp; đúng thì ghi `documents`

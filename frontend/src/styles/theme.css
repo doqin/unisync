@@ -1,14 +1,107 @@
 /* Theme chung (Minh Trọng phụ trách): ghi đè biến Bootstrap tại đây. */
+
 :root {
-  --bs-primary: #4f46e5;
+  --us-primary: #4f46e5;
+  --us-primary-hover: #4338ca;
+  --us-primary-active: #3730a3;
+  --us-primary-subtle: #eef2ff;
+  --us-bg: #f8f9fb;
+  --us-surface: #ffffff;
+  --us-border: #e3e6ec;
+  --us-text: #1f2430;
+  --us-text-muted: #565e66;
+  --us-focus: #b45309;
+
+  --bs-primary: var(--us-primary);
   --bs-primary-rgb: 79, 70, 229;
-  --bs-link-color: #4338ca;
-  --bs-link-hover-color: #3730a3;
+  --bs-primary-text-emphasis: var(--us-primary-active);
+  --bs-primary-bg-subtle: var(--us-primary-subtle);
+  --bs-link-color: var(--us-primary-hover);
+  --bs-link-color-rgb: 67, 56, 202;
+  --bs-link-hover-color: var(--us-primary-active);
+  --bs-link-hover-color-rgb: 55, 48, 163;
+  --bs-body-color: var(--us-text);
+  --bs-body-bg: var(--us-bg);
+  --bs-secondary-color: var(--us-text-muted);
+  --bs-border-color: var(--us-border);
+  --bs-border-radius: 0.5rem;
+  --bs-body-font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
+
+/* #6c757d mặc định của Bootstrap không đạt WCAG AA trên nền xám nhạt */
+.text-muted, .text-body-secondary { color: var(--us-text-muted) !important; }
+
 .btn-primary {
-  --bs-btn-bg: #4f46e5; --bs-btn-border-color: #4f46e5;
-  --bs-btn-hover-bg: #4338ca; --bs-btn-hover-border-color: #4338ca;
-  --bs-btn-active-bg: #3730a3; --bs-btn-active-border-color: #3730a3;
+  --bs-btn-bg: var(--us-primary); --bs-btn-border-color: var(--us-primary);
+  --bs-btn-hover-bg: var(--us-primary-hover); --bs-btn-hover-border-color: var(--us-primary-hover);
+  --bs-btn-active-bg: var(--us-primary-active); --bs-btn-active-border-color: var(--us-primary-active);
+  --bs-btn-disabled-bg: var(--us-primary); --bs-btn-disabled-border-color: var(--us-primary);
 }
-body { background: #f8f9fb; }
-main { min-height: calc(100vh - 56px - 72px); }
+.btn-outline-primary {
+  --bs-btn-color: var(--us-primary); --bs-btn-border-color: var(--us-primary);
+  --bs-btn-hover-bg: var(--us-primary); --bs-btn-hover-border-color: var(--us-primary);
+  --bs-btn-active-bg: var(--us-primary-hover); --bs-btn-active-border-color: var(--us-primary-hover);
+  --bs-btn-disabled-color: var(--us-primary); --bs-btn-disabled-border-color: var(--us-primary);
+}
+
+/* ---------- Bố cục ---------- */
+html, body, #root { height: 100%; }
+body { background: var(--us-bg); color: var(--us-text); }
+.app-shell { display: flex; flex-direction: column; min-height: 100%; }
+.app-main { flex: 1 0 auto; }
+.app-main:focus { outline: none; }
+
+@media (max-width: 575.98px) {
+  .container, .container-fluid { --bs-gutter-x: 1.5rem; }
+}
+
+/* ---------- Navbar ---------- */
+.app-navbar { background: var(--us-surface); }
+.app-brand {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  font-weight: 700; color: var(--us-primary) !important;
+}
+.app-brand-mark {
+  display: inline-grid; place-items: center;
+  width: 2rem; height: 2rem; border-radius: 0.5rem;
+  background: var(--us-primary); color: #fff; font-size: 1rem;
+}
+.app-navbar .nav-link { color: var(--us-text); border-radius: 0.375rem; padding-inline: 0.75rem; }
+.app-navbar .nav-link:hover { color: var(--us-primary-hover); background: var(--us-primary-subtle); }
+.app-navbar .nav-link.active {
+  color: var(--us-primary-active); background: var(--us-primary-subtle); font-weight: 600;
+}
+@media (max-width: 991.98px) {
+  .app-navbar .nav-link { padding-block: 0.65rem; }
+  .app-navbar .btn { width: 100%; padding-block: 0.6rem; }
+}
+
+/* ---------- Footer ---------- */
+.app-footer { background: var(--us-surface); flex-shrink: 0; }
+.footer-link { color: var(--us-text-muted); text-decoration: none; }
+.footer-link:hover { color: var(--us-primary-hover); text-decoration: underline; }
+
+/* ---------- Trợ năng ---------- */
+:focus-visible { outline: 3px solid var(--us-focus); outline-offset: 2px; }
+.btn:focus-visible, .nav-link:focus-visible, .form-control:focus-visible, .form-select:focus-visible,
+.dropdown-item:focus-visible, .navbar-toggler:focus-visible {
+  outline: 3px solid var(--us-focus); outline-offset: 2px; box-shadow: none;
+}
+
+.skip-link {
+  position: absolute; left: 0.5rem; top: -100px; z-index: 2000;
+  padding: 0.5rem 1rem; border-radius: 0.375rem;
+  background: var(--us-primary); color: #fff; text-decoration: none; font-weight: 600;
+}
+.skip-link:focus { top: 0.5rem; color: #fff; }
+
+img { max-width: 100%; height: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important; animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important; scroll-behavior: auto !important;
+  }
+}
+
+.card { border-color: var(--us-border); }

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import health from './health.js';
 import auth from './auth.js';
+import documents from './documents.js';
 import { requireAuth } from '../middleware/auth.js';
 import { stub } from './_stub.js';
 
@@ -24,7 +25,7 @@ r.use('/users',         stub('Tìm người dùng',   'FR-SOC-06',      'Minh Tr
 r.use('/notifications', stub('Thông báo',        'FR-SOC-07',      'Đức Huy'));
 r.use('/groups',        stub('Nhóm',             'FR-GRP-01..06',  'Hướng'));
 r.use('/teamups',       stub('Team-up',          'FR-TEAM-01..09', 'Hướng'));
-r.use('/documents',     stub('Thư viện tài liệu','FR-DOC-01..10',  'Đức Trọng'));
+r.use('/documents',     documents);
 r.use('/study',         stub('Góc học tập',      'FR-STU-04..09',  'Minh Trọng'));
 r.use('/admin',         stub('Quản trị',         'FR-ADM-01..04',  'Khang'));
 

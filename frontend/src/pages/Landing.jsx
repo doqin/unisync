@@ -8,31 +8,21 @@ import { useAuth } from '../context/AuthContext.jsx';
 
 const fadeUp = (delay = 0) => ({ 'data-aos': 'fade-up', 'data-aos-delay': delay || undefined });
 
-const FEATURES = [
-  {
-    icon: 'feed', title: 'Bảng tin và theo dõi',
-    text: 'Đăng bài kèm ảnh, bình luận, thả tim. Theo dõi bạn học; hai người theo dõi nhau sẽ thành Mutual.',
-  },
-  {
-    icon: 'groups', title: 'Nhóm học phần và ngành',
-    text: 'Nhóm tạo sẵn cho từng môn học và ngành học. Xin vào nhóm để trao đổi với đúng người cùng lớp.',
-  },
-  {
-    icon: 'library', title: 'Thư viện tài liệu',
-    text: 'Chia sẻ đề cương, slide, bài giải theo từng môn. Tìm kiếm không cần gõ dấu, tải về chỉ với một lần bấm.',
-  },
-  {
-    icon: 'study', title: 'Góc học tập',
-    text: 'Đồng hồ Pomodoro, thống kê thời gian học và chuỗi ngày học liên tục (streak) để giữ nhịp mỗi ngày.',
-  },
-  {
-    icon: 'teamup', title: 'Tìm đồng đội',
-    text: 'Đăng bài tìm thành viên cho bài tập nhóm, đồ án; nhận và duyệt yêu cầu tham gia ngay trong nhóm môn.',
-  },
-  {
-    icon: 'bell', title: 'Thông báo',
-    text: 'Biết ngay khi có người theo dõi, thích, bình luận bài của bạn, được duyệt vào nhóm hay có yêu cầu tham gia team-up.',
-  },
+// Nhóm theo cấu trúc SRS mục 3: mạng xã hội (FR-SOC), nhóm (FR-GRP), ba công cụ chuyên biệt (FR-DOC/STU/TEAM).
+const GROUPS = [
+  { title: 'Mạng xã hội', text: 'Bảng tin · thích, bình luận · theo dõi, Mutual · thông báo' },
+  { title: 'Nhóm học phần và ngành', text: 'Nhóm tạo sẵn theo môn và ngành · duyệt thành viên · bảng tin riêng của nhóm' },
+  { title: 'Ba công cụ cho sinh viên', text: 'Thư viện tài liệu · Góc học tập Pomodoro · Tìm đồng đội cho đồ án' },
+];
+
+// Vị trí trên vòng tròn bán kính 40%, bắt đầu từ đỉnh, đi theo chiều kim đồng hồ.
+const ORBIT = [
+  { icon: 'feed', title: 'Bảng tin', sub: 'Bài đăng, theo dõi', x: 50, y: 10 },
+  { icon: 'groups', title: 'Nhóm', sub: 'Học phần, ngành', x: 84.6, y: 30 },
+  { icon: 'library', title: 'Thư viện', sub: 'Tài liệu theo môn', x: 84.6, y: 70 },
+  { icon: 'study', title: 'Góc học tập', sub: 'Pomodoro, streak', x: 50, y: 90 },
+  { icon: 'teamup', title: 'Team-up', sub: 'Tìm đồng đội', x: 15.4, y: 70 },
+  { icon: 'bell', title: 'Thông báo', sub: 'Trong ứng dụng', x: 15.4, y: 30 },
 ];
 
 const STEPS = [
@@ -86,27 +76,30 @@ export default function Landing() {
         </Container>
       </section>
 
-      <section className="py-5" aria-labelledby="features-title">
+      <section className="py-5 overflow-hidden" aria-labelledby="features-title">
         <Container>
-          <div className="text-center mx-auto mb-4" style={{ maxWidth: 640 }} {...fadeUp()}>
-            <h2 id="features-title" className="h2 fw-bold">Mọi thứ bạn cần cho việc học</h2>
-            <p className="text-body-secondary mb-0">
-              Ngoài mạng xã hội quen thuộc, UniSync có ba công cụ dành riêng cho sinh viên:
-              thư viện tài liệu, góc học tập và bảng tìm đồng đội.
-            </p>
-          </div>
-          <Row xs={1} md={2} lg={3} className="g-3 g-lg-4">
-            {FEATURES.map((f, i) => (
-              <Col key={f.title} {...fadeUp((i % 3) * 100)}>
-                <Card className="landing-feature h-100">
-                  <Card.Body>
-                    <div className="landing-feature-icon mb-3"><Icon name={f.icon} /></div>
-                    <h3 className="h5 fw-semibold">{f.title}</h3>
-                    <p className="text-body-secondary mb-0">{f.text}</p>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
+          <Row className="align-items-center gy-5">
+            <Col lg={6}>
+              <p className="landing-eyebrow mb-2" {...fadeUp()}>Một tài khoản</p>
+              <h2 id="features-title" className="display-6 fw-bold mb-3" {...fadeUp(100)}>
+                Một tài khoản.{' '}<br />Đủ mọi việc học.
+              </h2>
+              <p className="lead text-body-secondary mb-4" {...fadeUp(200)}>
+                Đăng nhập một lần bằng email trường: lướt bảng tin, vào nhóm môn, tìm tài liệu,
+                học với Pomodoro và tìm đồng đội cho đồ án.
+              </p>
+              <ul className="list-unstyled mb-0 d-grid gap-2">
+                {GROUPS.map((g, i) => (
+                  <li key={g.title} className="landing-group" {...fadeUp(250 + i * 100)}>
+                    <h3 className="h5 fw-semibold mb-1">{g.title}</h3>
+                    <p className="text-body-secondary mb-0">{g.text}</p>
+                  </li>
+                ))}
+              </ul>
+            </Col>
+            <Col lg={6} className="d-none d-lg-block">
+              <FeatureOrbit />
+            </Col>
           </Row>
         </Container>
       </section>
@@ -138,6 +131,31 @@ export default function Landing() {
           </div>
         </Container>
       </section>
+    </div>
+  );
+}
+
+function FeatureOrbit() {
+  return (
+    <div className="landing-orbit" aria-hidden="true">
+      <div className="landing-orbit-ring landing-orbit-ring-outer" />
+      <div className="landing-orbit-ring landing-orbit-ring-inner" />
+      <div className="landing-orbit-core" data-aos="zoom-in">
+        <span className="app-brand-mark mb-2">U</span>
+        <span className="fw-bold">Tài khoản UniSync</span>
+        <span className="small text-body-secondary">Một email .edu.vn</span>
+      </div>
+      {ORBIT.map((o, i) => (
+        <div key={o.title} className="landing-orbit-slot" style={{ left: `${o.x}%`, top: `${o.y}%` }}>
+          <div className="landing-orbit-pill" data-aos="zoom-in" data-aos-delay={200 + i * 100}>
+            <span className="landing-orbit-icon"><Icon name={o.icon} size={18} /></span>
+            <span className="d-flex flex-column lh-sm">
+              <span className="fw-semibold">{o.title}</span>
+              <span className="small text-body-secondary">{o.sub}</span>
+            </span>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

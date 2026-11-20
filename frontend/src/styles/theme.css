@@ -81,6 +81,36 @@ body { background: var(--us-bg); color: var(--us-text); }
 .footer-link { color: var(--us-text-muted); text-decoration: none; }
 .footer-link:hover { color: var(--us-primary-hover); text-decoration: underline; }
 
+/* ---------- Trang giới thiệu (Landing) ---------- */
+.landing-hero { background: linear-gradient(180deg, var(--us-primary-subtle) 0%, var(--us-bg) 100%); }
+.landing-eyebrow {
+  color: var(--us-primary-hover); font-weight: 600;
+  font-size: 0.875rem; letter-spacing: 0.04em; text-transform: uppercase;
+}
+.landing-feature { border-color: var(--us-border); transition: box-shadow 0.15s ease, transform 0.15s ease; }
+.landing-feature:hover { box-shadow: 0 0.5rem 1.25rem rgba(31, 36, 48, 0.08); transform: translateY(-2px); }
+.landing-feature-icon {
+  display: inline-grid; place-items: center; flex-shrink: 0;
+  width: 3rem; height: 3rem; border-radius: 0.75rem;
+  background: var(--us-primary-subtle); color: var(--us-primary-hover);
+}
+.landing-steps { background: var(--us-surface); border-block: 1px solid var(--us-border); }
+.landing-step-number {
+  display: grid; place-items: center;
+  width: 2.75rem; height: 2.75rem; border-radius: 50%;
+  background: var(--us-primary); color: #fff; font-weight: 700; font-size: 1.125rem;
+}
+.landing-cta { background: var(--us-primary); color: #fff; }
+.landing-cta .btn-light { color: var(--us-primary-active); font-weight: 600; }
+.landing-preview { display: grid; gap: 1rem; max-width: 420px; margin-inline: auto; }
+.landing-preview-card { border-color: var(--us-border); }
+.landing-timer {
+  font-size: 3rem; font-weight: 700; line-height: 1.1; margin-bottom: 0.5rem;
+  color: var(--us-primary-active); font-variant-numeric: tabular-nums;
+}
+/* AOS mặc định trượt 100px, quá xa với các khối nhỏ */
+.landing-page [data-aos="fade-up"] { transform: translate3d(0, 32px, 0); }
+
 /* ---------- Trợ năng ---------- */
 :focus-visible { outline: 3px solid var(--us-focus); outline-offset: 2px; }
 .btn:focus-visible, .nav-link:focus-visible, .form-control:focus-visible, .form-select:focus-visible,

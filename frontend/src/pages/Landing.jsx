@@ -143,7 +143,6 @@ function FeatureOrbit() {
       <div className="landing-orbit-core" data-aos="zoom-in">
         <span className="app-brand-mark mb-2">U</span>
         <span className="fw-bold">Tài khoản UniSync</span>
-        <span className="small text-body-secondary">Một email .edu.vn</span>
       </div>
       {ORBIT.map((o, i) => (
         <div key={o.title} className="landing-orbit-slot" style={{ left: `${o.x}%`, top: `${o.y}%` }}>

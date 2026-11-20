@@ -8,6 +8,7 @@
   --us-bg: #f8f9fb;
   --us-surface: #ffffff;
   --us-border: #e3e6ec;
+  --us-border-strong: #c9cfdb;
   --us-text: #1f2430;
   --us-text-muted: #565e66;
   --us-focus: #b45309;
@@ -95,9 +96,12 @@ body { background: var(--us-bg); color: var(--us-text); }
   .landing-group:hover { border-left-color: var(--us-primary); background: var(--us-primary-subtle); }
 }
 
-/* Sơ đồ "một tài khoản – nhiều công cụ": chừa lề hai bên cho viên thuốc tràn ra ngoài vòng */
+/* Sơ đồ "một tài khoản – nhiều công cụ".
+   Viên thuốc ở x = 15,4% / 84,6% được căn giữa nên tràn ra ngoài sơ đồ khoảng nửa bề rộng (~85px).
+   7rem (3,5rem mỗi bên) là lề cho viên rộng tới ~170px; chữ trong viên dài hơn thì phải nới số này,
+   nếu không overflow-hidden của section sẽ cắt mất mà không báo. */
 .landing-orbit { position: relative; width: min(100% - 7rem, 460px); aspect-ratio: 1; margin-inline: auto; }
-.landing-orbit-ring { position: absolute; border-radius: 50%; border: 1.5px dashed #c9cfdb; }
+.landing-orbit-ring { position: absolute; border-radius: 50%; border: 1.5px dashed var(--us-border-strong); }
 .landing-orbit-ring-outer { inset: 10%; }
 .landing-orbit-ring-inner { inset: 27%; }
 .landing-orbit-core {
@@ -121,6 +125,8 @@ body { background: var(--us-bg); color: var(--us-text); }
   width: 2.25rem; height: 2.25rem; border-radius: 50%;
   background: var(--us-primary); color: #fff;
 }
+/* bg-success (#198754) với chữ trắng chỉ 4,27:1; #157347 đạt AA */
+.landing-badge-open.bg-success { background-color: #157347 !important; }
 .landing-feature-icon {
   display: inline-grid; place-items: center; flex-shrink: 0;
   width: 3rem; height: 3rem; border-radius: 0.75rem;

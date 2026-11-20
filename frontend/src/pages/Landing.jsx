@@ -2,8 +2,7 @@
 import { useEffect } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Badge, Button, Card, Col, Container, Row } from 'react-bootstrap';
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from 'aos'; // CSS của AOS được import trong main.jsx, trước theme.css
 import { useAuth } from '../context/AuthContext.jsx';
 
 const fadeUp = (delay = 0) => ({ 'data-aos': 'fade-up', 'data-aos-delay': delay || undefined });
@@ -32,18 +31,22 @@ const STEPS = [
 ];
 
 export default function Landing() {
-  const { user, loading } = useAuth();
-  const showPage = !loading && !user;
+  // Không chờ getSession(): khách thấy nội dung ngay; người đã đăng nhập có thể thấy landing một nhịp rồi chuyển.
+  const { user } = useAuth();
 
   useEffect(() => {
-    if (!showPage) return;
-    AOS.init({
-      once: true, duration: 700, easing: 'ease-out-cubic', offset: 40,
-      disable: () => window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    });
-  }, [showPage]);
+    if (user) return;
+    try {
+      AOS.init({
+        once: true, duration: 700, easing: 'ease-out-cubic', offset: 40,
+        disable: () => window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false,
+      });
+    } catch {
+      // aos.css ẩn sẵn mọi [data-aos]; init lỗi thì gỡ thuộc tính để nội dung không kẹt ở opacity 0.
+      document.querySelectorAll('[data-aos]').forEach((el) => el.removeAttribute('data-aos'));
+    }
+  }, [user]);
 
-  if (loading) return null; // tránh nháy trang giới thiệu trước khi chuyển hướng
   if (user) return <Navigate to="/home" replace />;
 
   return (
@@ -188,7 +191,7 @@ function HeroPreview() {
         <Card.Body>
           <div className="d-flex justify-content-between align-items-center mb-1">
             <span className="fw-semibold">Tìm 2 bạn làm đồ án web</span>
-            <Badge bg="success">Đang mở</Badge>
+            <Badge bg="success" className="landing-badge-open">Đang mở</Badge>
           </div>
           <div className="small text-body-secondary">Cần: Frontend, Backend · Còn 2 chỗ</div>
         </Card.Body>

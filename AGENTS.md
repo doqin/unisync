@@ -24,7 +24,7 @@ Mỗi stub trong `backend/src/routes/index.js` và `frontend/src/pages/` ghi ng�
 - Không tạo issue bug mới nếu chưa hỏi người phụ trách; ghi lại và hỏi trước.
 
 ## Quy tắc kỹ thuật
-- **Bảo mật:** `SUPABASE_SERVICE_ROLE_KEY` chỉ ở backend, không bao giờ vào frontend. Mọi API ngoài `/api/health` và `/api/auth/*` đi qua `requireAuth`. Kiểm tra quyền ở backend; RLS là lớp phòng thủ thứ hai (frontend chỉ đọc qua Express, mọi ghi đi qua Express).
+- **Bảo mật:** `SUPABASE_SECRET_KEY` (khóa `sb_secret_…`, trước đây `service_role`) chỉ ở backend, không bao giờ vào frontend. Mọi API ngoài `/api/health` và `/api/auth/*` đi qua `requireAuth`. Kiểm tra quyền ở backend; RLS là lớp phòng thủ thứ hai (frontend chỉ đọc qua Express, mọi ghi đi qua Express).
 - **Đầu vào:** validate bằng zod qua `validate()`; không dùng `dangerouslySetInnerHTML`.
 - **Email `.edu.vn`:** mẫu ở `backend/src/lib/edu.js`, `frontend/src/lib/edu.js` và trigger trong `0001_schema.sql` phải khớp nhau.
 - **Vercel Functions không trạng thái:** không ghi đĩa, không lưu dữ liệu trong bộ nhớ tiến trình, không tác vụ nền. Gửi email trong cùng request (Brevo, 300 email/ngày).

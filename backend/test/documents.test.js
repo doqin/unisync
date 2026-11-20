@@ -77,7 +77,10 @@ function fakeSupabase() {
     const data = tables.documents
       .filter((d) => !args.p_group || d.group_id === args.p_group)
       .filter((d) => !args.p_file_type || d.file_type === args.p_file_type)
-      .filter((d) => !q || norm(`${d.title} ${d.description ?? ''}`).includes(q))
+      .filter((d) => {
+        const g = tables.groups.find((x) => x.id === d.group_id);
+        return !q || norm(`${d.title} ${d.description ?? ''} ${g?.name ?? ''} ${g?.code ?? ''}`).includes(q);
+      })
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .slice(args.p_offset, args.p_offset + args.p_limit);
     return { data, error: null };
@@ -302,4 +305,13 @@ test('search: từ khóa không dấu khớp tiêu đề có dấu', async () =>
 test('browse: tham số không hợp lệ → 400', async () => {
   const res = await fetch(`${base}/?file_type=exe&page=0`);
   assert.equal(res.status, 400);
+});
+
+test('search: tìm theo tên môn hoặc mã môn, không chỉ tiêu đề', async () => {
+  seedDocs();
+  // COURSE = "Lập trình Web" (SE347) có 2 tài liệu; PENDING_COURSE = "CSDL" (IT004) có 1 tài liệu
+  const byName = await (await fetch(base + '/?q=' + encodeURIComponent('lap trinh'))).json();
+  assert.equal(byName.items.length, 2);
+  const byCode = await (await fetch(base + '/?q=IT004')).json();
+  assert.deepEqual(byCode.items.map((d) => d.title), ['Slide tổng quan']);
 });

@@ -117,7 +117,7 @@ export default function Library() {
         <Form onSubmit={(e) => { e.preventDefault(); update({ q: draftQ.trim() }); }}>
           <Row className="g-2">
             <Col xs={12} md={5}>
-              <Form.Control placeholder="Tìm theo tiêu đề, mô tả (không cần dấu)" value={draftQ}
+              <Form.Control placeholder="Tìm theo tiêu đề, mô tả, môn (không cần dấu)" value={draftQ}
                 onChange={(e) => setDraftQ(e.target.value)} aria-label="Tìm kiếm tài liệu" maxLength={200} />
             </Col>
             <Col xs={6} md={3}>

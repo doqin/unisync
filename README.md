@@ -18,7 +18,7 @@ Cần Node ≥ 20 (backend dùng `--env-file`).
 3. Backend: `cd backend && npm install && npm run seed && npm run dev` → http://localhost:3000/api/health
 4. Frontend: `cd frontend && npm install && npm run dev` → http://localhost:5173
 
-`SUPABASE_SERVICE_ROLE_KEY` chỉ đặt ở backend.
+`SUPABASE_SECRET_KEY` (khóa `sb_secret_…`, thay `service_role`) chỉ đặt ở backend; frontend chỉ dùng `VITE_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`, thay `anon`).
 
 ## Triển khai (Vercel, một dự án nhiều service)
 

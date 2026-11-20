@@ -196,7 +196,7 @@ Thành viên nhóm (phát triển, kiểm thử), giảng viên (đánh giá).
 | NFR-01 | Giao diện | Responsive, hiển thị tốt từ 360 px đến desktop; dùng lưới Bootstrap |
 | NFR-02 | Hiệu năng | Trang chính tải dưới 3 giây trên mạng thường; API thường trả lời dưới 500 ms; chịu được khoảng 100 người dùng đồng thời (đủ cho demo) |
 | NFR-03 | Bảo mật | Mật khẩu được Supabase Auth băm; mọi API ngoài đăng ký/đăng nhập đều yêu cầu JWT hợp lệ; kiểm tra quyền ở backend |
-| NFR-04 | Bảo mật | Bật **Row Level Security** trên các bảng; khóa `service_role` chỉ nằm ở backend, không bao giờ đưa vào frontend |
+| NFR-04 | Bảo mật | Bật **Row Level Security** trên các bảng; khóa secret (`sb_secret_…`, trước đây `service_role`) chỉ nằm ở backend, không bao giờ đưa vào frontend |
 | NFR-05 | Bảo mật | Kiểm tra và làm sạch dữ liệu đầu vào (schema validation, ví dụ zod); chống XSS (React escape mặc định, không dùng `dangerouslySetInnerHTML`); cấu hình CORS giới hạn; rate limit cho đăng nhập/đăng ký/tải lên |
 | NFR-06 | Tệp | Kiểm tra loại và kích thước tệp; đặt tên tệp lưu trữ bằng UUID; bucket không công khai, tải xuống qua signed URL |
 | NFR-07 | Khả dụng | Giao diện tiếng Việt; có trạng thái đang tải, lỗi, danh sách trống |
@@ -299,7 +299,7 @@ flowchart LR
 - **Backend:** Express xuất `app` và chạy như Vercel Function (`api/index.js` + `vercel.json` chuyển mọi đường dẫn vào đó). Hàm không có trạng thái: không lưu tệp trên đĩa, không dùng bộ nhớ trong tiến trình làm kho dữ liệu, không dùng tác vụ nền chạy lâu.
 - **Giới hạn kích thước body của Vercel Functions là 4,5 MB:** không thể đẩy tệp 10 MB qua Express. Ảnh bài đăng và ảnh đại diện (đã nén phía client, ≤ 1 MB mỗi ảnh) cũng dùng cùng luồng tải thẳng để không phụ thuộc vào giới hạn này. Vì vậy **luồng tải lên tài liệu** thiết kế như sau (xem mục 3.5): client gửi metadata → Express kiểm tra quyền, loại và kích thước tệp rồi cấp **signed upload URL** → client tải thẳng lên Supabase Storage → client gọi Express xác nhận để ghi bản ghi tài liệu.
 - **Email:** gửi bằng Brevo trong cùng request (chờ phản hồi trước khi trả kết quả) vì hàm có thể bị dừng ngay sau khi trả lời.
-- **Biến môi trường** đặt trên Vercel: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (chỉ backend), `BREVO_API_KEY`, `FRONTEND_URL` (cho CORS). Không đưa vào repo.
+- **Biến môi trường** đặt trên Vercel: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` (chỉ backend), `BREVO_API_KEY`, `FRONTEND_URL` (cho CORS). Không đưa vào repo.
 - **Chống Supabase tạm dừng:** dùng **Vercel Cron** gọi một endpoint nhẹ (`/api/health`, có truy vấn CSDL) mỗi ngày.
 
 ---

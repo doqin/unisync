@@ -46,6 +46,7 @@ const browseSchema = z.object({
   group_id: z.uuid('Môn học không hợp lệ').optional(),
   file_type: z.enum(Object.keys(DOCUMENT_TYPES), { message: 'Loại tệp không hợp lệ' }).optional(),
   q: z.string().trim().max(200, 'Từ khóa tối đa 200 ký tự').optional(),
+  sort: z.enum(['newest', 'rating'], { message: 'Cách sắp xếp không hợp lệ' }).optional(),
   page: z.coerce.number().int().min(1).max(1000).default(1),
 });
 
@@ -56,6 +57,8 @@ const editSchema = z.object({
   description: z.string().trim().max(2000, 'Mô tả tối đa 2000 ký tự').optional()
     .transform((v) => (v === undefined ? undefined : v || null)),
 }).refine((b) => Object.keys(b).length > 0, { message: 'Không có thông tin nào để sửa' });
+
+const ratingSchema = z.object({ stars: z.number().int().min(1, 'Số sao từ 1 đến 5').max(5, 'Số sao từ 1 đến 5') });
 
 const DOWNLOAD_TTL = 60; // giây
 
@@ -217,6 +220,7 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       const limit = 20;
       const { data, error } = await db().rpc('search_documents', {
         p_q: q ?? null, p_group: group_id ?? null, p_file_type: file_type ?? null,
+        p_sort: req.query.sort === 'rating' ? 'rating' : 'newest',
         p_limit: limit, p_offset: (page - 1) * limit,
       });
       if (error) throw error;
@@ -229,8 +233,19 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
   // Chi tiết một tài liệu (FR-DOC-05, FR-DOC-06).
   r.get('/:id', validate({ params: idParam }), async (req, res, next) => {
     try {
-      const doc = await loadDocument(db(), req.params.id);
-      res.json(doc);
+      const sb = db();
+      const doc = await loadDocument(sb, req.params.id);
+      const { data: ratings, error } = await sb.from('document_ratings').select('user_id, stars')
+        .eq('document_id', doc.id);
+      if (error) throw error;
+      const count = ratings.length;
+      const sum = ratings.reduce((a, x) => a + x.stars, 0);
+      res.json({
+        ...doc,
+        rating_avg: count ? Math.round((sum / count) * 10) / 10 : null,
+        rating_count: count,
+        my_rating: ratings.find((x) => x.user_id === req.user.id)?.stars ?? null,
+      });
     } catch (e) {
       next(e);
     }
@@ -243,6 +258,8 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       const { data, error } = await db().storage.from(DOCUMENTS_BUCKET)
         .createSignedUrl(doc.file_path, DOWNLOAD_TTL, { download: downloadName(doc) });
       if (error) throw error;
+      const { error: incErr } = await db().rpc('increment_download', { p_id: doc.id });
+      if (incErr) throw incErr;
       res.json({ url: data.signedUrl, expires_in: DOWNLOAD_TTL });
     } catch (e) {
       next(e);
@@ -275,6 +292,35 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       // Xóa tệp sau khi đã xóa bản ghi; nếu lỗi thì tệp mồ côi, không ảnh hưởng dữ liệu hiển thị.
       await sb.storage.from(DOCUMENTS_BUCKET).remove([doc.file_path]).catch(() => {});
       res.status(204).end();
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Xem trước PDF ngay trên trang (FR-DOC-09): signed URL không ép tải về.
+  r.get('/:id/preview', validate({ params: idParam }), async (req, res, next) => {
+    try {
+      const doc = await loadDocument(db(), req.params.id);
+      if (doc.file_type !== 'pdf') throw badRequest('Chỉ xem trước được tệp PDF');
+      const { data, error } = await db().storage.from(DOCUMENTS_BUCKET).createSignedUrl(doc.file_path, DOWNLOAD_TTL);
+      if (error) throw error;
+      res.json({ url: data.signedUrl, expires_in: DOWNLOAD_TTL });
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Đánh giá 1–5 sao, mỗi người một đánh giá cho một tài liệu (FR-DOC-08).
+  r.put('/:id/rating', validate({ params: idParam, body: ratingSchema }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const doc = await loadDocument(sb, req.params.id);
+      const { error } = await sb.from('document_ratings').upsert(
+        { document_id: doc.id, user_id: req.user.id, stars: req.body.stars },
+        { onConflict: 'document_id,user_id' },
+      );
+      if (error) throw error;
+      res.json({ my_rating: req.body.stars });
     } catch (e) {
       next(e);
     }

@@ -30,6 +30,7 @@ function fakeSupabase() {
       { group_id: MAJOR, user_id: USER, status: 'approved' },
     ],
     documents: [],
+    document_ratings: [],
   };
   const objects = {}; // path → { size, contentType, head }
   const removed = [];
@@ -39,6 +40,7 @@ function fakeSupabase() {
     let row = null;
     let op = 'select';
     let patch = null;
+    let conflict = [];
     const match = (r) => filters.every(([k, v]) => (Array.isArray(v) ? v.includes(r[k]) : r[k] === v));
     const rows = () => tables[table].filter(match);
     const q = {
@@ -49,6 +51,10 @@ function fakeSupabase() {
       insert: (r) => ((row = r), (op = 'insert'), q),
       update: (p) => ((patch = p), (op = 'update'), q),
       delete: () => ((op = 'delete'), q),
+      upsert: (r, opts) => {
+        op = 'upsert'; row = r; conflict = opts?.onConflict?.split(',') ?? [];
+        return q;
+      },
       maybeSingle: async () => ({ data: rows()[0] ?? null, error: null }),
       single: async () => {
         if (op === 'update') {
@@ -64,6 +70,12 @@ function fakeSupabase() {
         return { data: doc, error: null };
       },
       then: (ok, fail) => {
+        if (op === 'upsert') {
+          const hit = tables[table].find((r) => conflict.every((k) => r[k] === row[k]));
+          if (hit) Object.assign(hit, row);
+          else tables[table].push({ id: randomUUID(), ...row });
+          return Promise.resolve({ data: null, error: null }).then(ok, fail);
+        }
         if (op === 'delete') {
           tables[table] = tables[table].filter((r) => !match(r));
           return Promise.resolve({ data: null, error: null }).then(ok, fail);
@@ -92,7 +104,16 @@ function fakeSupabase() {
 
   // Hàm search_documents giả: lọc theo môn/loại tệp và từ khóa (so khớp chuỗi, không dấu).
   const rpc = async (name, args) => {
+    if (name === 'increment_download') {
+      const d = tables.documents.find((x) => x.id === args.p_id);
+      if (d) d.download_count = (d.download_count ?? 0) + 1;
+      return { data: null, error: null };
+    }
     if (name !== 'search_documents') return { data: null, error: { message: 'unknown rpc' } };
+    const avgOf = (id) => {
+      const rs = tables.document_ratings.filter((x) => x.document_id === id);
+      return rs.length ? rs.reduce((a, x) => a + x.stars, 0) / rs.length : null;
+    };
     const norm = (t) => (t ?? '').replace(/đ/g, 'd').replace(/Đ/g, 'D').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
     const q = norm(args.p_q).trim();
     const data = tables.documents
@@ -102,7 +123,9 @@ function fakeSupabase() {
         const g = tables.groups.find((x) => x.id === d.group_id);
         return !q || norm(`${d.title} ${d.description ?? ''} ${g?.name ?? ''} ${g?.code ?? ''}`).includes(q);
       })
-      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .sort((a, b) => (args.p_sort === 'rating'
+        ? (avgOf(b.id) ?? -1) - (avgOf(a.id) ?? -1)
+        : 0) || b.created_at.localeCompare(a.created_at))
       .slice(args.p_offset, args.p_offset + args.p_limit);
     return { data, error: null };
   };
@@ -400,4 +423,47 @@ test('delete: người tải lên xóa được bản ghi và tệp; người kh
   const theirs = ownDoc({ uploader_id: OTHER });
   assert.equal((await fetch(`${base}/${theirs.id}`, { method: 'DELETE' })).status, 403);
   assert.ok(sb.tables.documents.some((d) => d.id === theirs.id));
+});
+
+// ───── Đếm lượt tải, xem trước, đánh giá, sắp xếp theo điểm (FR-DOC-07, 08, 09) ─────
+
+test('download: mỗi lần tải xuống tăng download_count', async () => {
+  const doc = ownDoc({ download_count: 0 });
+  await fetch(`${base}/${doc.id}/download`);
+  await fetch(`${base}/${doc.id}/download`);
+  assert.equal(sb.tables.documents.find((d) => d.id === doc.id).download_count, 2);
+});
+
+test('preview: chỉ PDF được xem trước, loại khác → 400', async () => {
+  const pdf = ownDoc();
+  const pptx = ownDoc({ file_type: 'pptx' });
+  assert.equal((await fetch(`${base}/${pdf.id}/preview`)).status, 200);
+  assert.equal((await fetch(`${base}/${pptx.id}/preview`)).status, 400);
+});
+
+test('rating: đánh giá 1–5 sao, sửa được, chi tiết hiện điểm trung bình', async () => {
+  const doc = ownDoc();
+  const put = (stars) => fetch(`${base}/${doc.id}/rating`, {
+    method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ stars }),
+  });
+  assert.equal((await put(4)).status, 200);
+  assert.equal((await put(2)).status, 200);
+  assert.equal((await put(6)).status, 400);
+  const body = await (await fetch(`${base}/${doc.id}`)).json();
+  assert.equal(body.rating_count, 1);
+  assert.equal(body.rating_avg, 2);
+  assert.equal(body.my_rating, 2);
+});
+
+test('browse: sort=rating đưa tài liệu điểm cao lên đầu', async () => {
+  const low = ownDoc({ title: 'Điểm thấp', created_at: '2026-01-02T00:00:00Z' });
+  const high = ownDoc({ title: 'Điểm cao', created_at: '2026-01-01T00:00:00Z' });
+  sb.tables.document_ratings.push(
+    { document_id: low.id, user_id: OTHER, stars: 2 },
+    { document_id: high.id, user_id: OTHER, stars: 5 },
+  );
+  const newest = await (await fetch(`${base}/?sort=newest`)).json();
+  assert.equal(newest.items[0].title, 'Điểm thấp');
+  const byRating = await (await fetch(`${base}/?sort=rating`)).json();
+  assert.equal(byRating.items[0].title, 'Điểm cao');
 });

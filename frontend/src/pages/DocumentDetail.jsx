@@ -19,6 +19,7 @@ export default function DocumentDetail() {
   const [form, setForm] = useState({ title: '', description: '' });
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState('');
+  const [preview, setPreview] = useState('');
 
   useEffect(() => {
     let alive = true;
@@ -79,6 +80,30 @@ export default function DocumentDetail() {
     }
   }
 
+  async function showPreview() {
+    setBusy('preview'); setErr('');
+    try {
+      const { url } = await api(`/documents/${id}/preview`);
+      setPreview(url);
+    } catch (e) {
+      setErr(e.message);
+    } finally {
+      setBusy('');
+    }
+  }
+
+  async function rate(stars) {
+    setErr(''); setNotice('');
+    try {
+      await api(`/documents/${id}/rating`, { method: 'PUT', body: { stars } });
+      const fresh = await api(`/documents/${id}`);
+      setDoc(fresh);
+      setNotice('Đã ghi nhận đánh giá của bạn');
+    } catch (e) {
+      setErr(e.message);
+    }
+  }
+
   let content;
   if (loading) {
     content = <div className="text-center py-5"><Spinner animation="border" role="status" /><div className="mt-2">Đang tải…</div></div>;
@@ -117,11 +142,35 @@ export default function DocumentDetail() {
               <Badge bg="secondary" className="text-uppercase">{doc.file_type}</Badge>
             </div>
             <div className="small text-muted mb-3">
-              {subject && <>{subject} · </>}{formatSize(doc.file_size)} · {new Date(doc.created_at).toLocaleDateString('vi-VN')}
+              {subject && <>{subject} · </>}{formatSize(doc.file_size)} · {new Date(doc.created_at).toLocaleDateString('vi-VN')} · Đã tải {doc.download_count ?? 0} lần
             </div>
             {doc.description ? <p className="text-break" style={{ whiteSpace: 'pre-wrap' }}>{doc.description}</p>
               : <p className="text-muted fst-italic">Không có mô tả.</p>}
+            <div className="mb-3">
+              <div className="small mb-1">
+                {doc.rating_count
+                  ? <>Đánh giá trung bình: <strong>{doc.rating_avg}</strong> sao ({doc.rating_count} lượt)</>
+                  : 'Chưa có đánh giá.'}
+              </div>
+              <div role="group" aria-label="Đánh giá tài liệu" className="d-flex gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Button key={n} size="sm" variant={doc.my_rating >= n ? 'warning' : 'outline-warning'}
+                    onClick={() => rate(n)} aria-label={`${n} sao`} aria-pressed={doc.my_rating === n}>
+                    {n}★
+                  </Button>
+                ))}
+              </div>
+            </div>
+            {doc.file_type === 'pdf' && preview && (
+              <iframe title={`Xem trước ${doc.title}`} src={preview} className="w-100 mb-3 border rounded"
+                style={{ height: 520 }} />
+            )}
             <div className="d-flex gap-2 flex-wrap mt-3">
+              {doc.file_type === 'pdf' && (
+                <Button variant="outline-secondary" onClick={showPreview} disabled={busy !== ''}>
+                  {busy === 'preview' ? 'Đang tải…' : 'Xem trước'}
+                </Button>
+              )}
               <Button onClick={download} disabled={busy !== ''}>
                 {busy === 'download' ? 'Đang chuẩn bị…' : 'Tải xuống'}
               </Button>

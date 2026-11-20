@@ -13,6 +13,7 @@ export default function Library() {
   const group = params.get('group') ?? '';
   const type = params.get('type') ?? '';
   const q = params.get('q') ?? '';
+  const sort = params.get('sort') ?? 'newest';
 
   const [subjects, setSubjects] = useState([]);
   const [draftQ, setDraftQ] = useState(q);
@@ -35,12 +36,13 @@ export default function Library() {
     if (group) qs.set('group_id', group);
     if (type) qs.set('file_type', type);
     if (q) qs.set('q', q);
+    if (sort === 'rating') qs.set('sort', 'rating');
     api(`/documents?${qs}`)
       .then((r) => { if (alive) { setItems(r.items); setHasMore(r.has_more); } })
       .catch((e) => alive && setErr(e.message))
       .finally(() => alive && setLoading(false));
     return () => { alive = false; };
-  }, [group, type, q]);
+  }, [group, type, q, sort]);
 
   function update(patch) {
     const next = new URLSearchParams(params);
@@ -56,6 +58,7 @@ export default function Library() {
       if (group) qs.set('group_id', group);
       if (type) qs.set('file_type', type);
       if (q) qs.set('q', q);
+    if (sort === 'rating') qs.set('sort', 'rating');
       const r = await api(`/documents?${qs}`);
       setItems((cur) => [...cur, ...r.items]);
       setHasMore(r.has_more);
@@ -130,6 +133,12 @@ export default function Library() {
               <Form.Select value={type} onChange={(e) => update({ type: e.target.value })} aria-label="Lọc theo loại tệp">
                 <option value="">Mọi loại</option>
                 {FILE_TYPES.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+              </Form.Select>
+            </Col>
+            <Col xs={6} md={2}>
+              <Form.Select value={sort} onChange={(e) => update({ sort: e.target.value === 'rating' ? 'rating' : '' })} aria-label="Sắp xếp">
+                <option value="newest">Mới nhất</option>
+                <option value="rating">Điểm cao nhất</option>
               </Form.Select>
             </Col>
             <Col xs={12} md={2} className="d-grid">

@@ -49,6 +49,27 @@ const browseSchema = z.object({
   page: z.coerce.number().int().min(1).max(1000).default(1),
 });
 
+const idParam = z.object({ id: z.uuid('Tài liệu không hợp lệ') });
+
+const editSchema = z.object({
+  title: z.string().trim().min(1, 'Nhập tiêu đề').max(200, 'Tiêu đề tối đa 200 ký tự').optional(),
+  description: z.string().trim().max(2000, 'Mô tả tối đa 2000 ký tự').optional()
+    .transform((v) => (v === undefined ? undefined : v || null)),
+}).refine((b) => Object.keys(b).length > 0, { message: 'Không có thông tin nào để sửa' });
+
+const DOWNLOAD_TTL = 60; // giây
+
+/** Lấy tài liệu theo id, 404 nếu không có. */
+async function loadDocument(sb, id) {
+  const { data, error } = await sb.from('documents').select('*').eq('id', id).maybeSingle();
+  if (error) throw error;
+  if (!data) throw notFound('Không tìm thấy tài liệu');
+  return data;
+}
+
+/** Tên tệp khi người dùng tải về: tiêu đề + phần mở rộng thật. */
+const downloadName = (doc) => `${doc.title.replace(/[\/:*?"<>|]/g, '_').slice(0, 150)}.${doc.file_type}`;
+
 const confirmSchema = z.object({
   ...meta,
   path: z.string().max(255),
@@ -205,7 +226,61 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
     }
   });
 
-  // Phần còn lại của module (tải xuống, sửa/xóa: #27) chưa cài đặt.
+  // Chi tiết một tài liệu (FR-DOC-05, FR-DOC-06).
+  r.get('/:id', validate({ params: idParam }), async (req, res, next) => {
+    try {
+      const doc = await loadDocument(db(), req.params.id);
+      res.json(doc);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Tải xuống bằng signed URL có thời hạn ngắn (FR-DOC-05, NFR-06). Bucket không công khai.
+  r.get('/:id/download', validate({ params: idParam }), async (req, res, next) => {
+    try {
+      const doc = await loadDocument(db(), req.params.id);
+      const { data, error } = await db().storage.from(DOCUMENTS_BUCKET)
+        .createSignedUrl(doc.file_path, DOWNLOAD_TTL, { download: downloadName(doc) });
+      if (error) throw error;
+      res.json({ url: data.signedUrl, expires_in: DOWNLOAD_TTL });
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Người tải lên sửa tiêu đề/mô tả (FR-DOC-06).
+  r.patch('/:id', validate({ params: idParam, body: editSchema }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const doc = await loadDocument(sb, req.params.id);
+      if (doc.uploader_id !== req.user.id) throw forbidden('Chỉ người tải lên mới sửa được tài liệu này');
+      const { data, error } = await sb.from('documents').update(req.body).eq('id', doc.id).select().single();
+      if (error) throw error;
+      res.json(data);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Người tải lên xóa tài liệu của mình; Admin xóa tài liệu vi phạm (FR-DOC-06).
+  r.delete('/:id', validate({ params: idParam }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const doc = await loadDocument(sb, req.params.id);
+      const isAdmin = req.profile?.role === 'admin';
+      if (doc.uploader_id !== req.user.id && !isAdmin) throw forbidden('Bạn không có quyền xóa tài liệu này');
+      const { error } = await sb.from('documents').delete().eq('id', doc.id);
+      if (error) throw error;
+      // Xóa tệp sau khi đã xóa bản ghi; nếu lỗi thì tệp mồ côi, không ảnh hưởng dữ liệu hiển thị.
+      await sb.storage.from(DOCUMENTS_BUCKET).remove([doc.file_path]).catch(() => {});
+      res.status(204).end();
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Phần còn lại của module chưa cài đặt.
   r.use(stub('Thư viện tài liệu', 'FR-DOC-03..10', 'Đức Trọng'));
   return r;
 }

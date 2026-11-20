@@ -1,10 +1,10 @@
 # ĐẶC TẢ YÊU CẦU PHẦN MỀM (SRS)
 
-**Đề tài:** Xây dựng website mạng xã hội dành cho sinh viên đại học – UniSync
-**Môn học:** Công nghệ Web và ứng dụng (SE347)
-**Nhóm:** 5 thành viên
-**Thời gian thực hiện:** 11/2026 – 12/2026
-**Phiên bản:** 0.3 (đã chốt tên miền doqin.io.vn, hạn mức Brevo, giới hạn Vercel)
+**Đề tài:** Xây dựng website mạng xã hội dành cho sinh viên đại học – UniSync\
+**Môn học:** Công nghệ Web và ứng dụng (SE347)\
+**Nhóm:** 5 thành viên\
+**Thời gian thực hiện:** 11/2026 – 12/2026\
+**Phiên bản:** 0.4 (triển khai một dự án Vercel nhiều service, một tên miền; khóa API Supabase mới)
 
 > Quy ước độ ưu tiên: **M** = Must (bắt buộc), **S** = Should (nên có nếu đủ thời gian), **O** = Optional (tùy chọn, làm sau cùng).
 > Các mục đánh dấu **[GĐ]** là giả định do người soạn đưa ra, nhóm cần xác nhận hoặc sửa.
@@ -62,7 +62,7 @@ Thành viên nhóm (phát triển, kiểm thử), giảng viên (đánh giá).
 | Xác thực | Supabase Auth (email + mật khẩu, xác minh email); Express xác thực JWT |
 | Lưu trữ tệp | Supabase Storage |
 | Gửi email | **Brevo** (SMTP cho Supabase Auth; API/SMTP cho email thông báo team-up) |
-| Triển khai | **Vercel**: frontend Vite (tĩnh) và backend Express (Vercel Functions) |
+| Triển khai | **Vercel**: một dự án, hai service (frontend Vite tĩnh và backend Express chạy như Vercel Functions) dưới cùng một tên miền; `/api/*` vào backend |
 
 ### 2.3 Ràng buộc
 - Bắt buộc dùng framework Bootstrap; có cả frontend và backend.
@@ -196,7 +196,7 @@ Thành viên nhóm (phát triển, kiểm thử), giảng viên (đánh giá).
 | NFR-01 | Giao diện | Responsive, hiển thị tốt từ 360 px đến desktop; dùng lưới Bootstrap |
 | NFR-02 | Hiệu năng | Trang chính tải dưới 3 giây trên mạng thường; API thường trả lời dưới 500 ms; chịu được khoảng 100 người dùng đồng thời (đủ cho demo) |
 | NFR-03 | Bảo mật | Mật khẩu được Supabase Auth băm; mọi API ngoài đăng ký/đăng nhập đều yêu cầu JWT hợp lệ; kiểm tra quyền ở backend |
-| NFR-04 | Bảo mật | Bật **Row Level Security** trên các bảng; khóa `service_role` chỉ nằm ở backend, không bao giờ đưa vào frontend |
+| NFR-04 | Bảo mật | Bật **Row Level Security** trên các bảng; khóa secret (`sb_secret_…`, trước đây `service_role`) chỉ nằm ở backend, không bao giờ đưa vào frontend |
 | NFR-05 | Bảo mật | Kiểm tra và làm sạch dữ liệu đầu vào (schema validation, ví dụ zod); chống XSS (React escape mặc định, không dùng `dangerouslySetInnerHTML`); cấu hình CORS giới hạn; rate limit cho đăng nhập/đăng ký/tải lên |
 | NFR-06 | Tệp | Kiểm tra loại và kích thước tệp; đặt tên tệp lưu trữ bằng UUID; bucket không công khai, tải xuống qua signed URL |
 | NFR-07 | Khả dụng | Giao diện tiếng Việt; có trạng thái đang tải, lỗi, danh sách trống |
@@ -293,14 +293,15 @@ flowchart LR
 
 ### 6.1 Triển khai trên Vercel
 
-- **Monorepo:** một repo Git `unisync` gồm `frontend/` (Vite, build tĩnh), `backend/` (Express) và `docs/` (SRS, báo cáo). Trên Vercel tạo **hai dự án** từ cùng một repo, mỗi dự án đặt *Root Directory* lần lượt là `frontend` và `backend`; mỗi dự án chỉ build lại khi thư mục của nó thay đổi.
-- **Tên miền `doqin.io.vn`** (trưởng nhóm nắm quyền DNS): đề xuất `unisync.doqin.io.vn` cho frontend và `api.unisync.doqin.io.vn` cho backend, gắn vào hai dự án Vercel (chứng chỉ HTTPS do Vercel cấp tự động; thêm các bản ghi CNAME/A mà Vercel yêu cầu). `FRONTEND_URL` dùng cho CORS phải trỏ đúng địa chỉ frontend. Địa chỉ gửi thư `noreply@doqin.io.vn`; xác thực tên miền `doqin.io.vn` trên Brevo bằng các bản ghi DNS SPF, DKIM và DMARC để thư xác minh ít bị đưa vào thư rác. Tên miền con cụ thể là đề xuất, có thể đổi nếu `doqin.io.vn` còn dùng cho dự án khác.
-- **Frontend:** thêm rewrite về `index.html` để React Router hoạt động khi tải lại trang con.
-- **Backend:** Express xuất `app` và chạy như Vercel Function (`api/index.js` + `vercel.json` chuyển mọi đường dẫn vào đó). Hàm không có trạng thái: không lưu tệp trên đĩa, không dùng bộ nhớ trong tiến trình làm kho dữ liệu, không dùng tác vụ nền chạy lâu.
+- **Monorepo, một dự án Vercel:** một repo Git `unisync` gồm `frontend/` (Vite, build tĩnh), `backend/` (Express) và `docs/` (SRS, báo cáo). Trên Vercel chỉ tạo **một dự án** (`unisync`), cấu hình bằng `vercel.json` ở thư mục gốc với hai *service*: `frontend` (thư mục `frontend`, framework Vite) và `backend` (thư mục `backend`, framework Express, điểm vào `src/app.js`). Chạy cả hai cục bộ bằng `vercel dev`.
+- **Định tuyến một tên miền:** `vercel.json` có hai rewrite: `/api/*` chuyển vào service `backend`, mọi đường dẫn còn lại chuyển vào service `frontend`. Vì frontend và API cùng một địa chỉ nên không cần tên miền con riêng cho API; `src/lib/api.js` gọi `/api` (cùng domain) nên không cần CORS giữa hai nguồn, và `VITE_API_URL` chỉ đặt khi API chạy ở domain khác. Express mount mọi route dưới `/api` (kể cả `/api/health`).
+- **Tên miền `doqin.io.vn`** (trưởng nhóm nắm quyền DNS): gắn vào dự án Vercel duy nhất (chứng chỉ HTTPS do Vercel cấp tự động; thêm các bản ghi CNAME/A mà Vercel yêu cầu). Có thể dùng tên miền gốc hoặc một tên miền con như `unisync.doqin.io.vn`; việc chọn cụ thể làm khi cấu hình DNS. `FRONTEND_URL` (dùng cho CORS và đường dẫn trong email xác minh) phải trỏ đúng địa chỉ này. Địa chỉ gửi thư `noreply@doqin.io.vn`; xác thực tên miền `doqin.io.vn` trên Brevo bằng các bản ghi DNS SPF, DKIM và DMARC để thư xác minh ít bị đưa vào thư rác.
+- **Frontend:** service `frontend` là SPA; rewrite `/(.*)` về frontend để React Router hoạt động khi tải lại trang con (kiểm tra bằng cách tải lại một đường dẫn con trên bản preview).
+- **Backend:** Express xuất `app` (`backend/src/app.js`) và chạy như Vercel Function của service `backend`. Hàm không có trạng thái: không lưu tệp trên đĩa, không dùng bộ nhớ trong tiến trình làm kho dữ liệu, không dùng tác vụ nền chạy lâu.
 - **Giới hạn kích thước body của Vercel Functions là 4,5 MB:** không thể đẩy tệp 10 MB qua Express. Ảnh bài đăng và ảnh đại diện (đã nén phía client, ≤ 1 MB mỗi ảnh) cũng dùng cùng luồng tải thẳng để không phụ thuộc vào giới hạn này. Vì vậy **luồng tải lên tài liệu** thiết kế như sau (xem mục 3.5): client gửi metadata → Express kiểm tra quyền, loại và kích thước tệp rồi cấp **signed upload URL** → client tải thẳng lên Supabase Storage → client gọi Express xác nhận để ghi bản ghi tài liệu.
 - **Email:** gửi bằng Brevo trong cùng request (chờ phản hồi trước khi trả kết quả) vì hàm có thể bị dừng ngay sau khi trả lời.
-- **Biến môi trường** đặt trên Vercel: `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` (chỉ backend), `BREVO_API_KEY`, `FRONTEND_URL` (cho CORS). Không đưa vào repo.
-- **Chống Supabase tạm dừng:** dùng **Vercel Cron** gọi một endpoint nhẹ (`/api/health`, có truy vấn CSDL) mỗi ngày.
+- **Biến môi trường** đặt trong cài đặt của dự án Vercel (không đưa vào repo). Backend: `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY` (chỉ backend), `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `FRONTEND_URL`. Frontend (công khai, nhúng lúc build): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`.
+- **Chống Supabase tạm dừng:** **Vercel Cron** khai báo trong `vercel.json` gọi `/api/health` (endpoint nhẹ, có truy vấn CSDL) mỗi ngày lúc 03:00 UTC.
 
 ---
 
@@ -387,7 +388,7 @@ Báo cáo nên viết song song (chụp ảnh từng trang ngay khi hoàn thành
 | Nội dung | Quyết định |
 |---|---|
 | Tên sản phẩm | UniSync |
-| Cấu trúc repo | Monorepo (`frontend/`, `backend/`, `docs/`), hai dự án Vercel |
+| Cấu trúc repo | Monorepo (`frontend/`, `backend/`, `docs/`), một dự án Vercel nhiều service |
 | Giới hạn tệp tải lên | 10 MB/tệp |
 | Tên miền | `doqin.io.vn`; trưởng nhóm (Khang) nắm quyền DNS; gắn vào Vercel và dùng làm tên miền người gửi trên Brevo |
 | Email | Brevo, gói miễn phí 300 email/ngày |
@@ -396,7 +397,7 @@ Báo cáo nên viết song song (chụp ảnh từng trang ngay khi hoàn thành
 
 **Còn mở:**
 
-1. Tên miền con cho frontend và backend (đề xuất ở mục 6.1).
+1. Dùng tên miền gốc `doqin.io.vn` hay một tên miền con (ví dụ `unisync.doqin.io.vn`) cho dự án Vercel (mục 6.1); chốt khi cấu hình DNS.
 2. Các giả định đánh dấu **[GĐ]** ở mục 2.4.
 3. Chủ các tài khoản Brevo, Vercel, Supabase và cách cấp quyền cho các thành viên còn lại.
 4. Bảng phân công ở mục 12 (đổi nếu thành viên thấy chưa phù hợp với sở trường).

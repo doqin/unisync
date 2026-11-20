@@ -4,8 +4,8 @@ Mạng xã hội cho sinh viên (SE347). Đặc tả: [docs/SRS.md](docs/SRS.md)
 
 | Thư mục | Nội dung |
 |---|---|
-| `frontend/` | Vite + React + React-Bootstrap (dự án Vercel #1) |
-| `backend/` | Express REST API, chạy như Vercel Function qua `api/index.js` (dự án Vercel #2) |
+| `frontend/` | Vite + React + React-Bootstrap (service `frontend` của dự án Vercel) |
+| `backend/` | Express REST API (`src/app.js`), chạy như Vercel Function (service `backend`, nhận `/api/*`) |
 | `supabase/` | Migration SQL: schema, RLS, storage buckets |
 | `docs/` | SRS, báo cáo |
 
@@ -18,7 +18,7 @@ Cần Node ≥ 20 (backend dùng `--env-file`).
 3. Backend: `cd backend && npm install && npm run seed && npm run dev` → http://localhost:3000/api/health
 4. Frontend: `cd frontend && npm install && npm run dev` → http://localhost:5173
 
-`SUPABASE_SERVICE_ROLE_KEY` chỉ đặt ở backend.
+`SUPABASE_SECRET_KEY` (khóa `sb_secret_…`, thay `service_role`) chỉ đặt ở backend; frontend chỉ dùng `VITE_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`, thay `anon`).
 
 ## Triển khai (Vercel, một dự án nhiều service)
 

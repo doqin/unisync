@@ -4,8 +4,8 @@ Mạng xã hội cho sinh viên (SE347). Đặc tả: [docs/SRS.md](docs/SRS.md)
 
 | Thư mục | Nội dung |
 |---|---|
-| `frontend/` | Vite + React + React-Bootstrap (dự án Vercel #1) |
-| `backend/` | Express REST API, chạy như Vercel Function qua `api/index.js` (dự án Vercel #2) |
+| `frontend/` | Vite + React + React-Bootstrap (service `frontend` của dự án Vercel) |
+| `backend/` | Express REST API (`src/app.js`), chạy như Vercel Function (service `backend`, nhận `/api/*`) |
 | `supabase/` | Migration SQL: schema, RLS, storage buckets |
 | `docs/` | SRS, báo cáo |
 

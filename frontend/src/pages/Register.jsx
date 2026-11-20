@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form } from 'react-bootstrap';
 import { api } from '../lib/api.js';
 import { isEduVnEmail } from '../lib/edu.js';
 
 export default function Register() {
+  const nav = useNavigate();
   const [f, setF] = useState({ full_name: '', email: '', password: '' });
   const [err, setErr] = useState('');
   const [done, setDone] = useState(false);
@@ -18,7 +19,7 @@ export default function Register() {
     setBusy(true);
     try {
       await api('/auth/register', { method: 'POST', body: f, auth: false });
-      setDone(true);
+      nav('/verify', { state: { email: f.email.trim().toLowerCase() } });
     } catch (ex) { setErr(ex.message); } finally { setBusy(false); }
   }
 

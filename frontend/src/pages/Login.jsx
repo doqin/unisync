@@ -8,6 +8,7 @@ export default function Login() {
   const nav = useNavigate();
   const from = useLocation().state?.from?.pathname ?? '/home';
   const [email, setEmail] = useState('');
+  const [needsVerify, setNeedsVerify] = useState(false);
   const [password, setPassword] = useState('');
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
@@ -19,7 +20,13 @@ export default function Login() {
     setErr(''); setBusy(true);
     const { error } = await signIn(email, password);
     setBusy(false);
-    if (error) return setErr(/confirm/i.test(error.message) ? 'Email chưa được xác minh' : 'Email hoặc mật khẩu không đúng');
+    if (error) {
+      if (error.code === 'email_not_confirmed' || /confirm/i.test(error.message)) {
+        setNeedsVerify(true);
+        return setErr('Email chưa được xác minh. Hãy mở link trong email xác minh hoặc gửi lại email.');
+      }
+      return setErr('Email hoặc mật khẩu không đúng');
+    }
     nav(from, { replace: true });
   }
 
@@ -28,6 +35,7 @@ export default function Login() {
       <Card body>
         <h1 className="h4 mb-3">Đăng nhập</h1>
         <Form onSubmit={submit}>
+          {needsVerify && err && <Button as={Link} to="/verify" state={{ email: email.trim().toLowerCase() }} variant="warning" className="w-100 mb-3">Gửi lại email xác minh</Button>}
           {err && <Alert variant="danger">{err}</Alert>}
           <Form.Group className="mb-3" controlId="email"><Form.Label>Email</Form.Label>
             <Form.Control required type="email" value={email} onChange={(e) => setEmail(e.target.value)} /></Form.Group>

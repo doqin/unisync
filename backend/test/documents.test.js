@@ -37,21 +37,38 @@ function fakeSupabase() {
   const from = (table) => {
     const filters = [];
     let row = null;
-    const rows = () => tables[table].filter((r) => filters.every(([k, v]) => (Array.isArray(v) ? v.includes(r[k]) : r[k] === v)));
+    let op = 'select';
+    let patch = null;
+    const match = (r) => filters.every(([k, v]) => (Array.isArray(v) ? v.includes(r[k]) : r[k] === v));
+    const rows = () => tables[table].filter(match);
     const q = {
       select: () => q,
       eq: (k, v) => (filters.push([k, v]), q),
       in: (k, v) => (filters.push([k, v]), q),
       order: () => q,
-      then: (ok, fail) => Promise.resolve({ data: rows(), error: null }).then(ok, fail),
-      insert: (r) => ((row = r), q),
+      insert: (r) => ((row = r), (op = 'insert'), q),
+      update: (p) => ((patch = p), (op = 'update'), q),
+      delete: () => ((op = 'delete'), q),
       maybeSingle: async () => ({ data: rows()[0] ?? null, error: null }),
       single: async () => {
+        if (op === 'update') {
+          const hit = rows()[0];
+          if (!hit) return { data: null, error: { code: 'PGRST116', message: 'no rows' } };
+          Object.assign(hit, patch);
+          return { data: hit, error: null };
+        }
         if (tables.documents.some((d) => d.file_path === row.file_path))
           return { data: null, error: { code: '23505', message: 'duplicate key' } };
         const doc = { id: randomUUID(), ...row, created_at: new Date().toISOString() };
         tables[table].push(doc);
         return { data: doc, error: null };
+      },
+      then: (ok, fail) => {
+        if (op === 'delete') {
+          tables[table] = tables[table].filter((r) => !match(r));
+          return Promise.resolve({ data: null, error: null }).then(ok, fail);
+        }
+        return Promise.resolve({ data: rows(), error: null }).then(ok, fail);
       },
     };
     return q;
@@ -63,6 +80,10 @@ function fakeSupabase() {
     info: async (path) => (objects[path]
       ? { data: { size: objects[path].size, contentType: objects[path].contentType }, error: null }
       : { data: null, error: { message: 'Object not found' } }),
+    createSignedUrl: async (path, ttl, opts) => ({
+      data: { signedUrl: `https://sb.test/object/${path}?ttl=${ttl}&download=${encodeURIComponent(opts?.download ?? '')}` },
+      error: null,
+    }),
     remove: async (paths) => {
       for (const p of paths) { removed.push(p); delete objects[p]; }
       return { data: [], error: null };
@@ -254,7 +275,7 @@ test('xác nhận: gọi lại lần hai → 409, không xóa tệp của tài l
 });
 
 test('các đường dẫn chưa cài đặt của module trả 501', async () => {
-  const res = await fetch(`${base}/${randomUUID()}`);
+  const res = await fetch(`${base}/${randomUUID()}/chua-co`);
   assert.equal(res.status, 501);
 });
 
@@ -314,4 +335,88 @@ test('search: tìm theo tên môn hoặc mã môn, không chỉ tiêu đề', as
   assert.equal(byName.items.length, 2);
   const byCode = await (await fetch(base + '/?q=IT004')).json();
   assert.deepEqual(byCode.items.map((d) => d.title), ['Slide tổng quan']);
+});
+
+// ───── GET/PATCH/DELETE /:id và GET /:id/download (FR-DOC-05, FR-DOC-06) ─────
+
+const ownDoc = (extra = {}) => {
+  const doc = {
+    id: randomUUID(), group_id: COURSE, uploader_id: USER, title: 'Đề cương', description: null,
+    file_path: `${USER}/${randomUUID()}.pdf`, file_type: 'pdf', file_size: 100,
+    created_at: new Date().toISOString(), ...extra,
+  };
+  sb.tables.documents.push(doc);
+  return doc;
+};
+
+test('detail: trả tài liệu, 404 khi không có, 400 khi id sai', async () => {
+  const doc = ownDoc();
+  assert.equal((await (await fetch(`${base}/${doc.id}`)).json()).title, 'Đề cương');
+  assert.equal((await fetch(`${base}/${randomUUID()}`)).status, 404);
+  assert.equal((await fetch(`${base}/khong-phai-uuid`)).status, 400);
+});
+
+test('download: trả signed URL có thời hạn và tên tệp khi tải về', async () => {
+  const doc = ownDoc({ title: 'Đề: giữa kỳ' });
+  const body = await (await fetch(`${base}/${doc.id}/download`)).json();
+  assert.equal(body.expires_in, 60);
+  assert.match(body.url, /ttl=60/);
+  assert.match(body.url, /download=(.*)/);
+  assert.ok(decodeURIComponent(body.url).includes('Đề_ giữa kỳ.pdf'));
+});
+
+test('edit: người tải lên sửa được; người khác bị 403', async () => {
+  const mine = ownDoc();
+  const res = await fetch(`${base}/${mine.id}`, {
+    method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: 'Mới' }),
+  });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).title, 'Mới');
+
+  const theirs = ownDoc({ uploader_id: OTHER });
+  const denied = await fetch(`${base}/${theirs.id}`, {
+    method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: 'X' }),
+  });
+  assert.equal(denied.status, 403);
+});
+
+test('edit: body rỗng hoặc tiêu đề trống → 400', async () => {
+  const doc = ownDoc();
+  const send = (b) => fetch(`${base}/${doc.id}`, {
+    method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b),
+  });
+  assert.equal((await send({})).status, 400);
+  assert.equal((await send({ title: '   ' })).status, 400);
+});
+
+test('edit: xóa mô tả (client gửi description: null) → 200 và lưu null', async () => {
+  const doc = ownDoc({ description: 'mô tả cũ' });
+  const send = (b) => fetch(`${base}/${doc.id}`, {
+    method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b),
+  });
+
+  const res = await send({ description: null });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).description, null);
+  assert.equal(sb.tables.documents.find((d) => d.id === doc.id).description, null);
+
+  // Đổi tiêu đề kèm xóa mô tả trong cùng một request.
+  const both = await send({ title: 'Tiêu đề mới', description: null });
+  assert.equal(both.status, 200);
+  const body = await both.json();
+  assert.equal(body.title, 'Tiêu đề mới');
+  assert.equal(body.description, null);
+});
+
+test('delete: người tải lên xóa được bản ghi và tệp; người khác bị 403', async () => {
+  const mine = ownDoc();
+  sb.objects[mine.file_path] = { size: 100, contentType: 'application/pdf', head: HEADS.pdf };
+  const res = await fetch(`${base}/${mine.id}`, { method: 'DELETE' });
+  assert.equal(res.status, 204);
+  assert.ok(!sb.tables.documents.some((d) => d.id === mine.id));
+  assert.ok(sb.removed.includes(mine.file_path));
+
+  const theirs = ownDoc({ uploader_id: OTHER });
+  assert.equal((await fetch(`${base}/${theirs.id}`, { method: 'DELETE' })).status, 403);
+  assert.ok(sb.tables.documents.some((d) => d.id === theirs.id));
 });

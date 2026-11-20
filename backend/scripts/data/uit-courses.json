@@ -1,0 +1,4692 @@
+[
+ {
+  "code": "ACCT3603",
+  "name": "Hệ thống thông tin kế toán",
+  "en": "Accounting Information Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "ACCT5123",
+  "name": "Hoạch định nguồn lực doanh nghiệp",
+  "en": "Enterprise Resource Planning",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "ADENG1",
+  "name": "Tiếng Anh tăng cường 1",
+  "en": "Intensive English 1",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "ADENG2",
+  "name": "Tiếng Anh tăng cường 2",
+  "en": "Intensive English 2",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "ADENG3",
+  "name": "Tiếng Anh tăng cường 3",
+  "en": "Intensive English 3",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "ADENG4",
+  "name": "Tiếng Anh tăng cường 4",
+  "en": "Intensive English 4",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "AI001",
+  "name": "Giới thiệu ngành Trí tuệ nhân tạo",
+  "en": "Introduction to Artificial Intelligence",
+  "unit": "KHMT",
+  "credits": 1
+ },
+ {
+  "code": "AI002",
+  "name": "Tư duy Trí tuệ nhân tạo",
+  "en": "Artificial Intelligence Thinking",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "AI301",
+  "name": "Khởi nghiệp và sáng tạo",
+  "en": "Entrepreneurship and Innovation",
+  "unit": "KHMT",
+  "credits": 2
+ },
+ {
+  "code": "AI302",
+  "name": "Kỹ thuật viết báo cáo và trình bày",
+  "en": "Technical Report Writing and Presentation Skills",
+  "unit": "KHMT",
+  "credits": 2
+ },
+ {
+  "code": "AI503",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "KHMT",
+  "credits": 6
+ },
+ {
+  "code": "AI504",
+  "name": "Đồ án tốt nghiệp tại doanh nghiệp",
+  "en": "Industry Capstone Project",
+  "unit": "KHMT",
+  "credits": 10
+ },
+ {
+  "code": "BCH058",
+  "name": "Kỹ năng truyền thông giao tiếp",
+  "en": "Communications Techniques",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "BOQC1",
+  "name": "Nhập môn máy tính lượng tử",
+  "en": "Basics of Quantum Computing",
+  "unit": "BMTL",
+  "credits": 0
+ },
+ {
+  "code": "BUS1125",
+  "name": "Khởi nghiệp kinh doanh",
+  "en": "Entrepreneurship",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "CE005",
+  "name": "Giới thiệu ngành Kỹ Thuật Máy tính",
+  "en": "Introduction to Computer Engineering",
+  "unit": "KTMT",
+  "credits": 1
+ },
+ {
+  "code": "CE006",
+  "name": "Giới thiệu ngành Thiết kế vi mạch",
+  "en": "Introduction to Integrated Circuit Design",
+  "unit": "KTMT",
+  "credits": 1
+ },
+ {
+  "code": "CE103",
+  "name": "Vi xử lý-vi điều khiển",
+  "en": "Microprocessors and Microcontrollers",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE105",
+  "name": "Xử lý tín hiệu số",
+  "en": "Digital Signal Processing",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE118",
+  "name": "Thiết kế luận lý số",
+  "en": "Digital Logic Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE119",
+  "name": "Thực hành kiến trúc máy tính",
+  "en": "Computer Architecture Laboratory",
+  "unit": "KTMT",
+  "credits": 1
+ },
+ {
+  "code": "CE121",
+  "name": "Lý thuyết mạch điện",
+  "en": "Theory of Electrical Circuits",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE122",
+  "name": "Phân tích mạch kỹ thuật",
+  "en": "Engineering Circuit Analysis",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE124",
+  "name": "Các thiết bị và mạch điện tử",
+  "en": "Electronic Devices and Circuits",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE125",
+  "name": "Kỹ thuật phân tích mạch",
+  "en": "Introduction to Circuit Analysis",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE126",
+  "name": "Vật lý bán dẫn và ứng dụng",
+  "en": "Semiconductor Physics and Applications",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE201",
+  "name": "Đồ án 1",
+  "en": "Project 1",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "CE206",
+  "name": "Đồ án 2",
+  "en": "Project 2",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "CE207",
+  "name": "Đồ án thiết kế vi mạch 1",
+  "en": "Project on Integrated Circuit Design 1",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "CE208",
+  "name": "Đồ án thiết kế vi mạch 2",
+  "en": "Project on Integrated Circuit Design 2",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "CE212",
+  "name": "Điều khiển tự động",
+  "en": "Automatic Control",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE213",
+  "name": "Thiết kế hệ thống số với HDL",
+  "en": "Digital System Design with HDL",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE222",
+  "name": "Thiết kế vi mạch số",
+  "en": "Digital Integrated Circuit Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE224",
+  "name": "Thiết kế hệ thống nhúng",
+  "en": "Embedded Systems Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE226",
+  "name": "Thiết kế VLSI",
+  "en": "VLSI Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE232",
+  "name": "Thiết kế hệ thống nhúng không dây",
+  "en": "Wireless Embedded Systems Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE233",
+  "name": "Kỹ thuật Robot",
+  "en": "Robot Principles and Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE3031",
+  "name": "Công nghệ cảm biến",
+  "en": "Sensor Technologies",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE304",
+  "name": "Robot công nghiệp",
+  "en": "Industrial Robotics",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE313",
+  "name": "Xử lý song song và hệ thống phân tán",
+  "en": "Parallel Processing and Distributed Systems",
+  "unit": "KTMT",
+  "credits": 3
+ },
+ {
+  "code": "CE315",
+  "name": "Lập trình hệ thống với Java",
+  "en": "System Programming with Java",
+  "unit": "KTMT",
+  "credits": 3
+ },
+ {
+  "code": "CE317",
+  "name": "Điều khiển tự động nâng cao",
+  "en": "Advanced Automatic Control",
+  "unit": "KTMT",
+  "credits": 3
+ },
+ {
+  "code": "CE318",
+  "name": "Trình biên dịch",
+  "en": "Compiler",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE320",
+  "name": "Logic mờ cho ứng dụng hệ thống nhúng",
+  "en": "Fuzzy Logic for Embedded Systems Applications",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE323",
+  "name": "Kỹ thuật thiết kế mạch in",
+  "en": "Printed Circuit Board Design",
+  "unit": "KTMT",
+  "credits": 3
+ },
+ {
+  "code": "CE331",
+  "name": "Kỹ thuật chế tạo vi mạch",
+  "en": "Integrated Circuit Fabrication",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE332",
+  "name": "Thiết kế vi mạch hỗn hợp",
+  "en": "Mixed-Signal Integrated Circuit Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE333",
+  "name": "Tiếng Anh chuyên ngành Kỹ thuật máy tính",
+  "en": "Technical English for Computer Engineering",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE334",
+  "name": "Thiết kế vi mạch tương tự",
+  "en": "Analog Integrated Circuit Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE335",
+  "name": "Thiết kế dựa trên vi xử lý",
+  "en": "Microprocessor-Based Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE336",
+  "name": "Tự động hóa thiết kế vi mạch",
+  "en": "Electronic Design Automation",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE337",
+  "name": "Tối ưu hóa dựa trên FPGA",
+  "en": "FPGA-based Optimization",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE338",
+  "name": "Hệ thống thời gian thực",
+  "en": "Real-Time Systems",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE339",
+  "name": "Công nghệ IoT và ứng dụng",
+  "en": "IoT Technology and Applications",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE340",
+  "name": "Trí tuệ nhân tạo cho hệ thống nhúng",
+  "en": "Artificial Intelligence for Embedded Systems",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE341",
+  "name": "Lập trình nhúng trên thiết bị di động",
+  "en": "Embedded Programming on Mobile Devices",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE342",
+  "name": "Hệ thống thông minh",
+  "en": "Smart Systems",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE343",
+  "name": "Trí tuệ nhân tạo cho xe tự hành",
+  "en": "Artificial Intelligence for Autonomous Vehicles",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE344",
+  "name": "Trí tuệ nhân tạo cho IoT",
+  "en": "Artificial Intelligence for IoT",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE345",
+  "name": "Kiến trúc IoT: giao thức mạng và bảo mật",
+  "en": "IoT Architecture: Network Protocols and Security",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE346",
+  "name": "Thiết kế Ăng-ten tích hợp cho thiết bị IoT",
+  "en": "Antenna Design for IoT Devices",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE347",
+  "name": "Điều khiển thông minh cho robot",
+  "en": "Intelligent Control in Robotics",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE348",
+  "name": "Công nghệ cảm biến trong IoT",
+  "en": "Sensor Technologies for IoT",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE349",
+  "name": "Hệ thống nhúng trên SoC",
+  "en": "Embedded Systems Design on SoC",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE350",
+  "name": "Xử lý ảnh hướng ASIC",
+  "en": "Image Processing with ASIC",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE351",
+  "name": "Thiết kế bộ tăng tốc phần cứng",
+  "en": "Hardware Accelerator Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE352",
+  "name": "Xử lý tín hiệu số trên FPGA",
+  "en": "Digital Signal Processing on FPGA",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE353",
+  "name": "Thiết kế vật lý vi mạch",
+  "en": "Physical Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE405",
+  "name": "Tương tác người-máy",
+  "en": "Human-Computer Interaction",
+  "unit": "KTMT",
+  "credits": 3
+ },
+ {
+  "code": "CE406",
+  "name": "Tương tác người-máy",
+  "en": "Human-Computer Interaction",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE407",
+  "name": "Đồ án chuyên ngành hệ thống nhúng và robot",
+  "en": "Major Project on Embedded Systems and Robot Design",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "CE408",
+  "name": "Đồ án chuyên ngành thiết kế vi mạch và phần cứng",
+  "en": "Major Project on Integrated Circuit and Computer Hardware Design",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "CE409",
+  "name": "Kỹ thuật thiết kế kiểm tra",
+  "en": "Design Verification",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE410",
+  "name": "Kỹ thuật hệ thống máy tính",
+  "en": "Computer System Engineering",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE411",
+  "name": "Chuyên đề hệ thống nhúng và robot",
+  "en": "Special Topics on Embedded Systems and Robotics",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE412",
+  "name": "Đồ án chuyên ngành hệ thống nhúng và IoT",
+  "en": "Major Project on Embedded System and IoT Design",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "CE413",
+  "name": "Đồ án chuyên ngành Robotics và AI",
+  "en": "Major Project on Robotics and AI",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "CE421",
+  "name": "Chuyên đề thiết kế vi mạch và phần cứng",
+  "en": "Special Topics on Integrated Circuit and Computer Hardware Designs",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE432",
+  "name": "Thiết kế vi mạch hướng ASIC",
+  "en": "ASIC Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE433",
+  "name": "Thiết kế hệ thống SoC",
+  "en": "SoC Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE434",
+  "name": "Chuyên đề thiết kế hệ vi mạch 1",
+  "en": "Special Topics on Integrated Circuit Design 1",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE435",
+  "name": "Chuyên đề thiết kế hệ vi mạch 2",
+  "en": "Special Topics on Integrated Circuit Design 2",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE436",
+  "name": "Xử lý tín hiệu số và ứng dụng",
+  "en": "Digital Signal Processing and Applications",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE437",
+  "name": "Chuyên đề thiết kế hệ thống nhúng 1",
+  "en": "Special Topics on Embedded Systems 1",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE438",
+  "name": "Chuyên đề thiết kế hệ thống nhúng 2",
+  "en": "Special Topics on Embedded Systems 2",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE439",
+  "name": "Lập trình song song và hệ thống phân tán",
+  "en": "Parallel Programming and Distributed Systems",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE440",
+  "name": "Hệ thống định vị với ứng dụng Artificial Intelligence",
+  "en": "Indoor and Outdoor Localization Systems with Artificial Intelligence Applications",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE441",
+  "name": "Chuyên đề thiết kế Robotics và Artificial Intelligence 1",
+  "en": "Special Topics on Robotics and Artificial Intelligence 1",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE442",
+  "name": "Chuyên đề thiết kế Robotics và Artificial Intelligence 2",
+  "en": "Special Topics on Robotics and Artificial Intelligence 2",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE506",
+  "name": "Luận văn chuyên sâu đặc thù",
+  "en": "Thesis",
+  "unit": "KTMT",
+  "credits": 14
+ },
+ {
+  "code": "CE507",
+  "name": "Đồ án tốt nghiệp tại doanh nghiệp",
+  "en": "Industry Capstone Project",
+  "unit": "KTMT",
+  "credits": 10
+ },
+ {
+  "code": "CE508",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "KTMT",
+  "credits": 6
+ },
+ {
+  "code": "CE510",
+  "name": "Chuyên đề tốt nghiệp định hướng hệ thống nhúng và IoT",
+  "en": "Special Project on Embedded Systems and IoT",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE511",
+  "name": "Chuyên đề tốt nghiệp định hướng Robotic và trí tuệ nhân tạo",
+  "en": "Special Project on Robotics and Artificial Intelligence",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CE512",
+  "name": "Chuyên đề tốt nghiệp định hướng thiết kế vi mạch",
+  "en": "Special Project on Integrated Circuit Design",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "CNBU101",
+  "name": "Toán cho tin học",
+  "en": "Maths for Computing",
+  "unit": "MMT&TT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU102",
+  "name": "Công nghệ mạng máy tính",
+  "en": "Networking Technologies",
+  "unit": "MMT&TT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU103",
+  "name": "Lập trình cho kỹ sư mạng máy tính",
+  "en": "Programming for Network Engineers",
+  "unit": "MMT&TT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU104",
+  "name": "Hệ thống Servers",
+  "en": "Server Systems",
+  "unit": "MMT&TT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU105",
+  "name": "Hệ thống mạng doanh nghiệp",
+  "en": "Enterprise Network Systems",
+  "unit": "MMT&TT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU106",
+  "name": "Hoạt động an ninh mạng",
+  "en": "Cyber Security Operations",
+  "unit": "MMT&TT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU107",
+  "name": "Dự án chuyên ngành",
+  "en": "Enterprise Practice Project",
+  "unit": "MMT&TT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU108",
+  "name": "Hệ điều hành",
+  "en": "Applied Operating Systems",
+  "unit": "MMT&TT",
+  "credits": 69
+ },
+ {
+  "code": "CNBU201",
+  "name": "Công nghệ mạng không dây",
+  "en": "Wireless Networking Technologies",
+  "unit": "MMT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU202",
+  "name": "Hệ thống tường lửa nâng cao",
+  "en": "Advanced Firewall Systems",
+  "unit": "MMT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU203",
+  "name": "An toàn mạng máy tính",
+  "en": "Network Security",
+  "unit": "MMT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU204",
+  "name": "Ethical Hacking",
+  "en": "Ethical Hacking",
+  "unit": "MMT",
+  "credits": 65
+ },
+ {
+  "code": "CNBU205",
+  "name": "Dự án cá nhân",
+  "en": "Individual Honours Project",
+  "unit": "MMT",
+  "credits": 65
+ },
+ {
+  "code": "CS005",
+  "name": "Giới thiệu ngành Khoa học Máy tính",
+  "en": "Introduction to Computer Science",
+  "unit": "KHMT",
+  "credits": 1
+ },
+ {
+  "code": "CS105",
+  "name": "Đồ họa máy tính",
+  "en": "Computer Graphics",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS106",
+  "name": "Trí tuệ nhân tạo",
+  "en": "Artificial Intelligence",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS110",
+  "name": "Nhập môn công nghệ tri thức và máy học",
+  "en": "Introduction to Knowledge Engineering and Machine Learning",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS111",
+  "name": "Nguyên lý và phương pháp lập trình",
+  "en": "Principles and Techniques of Programming",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS1113",
+  "name": "Khoa học máy tính 1",
+  "en": "Computer Science 1",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS112",
+  "name": "Phân tích và thiết kế thuật toán",
+  "en": "Design and Analysis of Algorithms",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS113",
+  "name": "Đồ họa máy tính và xử lý ảnh",
+  "en": "Computer Graphics and Digital Image Processing",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS114",
+  "name": "Máy học",
+  "en": "Machine Learning",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS115",
+  "name": "Toán cho khoa học máy tính",
+  "en": "Mathematics for Computer Science",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS116",
+  "name": "Lập trình Python cho máy học",
+  "en": "Python for Machine Learning",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS117",
+  "name": "Tư duy tính toán",
+  "en": "Computational Thinking",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS211",
+  "name": "Trí tuệ nhân tạo nâng cao",
+  "en": "Advanced Artificial Intelligence",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS2133",
+  "name": "Khoa học máy tính 2",
+  "en": "Computer Science 2",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS2134",
+  "name": "Khoa học máy tính",
+  "en": "Computer Science",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS214",
+  "name": "Biểu diễn tri thức và suy luận",
+  "en": "Knowledge Representation and Reasoning",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS217",
+  "name": "Các hệ cơ sở tri thức",
+  "en": "Knowledge-Based Systems",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS221",
+  "name": "Xử lý ngôn ngữ tự nhiên",
+  "en": "Natural Language Processing",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS222",
+  "name": "Xử lý ngôn ngữ tự nhiên nâng cao",
+  "en": "Advanced Natural Language Processing",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS226",
+  "name": "Ngôn ngữ học máy tính",
+  "en": "Computational Linguistics",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS229",
+  "name": "Ngữ nghĩa học tính toán",
+  "en": "Computational Semantics",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS231",
+  "name": "Nhập môn thị giác máy tính",
+  "en": "Introduction to Computer Vision",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS232",
+  "name": "Tính toán đa phương tiện",
+  "en": "Introduction to Multimedia Computing",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS2433",
+  "name": "Lập trình C/C++",
+  "en": "C/C++ Programming",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS302",
+  "name": "Seminar",
+  "en": "Seminar",
+  "unit": "KHMT",
+  "credits": 3
+ },
+ {
+  "code": "CS311",
+  "name": "Kỹ thuật lập trình trí tuệ nhân tạo",
+  "en": "Artificial Intelligence Programming Techniques",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS312",
+  "name": "Hệ thống đa tác tử",
+  "en": "Multi-Agent Systems",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS313",
+  "name": "Khai thác dữ liệu và ứng dụng",
+  "en": "Data Mining and Applications",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS314",
+  "name": "Lập trình symbolic trong trí tuệ nhân tạo",
+  "en": "Symbolic Programming in Artificial Intelligence",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS315",
+  "name": "Máy học nâng cao",
+  "en": "Advanced Machine Learning",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS316",
+  "name": "Các hệ giải bài toán thông minh",
+  "en": "Intelligent Problem-Solving Systems",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS317",
+  "name": "Phát triển và vận hành hệ thống máy học",
+  "en": "Machine Learning Operations",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS321",
+  "name": "Ngôn ngữ học ngữ liệu",
+  "en": "Corpus Linguistics",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS323",
+  "name": "Các hệ thống hỏi-đáp",
+  "en": "Question-Answering Systems",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS324",
+  "name": "Máy học trong xử lý ngôn ngữ tự nhiên",
+  "en": "Machine Learning for Natural Language Processing",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS325",
+  "name": "Dịch máy",
+  "en": "Machine Translation",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS326",
+  "name": "Các kĩ thuật trong xử lý ngôn ngữ tự nhiên",
+  "en": "Advanced Techniques in Natural Language Processing",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS331",
+  "name": "Thị giác máy tính nâng cao",
+  "en": "Advanced Computer Vision",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS332",
+  "name": "Máy học trong thị giác máy tính",
+  "en": "Machine Learning in Computer Vision",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS333",
+  "name": "Đồ họa game",
+  "en": "Computer Graphics in Game",
+  "unit": "KHMT",
+  "credits": 3
+ },
+ {
+  "code": "CS335",
+  "name": "Tìm kiếm ảnh và video",
+  "en": "Image and Video Search",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS336",
+  "name": "Truy vấn thông tin đa phương tiện",
+  "en": "Multimedia Information Retrieval",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS3363",
+  "name": "Tổ chức ngôn ngữ lập trình",
+  "en": "Organization of Programming Languages",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS337",
+  "name": "Xử lý âm thanh và tiếng nói",
+  "en": "Speech and Audio Signal Processing",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS3373",
+  "name": "Lập trình hướng đối tượng nâng cao cho môi trường windows",
+  "en": "Advanced Object-Oriented Programming for Windows",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS338",
+  "name": "Nhận dạng",
+  "en": "Pattern Recognition",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS339",
+  "name": "Xử lý văn bản y khoa",
+  "en": "Natural Language Processing with Health Focus",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS3423",
+  "name": "Cấu trúc tập tin",
+  "en": "File Structures",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS3443",
+  "name": "Hệ thống máy tính",
+  "en": "Computer Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "CS3613",
+  "name": "Cơ sở tính toán",
+  "en": "Theoretical Foundations of Computing",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS3653",
+  "name": "Toán rời rạc",
+  "en": "Discrete Mathematics",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "CS405",
+  "name": "Logic mờ và ứng dụng",
+  "en": "Fuzzy Logic and Applications",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS406",
+  "name": "Xử lý ảnh và ứng dụng",
+  "en": "Image Processing and Applications",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS409",
+  "name": "Hệ suy diễn mờ",
+  "en": "Fuzzy Inference Systems",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS410",
+  "name": "Mạng neural và thuật giải di truyền",
+  "en": "Neural Networks and Genetic Algorithms",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS412",
+  "name": "Web ngữ nghĩa",
+  "en": "Semantic Web",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS414",
+  "name": "Lý thuyết automat và ứng dụng",
+  "en": "Automata Theory and Applications",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS4143",
+  "name": "Đồ họa máy tính",
+  "en": "Computer Graphics",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "CS4153",
+  "name": "Phát triển ứng dụng trên di động",
+  "en": "Mobile Application Development",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "CS419",
+  "name": "Truy xuất thông tin",
+  "en": "Information Retrieval",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS420",
+  "name": "Các vấn đề chọn lọc trong thị giác máy tính",
+  "en": "Selected Topics in Computer Vision",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS4243",
+  "name": "Thuật toán và tiến trình trong an toàn máy tính",
+  "en": "Algorithms and Processes in Computer Security",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "CS4273",
+  "name": "Nhập môn Công nghệ phần mềm",
+  "en": "Introduction to Software Engineering",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS4283",
+  "name": "Mạng máy tính",
+  "en": "Computer Networks",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "CS431",
+  "name": "Các kĩ thuật học sâu và ứng dụng",
+  "en": "Deep Learning and Applications",
+  "unit": "KHMT",
+  "credits": 3
+ },
+ {
+  "code": "CS4323",
+  "name": "Hệ điều hành",
+  "en": "Operating Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "CS4343",
+  "name": "Cấu trúc dữ liệu và giải thuật",
+  "en": "Data Structures and Algorithms",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS4793",
+  "name": "Trí tuệ nhân tạo",
+  "en": "Artificial Intelligence",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS5031",
+  "name": "Thực tập doanh nghiệp",
+  "en": "Internship",
+  "unit": "HTTT",
+  "credits": 2
+ },
+ {
+  "code": "CS511",
+  "name": "Ngôn ngữ lập trình C#",
+  "en": "C# Programming Language",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS519",
+  "name": "Phương pháp luận nghiên cứu khoa học",
+  "en": "Scientific Research Methodology",
+  "unit": "KHMT",
+  "credits": 3
+ },
+ {
+  "code": "CS521",
+  "name": "Toán rời rạc nâng cao",
+  "en": "Advanced Discrete Mathematics",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS522",
+  "name": "Đại số máy tính",
+  "en": "Computer Algebra",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS523",
+  "name": "Cấu trúc dữ liệu và giải thuật nâng cao",
+  "en": "Advanced Data Structures and Algorithms",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS524",
+  "name": "Một số ứng dụng của xử lý ngôn ngữ tự nhiên",
+  "en": "Applied Natural Language Processing",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS525",
+  "name": "Thị giác máy tính trong tương tác người – máy",
+  "en": "Computer Vision in Human-Computer Interaction",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS526",
+  "name": "Phát triển ứng dụng đa phương tiện trên thiết bị di động",
+  "en": "Multimedia Mobile Applications",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS527",
+  "name": "Thực tại ảo",
+  "en": "Virtual Reality",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS528",
+  "name": "Trực quan hóa thông tin",
+  "en": "Information Visualization",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS529",
+  "name": "Các vấn đề nghiên cứu và ứng dụng trong khoa học máy tính",
+  "en": "Selected Topics for Researching and Application in Computer Science",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS530",
+  "name": "Đồ án chuyên ngành",
+  "en": "Undergraduate Research Project",
+  "unit": "KHMT",
+  "credits": 3
+ },
+ {
+  "code": "CS532",
+  "name": "Thị giác máy tính trong tương tác người-máy",
+  "en": "Computer Vision in Human-Computer Interaction",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS534",
+  "name": "Lập trình Javascript và ứng dụng",
+  "en": "JavaScript Programming and Applications",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS535",
+  "name": "Tổng hợp tiếng nói",
+  "en": "Speech Synthesis",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CS5423",
+  "name": "Nguyên lý các hệ cơ sở dữ liệu",
+  "en": "Principles of Database Systems",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "CS5433",
+  "name": "Các hệ cơ sở dữ liệu phân tán",
+  "en": "Distributed Database Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "CS553",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "KHMT",
+  "credits": 6
+ },
+ {
+  "code": "CS554",
+  "name": "Đồ án tốt nghiệp tại doanh nghiệp",
+  "en": "Industry Capstone Project",
+  "unit": "KHMT",
+  "credits": 10
+ },
+ {
+  "code": "CSBU002",
+  "name": "Mạng máy tính",
+  "en": "Networking",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CSBU005",
+  "name": "Bảo mật",
+  "en": "Security",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "CSBU101",
+  "name": "Lập trình máy tính",
+  "en": "Computer Programming",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU102",
+  "name": "Hệ thống máy tính",
+  "en": "Computer Systems",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU103",
+  "name": "Phát triển và thiết kế web",
+  "en": "Website Design and Development",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU104",
+  "name": "Cấu trúc dữ liệu và giải thuật",
+  "en": "Data Structures and Algorithms",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU105",
+  "name": "Mạng máy tính căn bản",
+  "en": "Network Fundamentals",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU106",
+  "name": "Đồ án đổi mới sáng tạo",
+  "en": "Innovation Project",
+  "unit": "KHMT",
+  "credits": 80
+ },
+ {
+  "code": "CSBU107",
+  "name": "Lập trình hướng đối tượng",
+  "en": "Object-Oriented Programming",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU108",
+  "name": "Hệ điều hành",
+  "en": "Operating Systems",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU109",
+  "name": "Phát triển ứng dụng web và cơ sở dữ liệu",
+  "en": "Database and Web Application Development",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU110",
+  "name": "Toán rời rạc và lập trình khai báo",
+  "en": "Discrete Mathematics and Declarative Programming",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU111",
+  "name": "An ninh mạng",
+  "en": "Cyber Security",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU112",
+  "name": "Thiết kế phần mềm",
+  "en": "Software Design",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU201",
+  "name": "Thiết kế trải nghiệm người dùng",
+  "en": "User Experience Design",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU202",
+  "name": "Phát triển ứng dụng cho thiết bị di động và thiết bị đeo",
+  "en": "Mobile and Wearable Application Development",
+  "unit": "KHMT",
+  "credits": 80
+ },
+ {
+  "code": "CSBU203",
+  "name": "Điện toán đám mây",
+  "en": "Cloud Computing",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU204",
+  "name": "Trí tuệ nhân tạo và máy học",
+  "en": "Artificial Intelligence and Machine Learning",
+  "unit": "KHMT",
+  "credits": 65
+ },
+ {
+  "code": "CSBU205",
+  "name": "Dự án cá nhân",
+  "en": "Individual Honours Project",
+  "unit": "KHMT",
+  "credits": 80
+ },
+ {
+  "code": "CU001",
+  "name": "Văn hóa doanh nghiệp Nhật",
+  "en": "Japanese Corporate Culture",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "DAI015",
+  "name": "Thực hành văn bản Tiếng Việt",
+  "en": "Vietnamese Language Practice",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "DS005",
+  "name": "Giới thiệu ngành Khoa học Dữ liệu",
+  "en": "Introduction to Data Science",
+  "unit": "KTTT",
+  "credits": 1
+ },
+ {
+  "code": "DS101",
+  "name": "Thống kê và xác suất chuyên sâu",
+  "en": "Advanced Statistics and Probability",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS102",
+  "name": "Học máy thống kê",
+  "en": "Statistical Machine Learning",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS103",
+  "name": "Thu thập và tiền xử lý dữ liệu",
+  "en": "Getting and Cleaning Data",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS104",
+  "name": "Tính toán song song và phân tán",
+  "en": "Parallel and Distributed Computing",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS106",
+  "name": "Tối ưu hóa và ứng dụng",
+  "en": "Optimization and Applications",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS107",
+  "name": "Tư duy tính toán cho khoa học dữ liệu",
+  "en": "Computational Thinking for Data Science",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS108",
+  "name": "Tiền xử lý và xây dựng bộ dữ liệu",
+  "en": "Preprocessing and Constructing Datasets",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS111",
+  "name": "Phân tích dữ liệu",
+  "en": "Data Analysis",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS200",
+  "name": "Phân tích dữ liệu lớn",
+  "en": "Big Data Analysis",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS201",
+  "name": "Deep Learning trong khoa học dữ liệu",
+  "en": "Deep Learning for Data Science",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS202",
+  "name": "Đồ án khoa học dữ liệu và ứng dụng 1",
+  "en": "Data Science Project and Application 1",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "DS203",
+  "name": "Đồ án khoa học dữ liệu và ứng dụng 2",
+  "en": "Data Science Project and Application 2",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "DS204",
+  "name": "Đồ án khoa học dữ liệu và ứng dụng",
+  "en": "Data Science Project and Application",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "DS207",
+  "name": "Đồ án",
+  "en": "Project",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "DS300",
+  "name": "Hệ khuyến nghị",
+  "en": "Recommender Systems",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS301",
+  "name": "Các giải thuật khai phá dữ liệu lớn",
+  "en": "Mining of Massive Datasets",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS302",
+  "name": "Phân tích thống kê đa biến",
+  "en": "Multivariate Statistical Analysis",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS303",
+  "name": "Thống kê Bayes",
+  "en": "Bayesian Statistics",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS304",
+  "name": "Thiết kế và phân tích thực nghiệm",
+  "en": "Design and Analysis of Experiments",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS305",
+  "name": "Phân tích dữ liệu chuỗi thời gian và ứng dụng",
+  "en": "Applied Time Series Analysis",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS306",
+  "name": "Phân tích dữ liệu lớn trong tài chính",
+  "en": "Big Data Analytics in Finance",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS307",
+  "name": "Phân tích dữ liệu truyền thông xã hội",
+  "en": "Social Media Data Analytics",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS308",
+  "name": "Mô hình đồ thị xác suất",
+  "en": "Probabilistic Graphical Models",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS310",
+  "name": "Xử lý ngôn ngữ tự nhiên cho khoa học dữ liệu",
+  "en": "Natural Language Processing for Data Science",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS311",
+  "name": "Kỹ năng nghiên cứu và viết bài báo khoa học",
+  "en": "Scientific Research and Writing Skills",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS312",
+  "name": "Xử lý ảnh y khoa",
+  "en": "Medical Image Processing",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS313",
+  "name": "Xử lý thông tin giọng nói",
+  "en": "Speech Information Processing",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS314",
+  "name": "Rút trích và truy vấn thông tin",
+  "en": "Information Extraction and Retrieval",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS315",
+  "name": "Phân tích kho dữ liệu",
+  "en": "Data Warehouse Analysis",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS316",
+  "name": "Xây dựng ứng dụng thông minh",
+  "en": "Intelligent Applications",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS317",
+  "name": "Khai phá dữ liệu trong doanh nghiệp",
+  "en": "Data Mining for Enterprise",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS318",
+  "name": "Đạo đức trong trí tuệ nhân tạo và khoa học dữ liệu",
+  "en": "Ethics in Artificial Intelligence and Data Science",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS319",
+  "name": "Mô hình ngôn ngữ lớn",
+  "en": "Large Language Models",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS320",
+  "name": "Học đa thể thức",
+  "en": "Multimodal Learning",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS321",
+  "name": "Khoa học dữ liệu cho an toàn thông tin",
+  "en": "Data Science for Cybersecurity",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS322",
+  "name": "Thiết kế hệ thống học máy",
+  "en": "Machine Learning Systems Design",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS323",
+  "name": "Viết báo cáo kỹ thuật và thuyết trình",
+  "en": "Technical Report Writing and Presentation",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "DS324",
+  "name": "Khai thác dữ liệu ảnh số",
+  "en": "Digital Image Data Mining",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS325",
+  "name": "Thiết kế ứng dụng với dữ liệu chuyên sâu",
+  "en": "Designing Data-Intensive Applications",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS326",
+  "name": "Khai phá dữ liệu đa phương tiện và ứng dụng",
+  "en": "Multimedia Mining and Applications",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS327",
+  "name": "Các mô hình nền tảng",
+  "en": "Foundation Models",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS400",
+  "name": "Chuyên đề tốt nghiệp khoa học dữ liệu",
+  "en": "Data Science Graduate Seminars",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "DS501",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "KTTT",
+  "credits": 6
+ },
+ {
+  "code": "DS502",
+  "name": "Đồ án tốt nghiệp tại doanh nghiệp",
+  "en": "Industry Capstone Project",
+  "unit": "KTTT",
+  "credits": 10
+ },
+ {
+  "code": "DTH039",
+  "name": "Đô thị học đại cương",
+  "en": "Introduction to Urban Studies",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "EC001",
+  "name": "Kinh tế học đại cương",
+  "en": "Principles of Economics",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "EC002",
+  "name": "Quản trị doanh nghiệp",
+  "en": "Business Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC003",
+  "name": "Tiếp thị căn bản",
+  "en": "Basic Marketing",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC005",
+  "name": "Giới thiệu ngành Thương mại Điện tử",
+  "en": "Introduction to E-Commerce",
+  "unit": "HTTT",
+  "credits": 1
+ },
+ {
+  "code": "EC101",
+  "name": "Marketing căn bản",
+  "en": "Basic Marketing",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC201",
+  "name": "Phân tích thiết kế quy trình nghiệp vụ doanh nghiệp",
+  "en": "Business Process Analysis and Design",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "EC204",
+  "name": "Marketing điện tử",
+  "en": "E-Marketing",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC208",
+  "name": "Quản trị dự án thương mại điện tử",
+  "en": "E-Commerce Project Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC213",
+  "name": "Quản trị quan hệ khách hàng và nhà cung cấp",
+  "en": "Customer and Supplier Relationship Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC214",
+  "name": "Nhập môn quản trị chuỗi cung ứng",
+  "en": "Introduction to Supply Chain Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC229",
+  "name": "Pháp luật trong thương mại điện tử",
+  "en": "Law in E-Commerce",
+  "unit": "HTTT",
+  "credits": 2
+ },
+ {
+  "code": "EC232",
+  "name": "Nguyên lý kế toán",
+  "en": "Principles of Accounting",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC304",
+  "name": "Tối ưu hóa công cụ tìm kiếm trong thương mại điện tử",
+  "en": "Search Engine Optimization in E-Commerce",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC311",
+  "name": "Tiếp thị trực tuyến",
+  "en": "E-Marketing",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC312",
+  "name": "Thiết kế hệ thống thương mại điện tử",
+  "en": "E-Commerce Systems Design",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC331",
+  "name": "Quản trị chiến lược kinh doanh điện tử",
+  "en": "E-Business Strategic Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC332",
+  "name": "Quản trị sản xuất",
+  "en": "Production and Manufacturing Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC333",
+  "name": "Quản trị tài chính doanh nghiệp",
+  "en": "Financial Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC334",
+  "name": "Quản trị kênh phân phối",
+  "en": "Distribution Channel Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC335",
+  "name": "An toàn và bảo mật thương mại điện tử",
+  "en": "Safety and Security in E-Commerce",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC336",
+  "name": "Quản trị nhân lực",
+  "en": "Human Resources",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC337",
+  "name": "Hệ thống thanh toán trực tuyến",
+  "en": "E-Payment Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC338",
+  "name": "Quản trị bán hàng",
+  "en": "Sales Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC402",
+  "name": "Phát triển ứng dụng thương mại di động",
+  "en": "Mobile Commerce Application Development",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "EC403",
+  "name": "Thương mại xã hội",
+  "en": "Social Commerce",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "EC404",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "HTTT",
+  "credits": 6
+ },
+ {
+  "code": "EC405",
+  "name": "Đồ án tốt nghiệp tại doanh nghiệp",
+  "en": "Industry Capstone Project",
+  "unit": "HTTT",
+  "credits": 10
+ },
+ {
+  "code": "EN001.CO",
+  "name": "English for Communication 1",
+  "en": "English for Communication 1",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "EN001.GE",
+  "name": "General English",
+  "en": "General English",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "EN002.CO",
+  "name": "English for Communication 1",
+  "en": "English for Communication 1",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "EN002.GE",
+  "name": "General English",
+  "en": "General English",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "ENG01",
+  "name": "Anh văn 1",
+  "en": "English 1",
+  "unit": "TTNN",
+  "credits": 4
+ },
+ {
+  "code": "ENG02",
+  "name": "Anh văn 2",
+  "en": "English 2",
+  "unit": "TTNN",
+  "credits": 4
+ },
+ {
+  "code": "ENG03",
+  "name": "Anh văn 3",
+  "en": "English 3",
+  "unit": "TTNN",
+  "credits": 4
+ },
+ {
+  "code": "ENG04",
+  "name": "Anh văn 4",
+  "en": "English 4",
+  "unit": "TTNN",
+  "credits": 4
+ },
+ {
+  "code": "ENG05",
+  "name": "Anh văn 5",
+  "en": "English 5",
+  "unit": "TTNN",
+  "credits": 4
+ },
+ {
+  "code": "ENG06",
+  "name": "Kỹ năng thuyết trình tiếng Anh",
+  "en": "Effective Presentation",
+  "unit": "TTNN",
+  "credits": 4
+ },
+ {
+  "code": "ENG07",
+  "name": "Kỹ năng viết luận",
+  "en": "Academic Writing",
+  "unit": "TTNN",
+  "credits": 4
+ },
+ {
+  "code": "ENGA1",
+  "name": "Anh văn sơ cấp 1",
+  "en": "Anh văn sơ cấp 1",
+  "unit": "TTNN",
+  "credits": 0
+ },
+ {
+  "code": "ENGA2",
+  "name": "Anh văn sơ cấp 2",
+  "en": "Anh văn sơ cấp 2",
+  "unit": "TTNN",
+  "credits": 0
+ },
+ {
+  "code": "ENGL1113",
+  "name": "Tiếng Anh 1",
+  "en": "English Composition 1",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "ENGL1213",
+  "name": "Tiếng Anh 2",
+  "en": "English Composition 2",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "GDH075",
+  "name": "Tâm lý học giao tiếp",
+  "en": "Communication Psychology",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "IE005",
+  "name": "Giới thiệu ngành Công nghệ Thông tin",
+  "en": "Introduction to Information Technology",
+  "unit": "KTTT",
+  "credits": 1
+ },
+ {
+  "code": "IE101",
+  "name": "Cơ sở hạ tầng công nghệ thông tin",
+  "en": "Information Technology Infrastructure",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE102",
+  "name": "Các công nghệ nền",
+  "en": "Platform Technologies",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE103",
+  "name": "Quản lý thông tin",
+  "en": "Information Management",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE104",
+  "name": "Internet và công nghệ web",
+  "en": "Internet and Web Technology",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE105",
+  "name": "Nhập môn bảo đảm và an ninh thông tin",
+  "en": "Introduction to Information Assurance and Security",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE106",
+  "name": "Thiết kế giao diện người dùng",
+  "en": "User Interface Design",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE108",
+  "name": "Phân tích thiết kế phần mềm",
+  "en": "Software Analysis and Design",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE201",
+  "name": "Xử lý dữ liệu thống kê",
+  "en": "Analysis of Statistical Data",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE203",
+  "name": "Hệ thống quản trị qui trình nghiệp vụ",
+  "en": "Business Process Management Systems",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE204",
+  "name": "Tối ưu hóa công cụ tìm kiếm",
+  "en": "Search Engine Optimization",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE205",
+  "name": "Xử lý ảnh vệ tinh",
+  "en": "Satellite Image Processing",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE206",
+  "name": "Đồ án chuẩn bị tốt nghiệp",
+  "en": "Preparing for the Graduation Project",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "IE207",
+  "name": "Đồ án",
+  "en": "Project",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "IE212",
+  "name": "Công nghệ dữ liệu lớn",
+  "en": "Big Data Technology",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE213",
+  "name": "Kỹ thuật phát triển hệ thống web",
+  "en": "Web System Development Techniques",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE216",
+  "name": "Các chủ đề toán học cho khoa học dữ liệu",
+  "en": "Topics in Mathematics of Data Science",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE218",
+  "name": "Xử lý dữ liệu lớn",
+  "en": "Big Data Processing",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE221",
+  "name": "Kỹ thuật lập trình Python",
+  "en": "Python Programming Techniques",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE223",
+  "name": "Phân tích dữ liệu bằng Python và R",
+  "en": "Data Analysis with Python and R",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE225",
+  "name": "Mạng kết nối",
+  "en": "Interconnection Networks",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE226",
+  "name": "Đồ họa và trực quan hóa máy tính",
+  "en": "Computer Graphics and Visualization",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE227",
+  "name": "Xử lý tín hiệu số cho mạng",
+  "en": "Signal Processing over Networks",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE228",
+  "name": "Tương tác người-máy Việt Nhật",
+  "en": "Human-Computer Interaction",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE229",
+  "name": "Trí tuệ nhân tạo Việt Nhật",
+  "en": "Artificial Intelligence",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE230",
+  "name": "Viết báo cáo kỹ thuật bằng tiếng Nhật",
+  "en": "Japanese Technical Writing",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "IE231",
+  "name": "Quản trị doanh nghiệp công nghệ thông tin",
+  "en": "Information Technology Enterprise Management",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE232",
+  "name": "Nhập môn trí tuệ nhân tạo",
+  "en": "Introduction to Artificial Intelligence",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE233",
+  "name": "Phân tích và mô hình mạng xã hội",
+  "en": "Analysis and Modeling of Social Networks",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE301",
+  "name": "Quản trị quan hệ khách hàng",
+  "en": "Customer Relationship Management",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE302",
+  "name": "Kiến trúc và tích hợp hệ thống",
+  "en": "System Integration and Architecture",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE303",
+  "name": "Công nghệ Java",
+  "en": "Java Technology",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE304",
+  "name": "Hệ thống định vị toàn cầu",
+  "en": "Global Positioning System",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE305",
+  "name": "Tin học môi trường",
+  "en": "Environmental Informatics",
+  "unit": "KTTT",
+  "credits": 2
+ },
+ {
+  "code": "IE307",
+  "name": "Công nghệ lập trình đa nền tảng cho ứng dụng di động",
+  "en": "Cross-Platform Mobile Development",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE310",
+  "name": "Tư duy thiết kế",
+  "en": "Design Thinking",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE313",
+  "name": "Phân tích và trực quan dữ liệu",
+  "en": "Data Analysis and Visualization",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE400",
+  "name": "Chuyên đề tốt nghiệp",
+  "en": "Graduate Seminars",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE401",
+  "name": "Tin-Sinh học",
+  "en": "Bioinformatics",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE402",
+  "name": "Hệ thống thông tin địa lý 3 chiều",
+  "en": "Three-Dimensional Geographic Information Systems",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE403",
+  "name": "Khai thác dữ liệu truyền thông xã hội",
+  "en": "Social Media Mining",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE405",
+  "name": "Công nghệ phân tích dữ liệu lớn",
+  "en": "Big Data Analysis Technologies",
+  "unit": "KTTT",
+  "credits": 4
+ },
+ {
+  "code": "IE406",
+  "name": "Nhập môn ẩn thông tin và ứng dụng",
+  "en": "Data Hiding Fundamentals and Applications",
+  "unit": "KTTT",
+  "credits": 3
+ },
+ {
+  "code": "IE501",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "KTTT",
+  "credits": 6
+ },
+ {
+  "code": "IE502",
+  "name": "Đồ án tốt nghiệp tại doanh nghiệp",
+  "en": "Industry Capstone Project",
+  "unit": "KTTT",
+  "credits": 10
+ },
+ {
+  "code": "IEM4733",
+  "name": "Tái cấu trúc quy trình doanh nghiệp",
+  "en": "Re-engineering Business Processes",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IEM5723",
+  "name": "Mô hình hóa dữ liệu, quy trình và đối tượng",
+  "en": "Data, Process and Object Modeling",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "INI01",
+  "name": "Thực tập quốc tế",
+  "en": "International Internship",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "INT001",
+  "name": "Tiếng Anh tổng quát",
+  "en": "General English",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "INT002",
+  "name": "Toeic 1",
+  "en": "TOEIC 1",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "INT003",
+  "name": "Tiếng Anh tổng quát 2",
+  "en": "General English 2",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "INT004",
+  "name": "Toeic 2",
+  "en": "TOEIC 2",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "INT005",
+  "name": "Tiếng Anh giao tiếp",
+  "en": "Communication",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "INT006",
+  "name": "Toeic 3",
+  "en": "TOEIC 3",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "IS005",
+  "name": "Giới thiệu ngành Hệ thống Thông tin",
+  "en": "Introduction to Information Systems Discipline",
+  "unit": "HTTT",
+  "credits": 1
+ },
+ {
+  "code": "IS105",
+  "name": "Hệ quản trị cơ sở dữ liệu Oracle",
+  "en": "Oracle Database Management System",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS201",
+  "name": "Phân tích thiết kế hệ thống",
+  "en": "Systems Analysis and Design",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS207",
+  "name": "Phát triển ứng dụng web",
+  "en": "Web Application Development",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS208",
+  "name": "Quản lý dự án công nghệ thông tin",
+  "en": "Information Technology Project Management",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS210",
+  "name": "Hệ quản trị cơ sở dữ liệu",
+  "en": "Database Management Systems",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS211",
+  "name": "Cơ sở dữ liệu phân tán",
+  "en": "Distributed Databases",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS215",
+  "name": "Thiết kế hướng đối tượng với UML",
+  "en": "Object-Oriented Analysis and Design with UML",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS216",
+  "name": "Lập trình Java",
+  "en": "Programming with Java",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS217",
+  "name": "Kho dữ liệu và OLAP",
+  "en": "Data Warehouse and OLAP",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS220",
+  "name": "Xây dựng hệ thống thông tin trên các framework",
+  "en": "Information Systems Development with Frameworks",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS232",
+  "name": "Hệ thống thông tin kế toán",
+  "en": "Accounting Information Systems",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS251",
+  "name": "Nhập môn hệ thống thông tin địa lý",
+  "en": "Introduction to Geographic Information Systems",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS252",
+  "name": "Khai thác dữ liệu",
+  "en": "Data Mining",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS254",
+  "name": "Hệ hỗ trợ quyết định",
+  "en": "Decision Support Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS311",
+  "name": "Đồ án hệ thống thông tin",
+  "en": "Information Systems Project",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS332",
+  "name": "Hệ thống thông tin quản lý",
+  "en": "Management Information Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS334",
+  "name": "Thương mại điện tử",
+  "en": "E-Commerce",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS335",
+  "name": "An toàn và bảo mật hệ thống thông tin",
+  "en": "Information Systems Security",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS336",
+  "name": "Hoạch định nguồn lực doanh nghiệp",
+  "en": "Enterprise Resource Planning",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS339",
+  "name": "Sinh tin học",
+  "en": "Bioinformatics",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS340",
+  "name": "Thị trường chứng khoán",
+  "en": "Stock Market",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS341",
+  "name": "Khởi nghiệp",
+  "en": "Entrepreneurship",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS342",
+  "name": "Chính phủ điện tử",
+  "en": "E-Government",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS344",
+  "name": "Quản trị nguồn lực y tế",
+  "en": "Healthcare Resource Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS345",
+  "name": "AI trong y tế",
+  "en": "AI in Healthcare",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS346",
+  "name": "Quản lý dự án công nghệ thông tin y tế",
+  "en": "Healthcare Information Technology Project Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS347",
+  "name": "Thống kê y học",
+  "en": "Medical Statistics",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS348",
+  "name": "Dịch tễ học",
+  "en": "Epidemiology",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS349",
+  "name": "Hệ thống y tế",
+  "en": "Health Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS351",
+  "name": "Phân tích không gian",
+  "en": "Spatial Analysis",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS352",
+  "name": "Hệ cơ sở dữ liệu không gian",
+  "en": "Spatial Database Systems",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS353",
+  "name": "Mạng xã hội",
+  "en": "Social Networks",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS354",
+  "name": "Công nghệ tài chính căn bản Fintech",
+  "en": "Introduction to Financial Technology",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS355",
+  "name": "Công nghệ Blockchain",
+  "en": "Blockchain Technology",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS356",
+  "name": "Agile IT với DevOps",
+  "en": "Agile IT with DevOps",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS357",
+  "name": "Kiến trúc hướng dịch vụ",
+  "en": "Service Oriented Architecture",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS358",
+  "name": "Kiểm soát nhiễm khuẩn bệnh viện",
+  "en": "Hospital Infection Control",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS360",
+  "name": "Quản lý chăm sóc và điều trị",
+  "en": "Care Management and Treatment",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS361",
+  "name": "Quản lý chuỗi cung ứng dược và thiết bị y tế",
+  "en": "Supply Management of Drugs and Medical Equipment",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS362",
+  "name": "Quản trị tài chính và bảo hiểm y tế",
+  "en": "Hospital Financial Management and Health Insurance",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS363",
+  "name": "Pháp luật trong lĩnh vực y tế",
+  "en": "Law on Health and Medical",
+  "unit": "HTTT",
+  "credits": 2
+ },
+ {
+  "code": "IS364",
+  "name": "Mã tiêu chuẩn dùng chung trong y tế",
+  "en": "Medical Coding",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS402",
+  "name": "Điện toán đám mây",
+  "en": "Cloud Computing",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS403",
+  "name": "Phân tích dữ liệu kinh doanh",
+  "en": "Data Analysis in Business",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS405",
+  "name": "Dữ liệu lớn",
+  "en": "Big Data",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IS406",
+  "name": "Điện toán đám mây và dữ liệu lớn",
+  "en": "Cloud Computing and Big Data",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "IS407",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "HTTT",
+  "credits": 6
+ },
+ {
+  "code": "IS503",
+  "name": "Đồ án tốt nghiệp tại doanh nghiệp",
+  "en": "Industry Capstone Project",
+  "unit": "HTTT",
+  "credits": 10
+ },
+ {
+  "code": "IS6301",
+  "name": "Phân tích thiết kế hệ thống thông tin nâng cao",
+  "en": "Advanced Information Systems Analysis and Design",
+  "unit": "HTTT",
+  "credits": 7
+ },
+ {
+  "code": "IT001",
+  "name": "Nhập môn lập trình",
+  "en": "Introduction to Programming",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "IT002",
+  "name": "Lập trình hướng đối tượng",
+  "en": "Object-Oriented Programming",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "IT003",
+  "name": "Cấu trúc dữ liệu và giải thuật",
+  "en": "Data Structures and Algorithms",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "IT004",
+  "name": "Cơ sở dữ liệu",
+  "en": "Databases",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "IT005",
+  "name": "Nhập môn mạng máy tính",
+  "en": "Introduction to Computer Networks",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "IT006",
+  "name": "Kiến trúc máy tính",
+  "en": "Computer Architecture",
+  "unit": "KTMT",
+  "credits": 3
+ },
+ {
+  "code": "IT007",
+  "name": "Hệ điều hành",
+  "en": "Operating Systems",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "IT008",
+  "name": "Lập trình trực quan",
+  "en": "Visual Programming",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "IT010",
+  "name": "Tổ chức và cấu trúc máy tính",
+  "en": "Computer Organization and Architecture",
+  "unit": "KTMT",
+  "credits": 2
+ },
+ {
+  "code": "IT011",
+  "name": "Nhập môn lập trình thi đấu",
+  "en": "Introduction to Competitive Programming",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "IT012",
+  "name": "Tổ chức và cấu trúc máy tính 2",
+  "en": "Computer Structure and Organization 2",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "IT013",
+  "name": "Cấu trúc dữ liệu cho lập trình thi đấu",
+  "en": "Data Structures and Algorithms for Competitive Programming",
+  "unit": "KHMT",
+  "credits": 4
+ },
+ {
+  "code": "ITNT005",
+  "name": "Communication",
+  "en": "Communication",
+  "unit": "HTTT",
+  "credits": 0
+ },
+ {
+  "code": "JAN01",
+  "name": "Tiếng Nhật 1",
+  "en": "Japanese 1",
+  "unit": "PĐTĐH",
+  "credits": 5
+ },
+ {
+  "code": "JAN02",
+  "name": "Tiếng Nhật 2",
+  "en": "Japanese 2",
+  "unit": "PĐTĐH",
+  "credits": 5
+ },
+ {
+  "code": "JAN03",
+  "name": "Tiếng Nhật 3",
+  "en": "Japanese 3",
+  "unit": "PĐTĐH",
+  "credits": 5
+ },
+ {
+  "code": "JAN04",
+  "name": "Tiếng Nhật 4",
+  "en": "Japanese 4",
+  "unit": "PĐTĐH",
+  "credits": 5
+ },
+ {
+  "code": "JAN05",
+  "name": "Tiếng Nhật 5",
+  "en": "Japanese 5",
+  "unit": "PĐTĐH",
+  "credits": 5
+ },
+ {
+  "code": "JAN06",
+  "name": "Tiếng Nhật 6",
+  "en": "Japanese 6",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "JAN07",
+  "name": "Tiếng Nhật 7",
+  "en": "Japanese 7",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "JAN08",
+  "name": "Tiếng Nhật 8",
+  "en": "Japanese 8",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "JANHU",
+  "name": "Tiếng Nhật miễn phí do Huredee tài trợ",
+  "en": "Japanese language (sponsored by Huredee)",
+  "unit": "P.ĐTĐH",
+  "credits": 40
+ },
+ {
+  "code": "MA003",
+  "name": "Đại số tuyến tính",
+  "en": "Linear Algebra",
+  "unit": "BMTL",
+  "credits": 3
+ },
+ {
+  "code": "MA004",
+  "name": "Cấu trúc rời rạc",
+  "en": "Discrete Structures",
+  "unit": "BMTL",
+  "credits": 4
+ },
+ {
+  "code": "MA005",
+  "name": "Xác suất thống kê",
+  "en": "Probability and Statistics",
+  "unit": "BMTL",
+  "credits": 3
+ },
+ {
+  "code": "MA006",
+  "name": "Giải tích",
+  "en": "Calculus",
+  "unit": "BMTL",
+  "credits": 4
+ },
+ {
+  "code": "MATH2144",
+  "name": "Giải tích 1",
+  "en": "Calculus 1",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "MATH2153",
+  "name": "Giải tích 2",
+  "en": "Calculus 2",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MATH2154",
+  "name": "Giải tích",
+  "en": "Calculus",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "MATH3013",
+  "name": "Đại số tuyến tính",
+  "en": "Linear Algebra",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "ME001",
+  "name": "Giáo dục quốc phòng",
+  "en": "Military Education",
+  "unit": "P.ĐTĐH",
+  "credits": 0
+ },
+ {
+  "code": "MKTG4223",
+  "name": "Quản trị chuỗi cung ứng",
+  "en": "Supply Chain Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MKTG5883",
+  "name": "Khai phá dữ liệu và ứng dụng",
+  "en": "Data Mining and Applications",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "MM001",
+  "name": "Kỹ năng truyền thông cho người làm công nghệ thông tin",
+  "en": "Communication Skills for Information Technology Professionals",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "MM002",
+  "name": "Truyền thông kỹ thuật số",
+  "en": "Digital Communication",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "MM003",
+  "name": "Quản trị sự kiện",
+  "en": "Event Management",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM004",
+  "name": "Nguyên lý thiết kế đồ hoạ",
+  "en": "Principles of Graphic Design",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM005",
+  "name": "Nhập môn marketing",
+  "en": "Introduction to Marketing",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM006",
+  "name": "Tâm lý học đại cương",
+  "en": "Introduction to Psychology",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM007",
+  "name": "Tư duy sáng tạo và xu hướng thiết kế truyền thông",
+  "en": "Creative Thinking and Media Design Trends",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM008",
+  "name": "Kỹ năng truyền thông ứng dụng",
+  "en": "Applied Communication Skills",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM101",
+  "name": "Giới thiệu ngành Truyền thông đa phương tiện",
+  "en": "Introduction to Multimedia",
+  "unit": "CNPM",
+  "credits": 1
+ },
+ {
+  "code": "MM102",
+  "name": "Lý luận truyền thông đại chúng",
+  "en": "Foundations of Mass Communication",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM103",
+  "name": "Cơ sở tạo hình và nguyên lý thị giác",
+  "en": "Basics of Form Creation and Visual Principles",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM104",
+  "name": "Viết nội dung đa phương tiện",
+  "en": "Strategic Multimedia Writing",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM105",
+  "name": "Nhập môn kỹ thuật sản xuất nội dung đa phương tiện",
+  "en": "Introduction to Multimedia Production",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM106",
+  "name": "Thu thập và phân tích khám phá dữ liệu truyền thông đa phương tiện",
+  "en": "Data Collection and Exploratory Analysis for Multimedia",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM107",
+  "name": "Học máy ứng dụng trong truyền thông đa phương tiện",
+  "en": "Applied Machine Learning for Multimedia",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM108",
+  "name": "Tiếp thị số",
+  "en": "Digital Marketing",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM109",
+  "name": "Thiết kế đồ họa",
+  "en": "Graphic Design Principles",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM110",
+  "name": "Màu sắc và tâm lý thị giác trong thiết kế truyền thông",
+  "en": "Color and Visual Perception Psychology in Media Design",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM201",
+  "name": "Truyền thông và dư luận xã hội",
+  "en": "Media and Public Discourse",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM202",
+  "name": "Học sâu ứng dụng trong truyền thông đa phương tiện",
+  "en": "Applied Deep Learning for Multimedia",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM203",
+  "name": "Xử lý ngôn ngữ tự nhiên cho truyền thông đa phương tiện",
+  "en": "Natural Language Processing for Multimedia",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM204",
+  "name": "Xử lý ảnh số và video trong truyền thông đa phương tiện",
+  "en": "Digital Image and Video Processing for Multimedia",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM205",
+  "name": "Phân tích và hiểu nội dung đa phương thức",
+  "en": "Multimodal Data Analysis and Understanding",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM206",
+  "name": "Dữ liệu lớn ứng dụng trong truyền thông đa phương tiện",
+  "en": "Big Data Applied in Multimedia",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM207",
+  "name": "Hệ thống khai phá dữ liệu mạng xã hội",
+  "en": "Developing Social Network Data Mining Systems",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM208",
+  "name": "Thiết kế và sản xuất ấn phẩm",
+  "en": "Publication Design and Production",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM209",
+  "name": "Nghiệp vụ truyền thông và báo chí",
+  "en": "Press Communication Profession",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM210",
+  "name": "Kỹ thuật quay phim biên kịch và hậu kỳ",
+  "en": "Video Recording, Screen Writing and Post Processing Techniques",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM211",
+  "name": "Thực tế ảo và thực tế tăng cường",
+  "en": "Virtual and Augmented Reality",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM212",
+  "name": "Hoạt hình",
+  "en": "Animation",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM213",
+  "name": "Quản lý dự án truyền thông đa phương tiện",
+  "en": "Multimedia Project Management",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM214",
+  "name": "Chiến lược phát triển thương hiệu",
+  "en": "Brand Development Strategy",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM215",
+  "name": "Quan hệ công chúng trong marketing",
+  "en": "Public Relations for Marketing",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM216",
+  "name": "Tối ưu hóa và tiếp thị trên công cụ tìm kiếm",
+  "en": "Search Engine Optimization and Marketing",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM217",
+  "name": "Tiếp thị cho sản phẩm dịch vụ",
+  "en": "Marketing for Service Products",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM218",
+  "name": "Xây dựng kênh tiếp thị trực tuyến",
+  "en": "Building Online Marketing Channels",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM219",
+  "name": "Quản trị mối quan hệ khách hàng định hướng dữ liệu",
+  "en": "Data Driven Customer Relationship Management",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM220",
+  "name": "Phân tích dữ liệu truyền thông số",
+  "en": "Digital Media Data Analytics",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM221",
+  "name": "Chuyên đề các vấn đề hiện đại trong truyền thông đa phương tiện",
+  "en": "Seminar on Modern Topics in Multimedia",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "MM222",
+  "name": "An ninh thông tin trong truyền thông đa phương tiện",
+  "en": "Information Security in Multimedia",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM223",
+  "name": "Kể chuyện tương tác",
+  "en": "Interactive Storytelling",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM224",
+  "name": "Hình họa cơ bản",
+  "en": "Basic Drawing and Visual Observation",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "MM301",
+  "name": "Đồ án truyền thông đa phương tiện",
+  "en": "Multimedia Projects",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM302",
+  "name": "Thực tập",
+  "en": "Internship",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MM304",
+  "name": "Khởi nghiệp ngành Truyền thông đa phương tiện",
+  "en": "Startup in Multimedia",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "MSIS207",
+  "name": "Phát triển ứng dụng web",
+  "en": "Web Application Development",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "MSIS2433",
+  "name": "Lập trình hướng đối tượng",
+  "en": "Object-Oriented Programming",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS3033",
+  "name": "Quản lý dự án hệ thống thông tin",
+  "en": "Information Systems Project Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS3233",
+  "name": "Khoa học quản lý",
+  "en": "Management Science",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS3242",
+  "name": "Quản lý chất lượng phần mềm",
+  "en": "Software Quality Management",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS3243",
+  "name": "Lý thuyết quyết định quản lý",
+  "en": "Managerial Decision Theory",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS3303",
+  "name": "Phân tích thiết kế hệ thống",
+  "en": "Systems Analysis and Design",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "MSIS4013",
+  "name": "Thiết kế, quản lý và quản trị hệ cơ sở dữ liệu",
+  "en": "Database Systems Design, Management and Administration",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS402",
+  "name": "Điện toán đám mây",
+  "en": "Cloud Computing",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS405",
+  "name": "Dữ liệu lớn",
+  "en": "Big Data",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS406",
+  "name": "Dữ liệu lớn trên nền điện toán đám mây",
+  "en": "Big Data in Cloud Computing",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "MSIS4133",
+  "name": "Công nghệ thông tin trong thương mại điện tử",
+  "en": "Information Technologies for E-Commerce",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS4243",
+  "name": "Điều khiển và giám sát hệ thống thông tin",
+  "en": "Control and Audit of Information Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS4263",
+  "name": "Các ứng dụng thông minh và hỗ trợ ra quyết định",
+  "en": "Decision Support and Intelligent Applications",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS4443",
+  "name": "Các hệ thống mô phỏng trên máy tính",
+  "en": "Computer-based Simulation Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS4523",
+  "name": "Hệ truyền thông dữ liệu",
+  "en": "Data Communication Systems",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "MSIS5723",
+  "name": "Phân tích thiết kế hệ thống thông tin",
+  "en": "Information Systems Analysis and Design",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "NHJP1",
+  "name": "Tiếng Nhật Sơ cấp 1",
+  "en": "Japanese for Beginners 1",
+  "unit": "PĐTĐH",
+  "credits": 0
+ },
+ {
+  "code": "NHJP2",
+  "name": "Tiếng Nhật Sơ cấp 2",
+  "en": "Japanese for Beginners 2",
+  "unit": "PĐTĐH",
+  "credits": 0
+ },
+ {
+  "code": "NNH050",
+  "name": "Ngôn ngữ quảng cáo",
+  "en": "The Language of Advertising",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "NT005",
+  "name": "Giới thiệu ngành Mạng máy tính và Truyền thông dữ liệu",
+  "en": "Introduction to Computer Networks and Data Communication",
+  "unit": "MMT&TT",
+  "credits": 1
+ },
+ {
+  "code": "NT015",
+  "name": "Giới thiệu ngành An toàn Thông tin",
+  "en": "Introduction to Information Security Programs",
+  "unit": "MMT&TT",
+  "credits": 1
+ },
+ {
+  "code": "NT101",
+  "name": "An toàn mạng máy tính",
+  "en": "Network Security",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT103",
+  "name": "Hệ điều hành Linux",
+  "en": "Linux Operating Systems",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT104",
+  "name": "Lý thuyết thông tin",
+  "en": "Information Theory",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT105",
+  "name": "Truyền dữ liệu",
+  "en": "Data Communications",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT106",
+  "name": "Lập trình mạng căn bản",
+  "en": "Basic Network Programming",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT109",
+  "name": "Lập trình ứng dụng mạng",
+  "en": "Network-Based Application Development",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT113",
+  "name": "Thiết kế mạng",
+  "en": "Network Design",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT114",
+  "name": "Đồ án chuyên ngành",
+  "en": "Specialized Project",
+  "unit": "MMT&TT",
+  "credits": 2
+ },
+ {
+  "code": "NT117",
+  "name": "Đồ án môn học lập trình ứng dụng mạng",
+  "en": "Network-Based Application Programming Project",
+  "unit": "MMT&TT",
+  "credits": 2
+ },
+ {
+  "code": "NT118",
+  "name": "Phát triển ứng dụng trên thiết bị di động",
+  "en": "Mobile Application Development",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT121",
+  "name": "Thiết bị mạng và truyền thông đa phương tiện",
+  "en": "Network Appliances and Multimedia Communications",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT131",
+  "name": "Hệ thống nhúng mạng không dây",
+  "en": "Wireless Embedded Network Systems",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT132",
+  "name": "Quản trị mạng và hệ thống",
+  "en": "Networks and Systems Administration",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT133",
+  "name": "An toàn kiến trúc hệ thống",
+  "en": "Systems Architecture Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT137",
+  "name": "Kỹ thuật phân tích mã độc",
+  "en": "Malware Analysis Techniques",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT140",
+  "name": "An toàn mạng",
+  "en": "Network Security",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT201",
+  "name": "Phân tích thiết kế hệ thống truyền thông và mạng",
+  "en": "Communication and Network Systems Analysis and Design",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT204",
+  "name": "Hệ thống tìm kiếm, phát hiện và ngăn ngừa xâm nhập",
+  "en": "Intrusion Detection and Prevention Systems",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT205",
+  "name": "Tấn công mạng",
+  "en": "Network Offences",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT207",
+  "name": "Quản lý rủi ro và an toàn thông tin trong doanh nghiệp",
+  "en": "Risk Management and Information Security in Enterprise",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT208",
+  "name": "Lập trình ứng dụng web",
+  "en": "Web-Based Application Development",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT209",
+  "name": "Lập trình hệ thống",
+  "en": "Computer System Programming",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT210",
+  "name": "Thương mại điện tử và triển khai ứng dụng",
+  "en": "E-Commerce and Applications",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT211",
+  "name": "An ninh nhân sự, định danh và chứng thực",
+  "en": "Personnel Security, Identification, and Authentication",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT212",
+  "name": "An toàn dữ liệu, khôi phục thông tin sau sự cố",
+  "en": "Data Integrity and Disaster Recovery",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT213",
+  "name": "Bảo mật web và ứng dụng",
+  "en": "Web and Application Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT216",
+  "name": "Bảo mật hệ thống dữ liệu",
+  "en": "Data System Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT219",
+  "name": "Mật mã học",
+  "en": "Cryptography",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT230",
+  "name": "Cơ chế hoạt động của mã độc",
+  "en": "Malware: Modes of Operation",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT303",
+  "name": "Công nghệ thoại IP",
+  "en": "VoIP Phone Technology",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT310",
+  "name": "Pháp chứng mạng di động",
+  "en": "Digital Forensics",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT311",
+  "name": "Công nghệ tường lửa và bảo vệ mạng ngoại vi",
+  "en": "Firewall Technology and Perimeter Protection",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT312",
+  "name": "Bảo mật với smartcard và NFC",
+  "en": "Smart Card and NFC Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT330",
+  "name": "An toàn mạng không dây và di động",
+  "en": "Wireless Network and Mobile Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT331",
+  "name": "Xây dựng chuẩn chính sách an toàn thông tin trong doanh nghiệp",
+  "en": "Building Enterprise Information Security Policies",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT332",
+  "name": "Xử lý tín hiệu trong truyền thông",
+  "en": "Signal Processing in Communications",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT333",
+  "name": "Tính toán lưới",
+  "en": "Grid Computing",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT334",
+  "name": "Pháp chứng kỹ thuật số",
+  "en": "Digital Forensics",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT402",
+  "name": "Công nghệ mạng viễn thông",
+  "en": "Telecommunications Technology",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT405",
+  "name": "Bảo mật Internet",
+  "en": "Internet Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT504",
+  "name": "Tiểu luận tốt nghiệp",
+  "en": "Graduation Project",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT506",
+  "name": "Đồ án tốt nghiệp tại doanh nghiệp",
+  "en": "Industry Capstone Project",
+  "unit": "MMT",
+  "credits": 10
+ },
+ {
+  "code": "NT508",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "MMT",
+  "credits": 6
+ },
+ {
+  "code": "NT521",
+  "name": "Lập trình an toàn và khai thác lỗ hổng phần mềm",
+  "en": "Secure Programming and Exploiting Vulnerabilities",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT522",
+  "name": "Phương pháp học máy trong an toàn thông tin",
+  "en": "Machine Learning for Information Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT523",
+  "name": "An toàn thông tin trong kỷ nguyên máy tính lượng tử",
+  "en": "Cybersecurity in the Quantum Era",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT524",
+  "name": "Kiến trúc và bảo mật điện toán đám mây",
+  "en": "Cloud Architecture and Security",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT531",
+  "name": "Đánh giá hiệu năng hệ thống mạng máy tính",
+  "en": "Modeling and Performance Evaluation of Network and Computer Systems",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT532",
+  "name": "Công nghệ Internet of things hiện đại",
+  "en": "Advanced Internet of Things Technologies",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT533",
+  "name": "Hệ tính toán phân bố",
+  "en": "Distributed Computing Systems",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT534",
+  "name": "An toàn mạng máy tính nâng cao",
+  "en": "Advanced Network Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT535",
+  "name": "Bảo mật Internet of things",
+  "en": "Security and Privacy in Internet of Things",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT536",
+  "name": "Công nghệ truyền thông đa phương tiện",
+  "en": "Multimedia Communication Technologies",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT537",
+  "name": "Truyền thông xã hội và kinh doanh",
+  "en": "Social Media and Business Practices",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT538",
+  "name": "Giải thuật xử lý song song và phân bố",
+  "en": "Algorithms in Parallel and Distributed Computing",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT539",
+  "name": "AI ứng dụng trong mạng và truyền thông",
+  "en": "Artificial Intelligence for Networking and Communications",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT540",
+  "name": "Mạng không dây thế hệ mới",
+  "en": "Next-Generation Wireless Networks",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT541",
+  "name": "Công nghệ mạng khả lập trình",
+  "en": "Reprogramming Network Technologies",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT542",
+  "name": "Lập trình kịch bản tự động hóa cho quản trị và bảo mật mạng",
+  "en": "Scripting for Automation in Administration and Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT543",
+  "name": "Tín hiệu và hệ thống thông tin",
+  "en": "Signals and Communication Systems",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT544",
+  "name": "Ăng ten và truyền thông vô tuyến",
+  "en": "Antenna and Telecommunications",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT545",
+  "name": "Thiết kế hệ thống viễn thông",
+  "en": "Fundamental Techniques in Telecommunication System Design",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT546",
+  "name": "Thiết kế và triển khai mạng tốc độ cao",
+  "en": "Design and Implementation of High-Speed Networks",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT547",
+  "name": "Blockchain: Nền tảng, ứng dụng và bảo mật",
+  "en": "Blockchain: Fundamentals, Applications and Security",
+  "unit": "MMT&TT",
+  "credits": 3
+ },
+ {
+  "code": "NT548",
+  "name": "Công nghệ DevOps và ứng dụng",
+  "en": "DevOps Technology and Its Applications",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "NT549",
+  "name": "Học máy tăng cường cho các hệ thống mạng",
+  "en": "Reinforcement Learning for Networked Systems",
+  "unit": "MMT&TT",
+  "credits": 4
+ },
+ {
+  "code": "PE231",
+  "name": "Giáo dục thể chất 1",
+  "en": "Physical Education 1",
+  "unit": "PĐTĐH",
+  "credits": 0
+ },
+ {
+  "code": "PE232",
+  "name": "Giáo dục thể chất 2",
+  "en": "Physical Education 2",
+  "unit": "PĐTĐH",
+  "credits": 0
+ },
+ {
+  "code": "PH001",
+  "name": "Nhập môn điện tử",
+  "en": "Introduction to Electrical Engineering",
+  "unit": "BMTL",
+  "credits": 3
+ },
+ {
+  "code": "PH002",
+  "name": "Nhập môn mạch số",
+  "en": "Introduction to Digital Circuits",
+  "unit": "KTMT",
+  "credits": 4
+ },
+ {
+  "code": "PHYS1114",
+  "name": "Vật lý đại cương 1",
+  "en": "General Physics 1",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "PHYS1214",
+  "name": "Vật lý đại cương 2",
+  "en": "General Physics 2",
+  "unit": "HTTT",
+  "credits": 4
+ },
+ {
+  "code": "PHYS1215",
+  "name": "Vật lý đại cương",
+  "en": "General Physics",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "QTE111",
+  "name": "Văn hóa giao tiếp",
+  "en": "Intercultural Communication",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "SC203",
+  "name": "Phương pháp nghiên cứu khoa học",
+  "en": "Scientific Research Methodology",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "SE005",
+  "name": "Giới thiệu ngành Kỹ thuật Phần mềm",
+  "en": "Introduction to Software Engineering",
+  "unit": "CNPM",
+  "credits": 1
+ },
+ {
+  "code": "SE100",
+  "name": "Phương pháp phát triển phần mềm hướng đối tượng",
+  "en": "Object-Oriented Software Development Methodology",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE101",
+  "name": "Phương pháp mô hình hóa",
+  "en": "Modeling Methods",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE102",
+  "name": "Nhập môn phát triển game",
+  "en": "Introduction to Game Development",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE104",
+  "name": "Nhập môn Công nghệ phần mềm",
+  "en": "Introduction to Software Engineering",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE106",
+  "name": "Đặc tả hình thức",
+  "en": "Formal Specification",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE109",
+  "name": "Phát triển, vận hành, bảo trì phần mềm",
+  "en": "Software Development, Deployment and Maintenance",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE111",
+  "name": "Đồ án mã nguồn mở",
+  "en": "Open Source Project",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE112",
+  "name": "Đồ án chuyên ngành",
+  "en": "Specialized Project",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE113",
+  "name": "Kiểm chứng phần mềm",
+  "en": "Software Testing",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE114",
+  "name": "Nhập môn ứng dụng di động",
+  "en": "Mobile Application Overview",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE115",
+  "name": "Phát triển game với Unity",
+  "en": "Game Development with Unity",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE116",
+  "name": "Phát triển kỹ năng lập trình game ứng dụng trong thực tế",
+  "en": "Skill Development in Game Programming for Real Projects",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE117",
+  "name": "Kỹ thuật lập trình",
+  "en": "Programming Techniques",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE121",
+  "name": "Đồ án 1",
+  "en": "Project 1",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE122",
+  "name": "Đồ án 2",
+  "en": "Project 2",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE214",
+  "name": "Công nghệ phần mềm chuyên sâu",
+  "en": "Advanced Software Engineering",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE215",
+  "name": "Giao tiếp người máy",
+  "en": "Human-Computer Interaction",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE220",
+  "name": "Thiết kế game",
+  "en": "Game Design",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE221",
+  "name": "Lập trình game nâng cao",
+  "en": "Advanced Game Programming",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE301",
+  "name": "Phát triển phần mềm mã nguồn mở",
+  "en": "Open Source Software Development",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE310",
+  "name": "Công nghệ .NET",
+  "en": ".NET Technology",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE313",
+  "name": "Một số thuật toán thông minh",
+  "en": "Intelligent Algorithms",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE314",
+  "name": "Công nghệ game 3D",
+  "en": "3D Game Technology",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE315",
+  "name": "Công nghệ game online",
+  "en": "Technology for Online Game Development",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE316",
+  "name": "Phát triển game đa nền tảng",
+  "en": "Cross-Platform Game Development",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE317",
+  "name": "Công nghệ tiên tiến trong phát triển game",
+  "en": "Advanced Technologies in Game Development",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE320",
+  "name": "Lập trình đồ họa 3 chiều với Direct3D",
+  "en": "3D Programming with Direct3D",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE325",
+  "name": "Chuyên đề J2EE",
+  "en": "J2EE",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE327",
+  "name": "Phát triển và vận hành game",
+  "en": "Game Development and Operations",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE328",
+  "name": "Lập trình trí tuệ nhân tạo trong game",
+  "en": "Artificial Intelligent in Game Development",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE329",
+  "name": "Thiết kế 3D Game Engine",
+  "en": "3D Game Engine Design",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE330",
+  "name": "Ngôn ngữ lập trình Java",
+  "en": "Java Programming Language",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE331",
+  "name": "Chuyên đề E-commerce",
+  "en": "E-Commerce",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE332",
+  "name": "Chuyên đề cơ sở dữ liệu nâng cao",
+  "en": "Advanced Database",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE334",
+  "name": "Các phương pháp lập trình",
+  "en": "Programming Paradigms",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE343",
+  "name": "Công nghệ Portal",
+  "en": "Portal Technology",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE344",
+  "name": "Lập trình game trong các thiết bị di động",
+  "en": "Mobile Game Programming",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE346",
+  "name": "Lập trình trên thiết bị di động",
+  "en": "Mobile Device Application Development",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE347",
+  "name": "Công nghệ web và ứng dụng",
+  "en": "Web Technologies and Applications",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE348",
+  "name": "Chuyên đề M-commerce",
+  "en": "M-Commerce",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE350",
+  "name": "Chuyên đề E-learning",
+  "en": "E-Learning",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE351",
+  "name": "Xử lý song song",
+  "en": "Parallel Processing",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE352",
+  "name": "Phát triển ứng dụng VR",
+  "en": "VR App Development",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE354",
+  "name": "Chuyên đề các quy trình phát triển phần mềm hiện đại",
+  "en": "Special Topics in Modern Software Development Processes",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE355",
+  "name": "Máy học và các công cụ",
+  "en": "Machine Learning and Tools",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE356",
+  "name": "Kiến trúc phần mềm",
+  "en": "Software Architecture",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE357",
+  "name": "Kỹ thuật phân tích yêu cầu",
+  "en": "Requirements Engineering",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE358",
+  "name": "Quản lý dự án phát triển phần mềm",
+  "en": "Software Development Project Management",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE359",
+  "name": "DevOps trong phát triển phần mềm",
+  "en": "DevOps in Software Developing",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE360",
+  "name": "Điện toán đám mây và phát triển ứng dụng hướng dịch vụ",
+  "en": "Cloud Computing and Building Cloud-Native Applications",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE361",
+  "name": "Phát triển phần mềm theo kiến trúc Microservices",
+  "en": "Microservices Software Development",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE362",
+  "name": "An toàn phần mềm và hệ thống",
+  "en": "Software and Systems Security",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE363",
+  "name": "Phát triển ứng dụng trên nền tảng dữ liệu lớn",
+  "en": "Application Development on Big Data Platforms",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE364",
+  "name": "Thiết kế giao diện và trải nghiệm người dùng",
+  "en": "UI/UX Design",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE365",
+  "name": "Học sâu ứng dụng trong phát triển phần mềm",
+  "en": "Applied Deep Learning in Software Engineering",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE400",
+  "name": "Seminar các vấn đề hiện đại của công nghệ phần mềm",
+  "en": "Seminar on Modern Software Engineering",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE401",
+  "name": "Mẫu thiết kế",
+  "en": "Design Patterns",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE403",
+  "name": "Nguyên lý thiết kế thế giới ảo",
+  "en": "Virtual World Design",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE404",
+  "name": "Chuyên đề E-Government",
+  "en": "E-Government",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE405",
+  "name": "Chuyên đề mobile and pervasive computing",
+  "en": "Mobile Pervasive Computing",
+  "unit": "CNPM",
+  "credits": 3
+ },
+ {
+  "code": "SE406",
+  "name": "Mẫu thiết kế hướng đối tượng",
+  "en": "Object-Oriented Design Patterns",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE407",
+  "name": "Chuyên đề pervasive and mobile computing",
+  "en": "Pervasive Mobile Computing",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE408",
+  "name": "Phát triển game với blockchain",
+  "en": "Blockchain-Based Game Development",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE409",
+  "name": "Phát triển dự án game",
+  "en": "Game Project Development",
+  "unit": "CNPM",
+  "credits": 4
+ },
+ {
+  "code": "SE417",
+  "name": "Đồ án môn học mã nguồn mở",
+  "en": "Open Source Project",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE503",
+  "name": "Đồ án",
+  "en": "Major Project",
+  "unit": "CNPM",
+  "credits": 2
+ },
+ {
+  "code": "SE507",
+  "name": "Đồ án tốt nghiệp",
+  "en": "Capstone Project",
+  "unit": "CNPM",
+  "credits": 6
+ },
+ {
+  "code": "SPCH2713",
+  "name": "Kỹ năng giao tiếp",
+  "en": "Introduction to Speech Communication",
+  "unit": "HTTT",
+  "credits": 2
+ },
+ {
+  "code": "SPCH3723",
+  "name": "Tiếng Anh chuyên ngành công nghệ thông tin",
+  "en": "English for Computer Science",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "SS003",
+  "name": "Tư tưởng Hồ Chí Minh",
+  "en": "Ho Chi Minh Thought",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "SS004",
+  "name": "Kỹ năng nghề nghiệp",
+  "en": "Professional Skills",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "SS006",
+  "name": "Pháp luật đại cương",
+  "en": "Introduction to Law",
+  "unit": "P.ĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "SS007",
+  "name": "Triết học Mác – Lênin",
+  "en": "Philosophy of Marxism and Leninism",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "SS008",
+  "name": "Kinh tế chính trị Mác – Lênin",
+  "en": "Political Economics of Marxism and Leninism",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "SS009",
+  "name": "Chủ nghĩa xã hội khoa học",
+  "en": "Scientific Socialism",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "SS010",
+  "name": "Lịch sử Đảng Cộng sản Việt Nam",
+  "en": "History of Vietnamese Communist Party",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "STAT3013",
+  "name": "Phân tích thống kê",
+  "en": "Intermediate Statistical Analysis",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "STAT4033",
+  "name": "Thống kê",
+  "en": "Statistics",
+  "unit": "HTTT",
+  "credits": 3
+ },
+ {
+  "code": "THU086",
+  "name": "Đào tạo năng lực thông tin",
+  "en": "Information Literacy Training",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "THU107",
+  "name": "Truyền thông xã hội trong các tổ chức",
+  "en": "Social Media in Organizations",
+  "unit": "PĐTĐH",
+  "credits": 2
+ },
+ {
+  "code": "TLH025",
+  "name": "Tâm lý học nhân cách",
+  "en": "Personality Psychology",
+  "unit": "PĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "TLH085",
+  "name": "Giáo dục cảm xúc xã hội",
+  "en": "Social-Emotional Learning",
+  "unit": "P.ĐTĐH",
+  "credits": 3
+ },
+ {
+  "code": "TOEIC 450",
+  "name": "TOEIC 450",
+  "en": "TOEIC 450",
+  "unit": "TTNN",
+  "credits": 0
+ },
+ {
+  "code": "TOEIC450",
+  "name": "TOEIC 450",
+  "en": "TOEIC 450",
+  "unit": "TTNN",
+  "credits": 0
+ }
+]

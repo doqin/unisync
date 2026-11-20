@@ -1,9 +1,9 @@
 # ĐẶC TẢ YÊU CẦU PHẦN MỀM (SRS)
 
-**Đề tài:** Xây dựng website mạng xã hội dành cho sinh viên đại học – UniSync
-**Môn học:** Công nghệ Web và ứng dụng (SE347)
-**Nhóm:** 5 thành viên
-**Thời gian thực hiện:** 11/2026 – 12/2026
+**Đề tài:** Xây dựng website mạng xã hội dành cho sinh viên đại học – UniSync\
+**Môn học:** Công nghệ Web và ứng dụng (SE347)\
+**Nhóm:** 5 thành viên\
+**Thời gian thực hiện:** 11/2026 – 12/2026\
 **Phiên bản:** 0.4 (triển khai một dự án Vercel nhiều service, một tên miền; khóa API Supabase mới)
 
 > Quy ước độ ưu tiên: **M** = Must (bắt buộc), **S** = Should (nên có nếu đủ thời gian), **O** = Optional (tùy chọn, làm sau cùng).

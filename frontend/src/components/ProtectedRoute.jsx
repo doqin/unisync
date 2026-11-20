@@ -1,10 +1,10 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { Spinner } from 'react-bootstrap';
 import { useAuth } from '../context/AuthContext.jsx';
+import LoadingSpinner from './LoadingSpinner.jsx';
 
 export default function ProtectedRoute() {
   const { user, loading } = useAuth();
   const loc = useLocation();
-  if (loading) return <div className="text-center py-5"><Spinner animation="border" role="status" /></div>;
+  if (loading) return <LoadingSpinner className="py-5" />;
   return user ? <Outlet /> : <Navigate to="/login" replace state={{ from: loc }} />;
 }

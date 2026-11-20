@@ -105,3 +105,12 @@ img { max-width: 100%; height: auto; }
 }
 
 .card { border-color: var(--us-border); }
+
+/* ---------- Trạng thái tải / trống (NFR-07) ---------- */
+.state-block { padding: 2rem 1rem; }
+.empty-state {
+  background: var(--us-surface);
+  border: 1px dashed var(--us-border);
+  border-radius: var(--bs-border-radius);
+}
+.empty-state-icon { color: var(--us-text-muted); margin-bottom: 0.75rem; line-height: 0; }

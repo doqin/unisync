@@ -22,7 +22,7 @@ import { z } from 'zod';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { badRequest, forbidden, HttpError, notFound } from '../lib/errors.js';
 import {
-  DOCUMENTS_BUCKET, HEAD_BYTES, buildStoragePath, checkDeclaredFile, checkStoredFile, parseStoragePath,
+  DOCUMENT_TYPES, DOCUMENTS_BUCKET, HEAD_BYTES, buildStoragePath, checkDeclaredFile, checkStoredFile, parseStoragePath,
 } from '../lib/files.js';
 import { validate } from '../middleware/validate.js';
 import { uploadLimiter } from '../middleware/rateLimit.js';
@@ -40,6 +40,13 @@ const uploadUrlSchema = z.object({
   file_name: z.string().trim().min(1).max(255),
   mime_type: z.string().max(255).optional(),
   file_size: z.number().int(),
+});
+
+const browseSchema = z.object({
+  group_id: z.uuid('Môn học không hợp lệ').optional(),
+  file_type: z.enum(Object.keys(DOCUMENT_TYPES), { message: 'Loại tệp không hợp lệ' }).optional(),
+  q: z.string().trim().max(200, 'Từ khóa tối đa 200 ký tự').optional(),
+  page: z.coerce.number().int().min(1).max(1000).default(1),
 });
 
 const confirmSchema = z.object({
@@ -169,7 +176,36 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
     }
   });
 
-  // Phần còn lại của module (duyệt, tìm kiếm, tải xuống, sửa/xóa: #25–#27) chưa cài đặt.
+  // Danh sách môn học (nhóm học phần) để duyệt theo môn (FR-DOC-03).
+  r.get('/subjects', async (_req, res, next) => {
+    try {
+      const { data, error } = await db().from('groups').select('id, name, code')
+        .eq('type', 'course').order('name');
+      if (error) throw error;
+      res.json(data);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Duyệt và tìm kiếm tài liệu (FR-DOC-03, FR-DOC-04): lọc theo môn, loại tệp, từ khóa không dấu.
+  r.get('/', validate({ query: browseSchema }), async (req, res, next) => {
+    try {
+      const { group_id, file_type, q } = req.query; // đã kiểm tra bởi browseSchema
+      const page = Number(req.query.page ?? 1);
+      const limit = 20;
+      const { data, error } = await db().rpc('search_documents', {
+        p_q: q ?? null, p_group: group_id ?? null, p_file_type: file_type ?? null,
+        p_limit: limit, p_offset: (page - 1) * limit,
+      });
+      if (error) throw error;
+      res.json({ items: data, page, has_more: data.length === limit });
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Phần còn lại của module (tải xuống, sửa/xóa: #27) chưa cài đặt.
   r.use(stub('Thư viện tài liệu', 'FR-DOC-03..10', 'Đức Trọng'));
   return r;
 }

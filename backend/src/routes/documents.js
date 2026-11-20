@@ -53,7 +53,8 @@ const idParam = z.object({ id: z.uuid('Tài liệu không hợp lệ') });
 
 const editSchema = z.object({
   title: z.string().trim().min(1, 'Nhập tiêu đề').max(200, 'Tiêu đề tối đa 200 ký tự').optional(),
-  description: z.string().trim().max(2000, 'Mô tả tối đa 2000 ký tự').optional()
+  // `.nullish()` (không phải `.optional()`): client gửi `description: null` khi người dùng xóa hết mô tả.
+  description: z.string().trim().max(2000, 'Mô tả tối đa 2000 ký tự').nullish()
     .transform((v) => (v === undefined ? undefined : v || null)),
 }).refine((b) => Object.keys(b).length > 0, { message: 'Không có thông tin nào để sửa' });
 

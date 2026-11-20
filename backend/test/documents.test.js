@@ -389,6 +389,25 @@ test('edit: body rỗng hoặc tiêu đề trống → 400', async () => {
   assert.equal((await send({ title: '   ' })).status, 400);
 });
 
+test('edit: xóa mô tả (client gửi description: null) → 200 và lưu null', async () => {
+  const doc = ownDoc({ description: 'mô tả cũ' });
+  const send = (b) => fetch(`${base}/${doc.id}`, {
+    method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify(b),
+  });
+
+  const res = await send({ description: null });
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).description, null);
+  assert.equal(sb.tables.documents.find((d) => d.id === doc.id).description, null);
+
+  // Đổi tiêu đề kèm xóa mô tả trong cùng một request.
+  const both = await send({ title: 'Tiêu đề mới', description: null });
+  assert.equal(both.status, 200);
+  const body = await both.json();
+  assert.equal(body.title, 'Tiêu đề mới');
+  assert.equal(body.description, null);
+});
+
 test('delete: người tải lên xóa được bản ghi và tệp; người khác bị 403', async () => {
   const mine = ownDoc();
   sb.objects[mine.file_path] = { size: 100, contentType: 'application/pdf', head: HEADS.pdf };

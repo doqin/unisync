@@ -69,7 +69,24 @@ function fakeSupabase() {
     },
   };
 
-  return { tables, objects, removed, from, storage: { from: () => bucket } };
+  // Hàm search_documents giả: lọc theo môn/loại tệp và từ khóa (so khớp chuỗi, không dấu).
+  const rpc = async (name, args) => {
+    if (name !== 'search_documents') return { data: null, error: { message: 'unknown rpc' } };
+    const norm = (t) => (t ?? '').replace(/đ/g, 'd').replace(/Đ/g, 'D').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const q = norm(args.p_q).trim();
+    const data = tables.documents
+      .filter((d) => !args.p_group || d.group_id === args.p_group)
+      .filter((d) => !args.p_file_type || d.file_type === args.p_file_type)
+      .filter((d) => {
+        const g = tables.groups.find((x) => x.id === d.group_id);
+        return !q || norm(`${d.title} ${d.description ?? ''} ${g?.name ?? ''} ${g?.code ?? ''}`).includes(q);
+      })
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .slice(args.p_offset, args.p_offset + args.p_limit);
+    return { data, error: null };
+  };
+
+  return { tables, objects, removed, from, rpc, storage: { from: () => bucket } };
 }
 
 let sb, server, base;
@@ -237,6 +254,64 @@ test('xác nhận: gọi lại lần hai → 409, không xóa tệp của tài l
 });
 
 test('các đường dẫn chưa cài đặt của module trả 501', async () => {
-  const res = await fetch(base);
+  const res = await fetch(`${base}/${randomUUID()}`);
   assert.equal(res.status, 501);
+});
+
+// ───── GET /subjects và GET / (duyệt, tìm kiếm) ─────
+
+test('subjects: trả mọi nhóm học phần, không trả ngành', async () => {
+  const res = await fetch(base + '/subjects');
+  const list = await res.json();
+  assert.equal(res.status, 200);
+  assert.ok(list.every((g) => g.id !== MAJOR));
+  assert.ok(list.some((g) => g.id === COURSE));
+});
+
+const seedDocs = () => {
+  const mk = (title, extra) => ({
+    id: randomUUID(), group_id: COURSE, uploader_id: OTHER, description: null,
+    file_path: `${OTHER}/${randomUUID()}.pdf`, file_type: 'pdf', file_size: 100,
+    created_at: new Date().toISOString(), title, ...extra,
+  });
+  sb.tables.documents.push(
+    mk('Đề thi giữa kỳ'),
+    mk('Bài giảng chương 2', { file_type: 'pptx', file_path: `${OTHER}/${randomUUID()}.pptx` }),
+    mk('Slide tổng quan', { group_id: PENDING_COURSE }),
+  );
+};
+
+test('browse: không lọc → trả mọi tài liệu, có phân trang', async () => {
+  seedDocs();
+  const body = await (await fetch(base + '/?page=1')).json();
+  assert.equal(body.items.length, 3);
+  assert.equal(body.has_more, false);
+});
+
+test('browse: lọc theo môn và loại tệp', async () => {
+  seedDocs();
+  const byGroup = await (await fetch(`${base}/?group_id=${COURSE}`)).json();
+  assert.equal(byGroup.items.length, 2);
+  const byType = await (await fetch(`${base}/?group_id=${COURSE}&file_type=pptx`)).json();
+  assert.deepEqual(byType.items.map((d) => d.title), ['Bài giảng chương 2']);
+});
+
+test('search: từ khóa không dấu khớp tiêu đề có dấu', async () => {
+  seedDocs();
+  const body = await (await fetch(base + '/?q=' + encodeURIComponent('de thi'))).json();
+  assert.deepEqual(body.items.map((d) => d.title), ['Đề thi giữa kỳ']);
+});
+
+test('browse: tham số không hợp lệ → 400', async () => {
+  const res = await fetch(`${base}/?file_type=exe&page=0`);
+  assert.equal(res.status, 400);
+});
+
+test('search: tìm theo tên môn hoặc mã môn, không chỉ tiêu đề', async () => {
+  seedDocs();
+  // COURSE = "Lập trình Web" (SE347) có 2 tài liệu; PENDING_COURSE = "CSDL" (IT004) có 1 tài liệu
+  const byName = await (await fetch(base + '/?q=' + encodeURIComponent('lap trinh'))).json();
+  assert.equal(byName.items.length, 2);
+  const byCode = await (await fetch(base + '/?q=IT004')).json();
+  assert.deepEqual(byCode.items.map((d) => d.title), ['Slide tổng quan']);
 });

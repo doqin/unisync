@@ -1,10 +1,12 @@
 // Thư viện tài liệu (FR-DOC-03, FR-DOC-04) – phụ trách: Đức Trọng (ImDT06).
-// Duyệt theo môn, lọc theo loại tệp, tìm kiếm từ khóa không dấu. Dữ liệu qua Express (api()).
+// Duyệt theo môn, lọc theo loại tệp, tìm kiếm từ khóa không dấu, sắp xếp. Dữ liệu qua Express (api()).
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Alert, Badge, Button, Card, Col, Container, Form, ListGroup, Row, Spinner } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
 import { api } from '../lib/api.js';
 import { formatSize } from '../lib/files.js';
+import FilterDropdown from '../components/FilterDropdown.jsx';
+import '../styles/library.css';
 
 const FILE_TYPES = ['pdf', 'docx', 'pptx', 'png', 'jpg', 'webp'];
 
@@ -27,6 +29,15 @@ export default function Library() {
   useEffect(() => {
     api('/documents/subjects').then(setSubjects).catch(() => setSubjects([]));
   }, []);
+
+  const buildQs = (p) => {
+    const qs = new URLSearchParams({ page: String(p) });
+    if (group) qs.set('group_id', group);
+    if (type) qs.set('file_type', type);
+    if (q) qs.set('q', q);
+    if (sort === 'rating') qs.set('sort', 'rating');
+    return qs;
+  };
 
   // Đổi bộ lọc → tải lại từ trang 1.
   useEffect(() => {
@@ -54,12 +65,7 @@ export default function Library() {
     const nextPage = page + 1;
     setLoadingMore(true);
     try {
-      const qs = new URLSearchParams({ page: String(nextPage) });
-      if (group) qs.set('group_id', group);
-      if (type) qs.set('file_type', type);
-      if (q) qs.set('q', q);
-    if (sort === 'rating') qs.set('sort', 'rating');
-      const r = await api(`/documents?${qs}`);
+      const r = await api(`/documents?${buildQs(nextPage)}`);
       setItems((cur) => [...cur, ...r.items]);
       setHasMore(r.has_more);
       setPage(nextPage);
@@ -75,32 +81,75 @@ export default function Library() {
     return s ? (s.code ? `${s.code} – ${s.name}` : s.name) : '';
   };
 
+  // Có bộ lọc hoặc từ khóa đang bật (sắp xếp mặc định "newest" không tính là lọc).
+  const hasFilter = Boolean(q || group || type || sort === 'rating');
+  function clearFilters() {
+    setDraftQ('');
+    setParams(new URLSearchParams());
+  }
+
   let results;
   if (loading) {
-    results = <div className="text-center py-4"><Spinner animation="border" role="status" /><div className="mt-2">Đang tải…</div></div>;
+    results = (
+      <Row xs={1} sm={2} lg={3} className="g-3" aria-busy="true" aria-label="Đang tải tài liệu">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Col key={i}>
+            <Card body className="h-100 border-0 shadow-sm" style={{ borderRadius: 14 }}>
+              <div className="d-flex gap-3">
+                <div className="skeleton" style={{ width: 48, height: 48 }} />
+                <div className="flex-grow-1">
+                  <div className="skeleton mb-2" style={{ height: 16, width: '80%' }} />
+                  <div className="skeleton" style={{ height: 12, width: '50%' }} />
+                </div>
+              </div>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    );
   } else if (err) {
     results = <Alert variant="danger">Không tải được tài liệu: {err}</Alert>;
   } else if (items.length === 0) {
-    results = <Alert variant="light" className="mb-0">Không có tài liệu nào{q || group || type ? ' khớp bộ lọc' : ' trong thư viện'}.</Alert>;
+    results = (
+      <Card body className="text-center py-5 border-0 shadow-sm" style={{ borderRadius: 14 }}>
+        <div className="fw-semibold">Không có tài liệu nào{q || group || type ? ' khớp bộ lọc' : ' trong thư viện'}</div>
+        <div className="small text-muted">Thử đổi bộ lọc, hoặc là người đầu tiên tải tài liệu lên.</div>
+        {hasFilter && (
+          <div className="mt-3">
+            <Button variant="outline-primary" size="sm" className="rounded-pill px-3" onClick={clearFilters}>Xóa bộ lọc</Button>
+          </div>
+        )}
+      </Card>
+    );
   } else {
     results = (
       <>
-        <ListGroup>
-          {items.map((d) => (
-            <ListGroup.Item key={d.id} action as={Link} to={`/library/${d.id}`}>
-              <div className="d-flex justify-content-between align-items-start gap-2">
-                <div className="fw-semibold text-break">{d.title}</div>
-                <Badge bg="secondary" className="text-uppercase">{d.file_type}</Badge>
-              </div>
-              <div className="small text-muted">
-                {subjectName(d.group_id)} · {formatSize(d.file_size)} · {new Date(d.created_at).toLocaleDateString('vi-VN')}
-              </div>
-            </ListGroup.Item>
+        <Row xs={1} sm={2} lg={3} className="g-3">
+          {items.map((d, i) => (
+            <Col key={d.id}>
+              <Link to={`/library/${d.id}`} className="doc-card-link text-decoration-none text-reset d-block h-100">
+                <Card className="doc-card h-100 fade-up" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
+                  <Card.Body>
+                    <div className="d-flex align-items-start gap-3">
+                      <span className={`file-badge file-${d.file_type}`} aria-hidden="true">{d.file_type.toUpperCase()}</span>
+                      <div className="min-w-0">
+                        <div className="fw-semibold text-break doc-title">{d.title}</div>
+                        <div className="small text-muted text-break">{subjectName(d.group_id)}</div>
+                      </div>
+                    </div>
+                    <div className="small text-muted mt-3 d-flex justify-content-between">
+                      <span>{formatSize(d.file_size)}</span>
+                      <span>{new Date(d.created_at).toLocaleDateString('vi-VN')}</span>
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Link>
+            </Col>
           ))}
-        </ListGroup>
+        </Row>
         {hasMore && (
-          <div className="text-center mt-3">
-            <Button variant="outline-primary" onClick={loadMore} disabled={loadingMore}>
+          <div className="text-center mt-4">
+            <Button variant="outline-primary" className="rounded-pill px-4" onClick={loadMore} disabled={loadingMore}>
               {loadingMore ? 'Đang tải…' : 'Tải thêm'}
             </Button>
           </div>
@@ -110,43 +159,66 @@ export default function Library() {
   }
 
   return (
-    <Container className="py-4">
-      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-        <h1 className="h4 mb-0">Thư viện tài liệu</h1>
-        <Button as={Link} to="/library/new">Tải lên tài liệu</Button>
+    <Container className="py-4 library-page">
+      <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 ps-3">
+        <div>
+          <h1 className="h4 mb-0">Thư viện tài liệu</h1>
+          <div className="small text-muted">Tài liệu học tập do sinh viên đóng góp</div>
+        </div>
+        <Button as={Link} to="/library/new" className="rounded-pill px-3 d-inline-flex align-items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+            <path d="M12 5v14M5 12h14" />
+          </svg>
+          Tải lên
+        </Button>
       </div>
 
-      <Card body className="mb-3">
+      <Card body className="mb-4 border-0 shadow-sm" style={{ borderRadius: 14 }}>
         <Form onSubmit={(e) => { e.preventDefault(); update({ q: draftQ.trim() }); }}>
-          <Row className="g-2">
-            <Col xs={12} md={5}>
-              <Form.Control placeholder="Tìm theo tiêu đề, mô tả, môn (không cần dấu)" value={draftQ}
-                onChange={(e) => setDraftQ(e.target.value)} aria-label="Tìm kiếm tài liệu" maxLength={200} />
-            </Col>
-            <Col xs={6} md={3}>
-              <Form.Select value={group} onChange={(e) => update({ group: e.target.value })} aria-label="Lọc theo môn">
-                <option value="">Tất cả môn</option>
-                {subjects.map((s) => <option key={s.id} value={s.id}>{s.code ? `${s.code} – ${s.name}` : s.name}</option>)}
-              </Form.Select>
-            </Col>
-            <Col xs={6} md={2}>
-              <Form.Select value={type} onChange={(e) => update({ type: e.target.value })} aria-label="Lọc theo loại tệp">
-                <option value="">Mọi loại</option>
-                {FILE_TYPES.map((t) => <option key={t} value={t}>{t.toUpperCase()}</option>)}
-              </Form.Select>
-            </Col>
-            <Col xs={6} md={2}>
-              <Form.Select value={sort} onChange={(e) => update({ sort: e.target.value === 'rating' ? 'rating' : '' })} aria-label="Sắp xếp">
-                <option value="newest">Mới nhất</option>
-                <option value="rating">Điểm cao nhất</option>
-              </Form.Select>
-            </Col>
-            <Col xs={12} md={2} className="d-grid">
-              <Button type="submit" variant="outline-primary">Tìm</Button>
-            </Col>
-          </Row>
+          <div className="filter-bar">
+            <div className="filter-search">
+              <InputGroup className="search-group">
+                <InputGroup.Text as="span" className="search-icon" aria-hidden="true">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.5-3.5" />
+                  </svg>
+                </InputGroup.Text>
+                <Form.Control placeholder="Tìm tài liệu, môn học…" value={draftQ}
+                  onChange={(e) => setDraftQ(e.target.value)} aria-label="Tìm kiếm tài liệu" maxLength={200} />
+              </InputGroup>
+            </div>
+            <div className="filter-subject">
+              <FilterDropdown id="flt-subject" label="Lọc theo môn" value={group}
+                onChange={(v) => update({ group: v })}
+                options={[{ value: '', label: 'Tất cả môn' },
+                  ...subjects.map((s) => ({ value: s.id, label: s.code ? `${s.code} – ${s.name}` : s.name }))]} />
+            </div>
+            <div className="filter-type">
+              <FilterDropdown id="flt-type" label="Lọc theo loại tệp" value={type}
+                onChange={(v) => update({ type: v })}
+                options={[{ value: '', label: 'Tất cả' },
+                  ...FILE_TYPES.map((t) => ({ value: t, label: t.toUpperCase() }))]} />
+            </div>
+            <div className="filter-sort">
+              <FilterDropdown id="flt-sort" label="Sắp xếp" value={sort}
+                onChange={(v) => update({ sort: v === 'rating' ? 'rating' : '' })}
+                options={[{ value: 'newest', label: 'Mới nhất' }, { value: 'rating', label: 'Điểm cao nhất' }]} />
+            </div>
+            <div className="filter-submit">
+              <Button type="submit" variant="primary">Tìm</Button>
+            </div>
+          </div>
         </Form>
       </Card>
+
+      {hasFilter && (
+        <div className="text-end mt-2 mb-3">
+          <button type="button" className="filter-clear" onClick={clearFilters}>
+            Xóa bộ lọc
+          </button>
+        </div>
+      )}
 
       {results}
     </Container>

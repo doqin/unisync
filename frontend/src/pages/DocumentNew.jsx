@@ -1,12 +1,13 @@
 // Tải lên tài liệu (FR-DOC-01, FR-DOC-02) – phụ trách: Đức Trọng (ImDT06).
 // Luồng: xin signed URL từ Express → tải thẳng lên Supabase Storage → Express xác nhận
 // (xem backend/src/routes/documents.js). Tệp không đi qua Express (giới hạn 4,5 MB của Vercel).
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Alert, Button, Card, Container, Form, Spinner } from 'react-bootstrap';
+import { Alert, Button, Card, Container, Form, ProgressBar, Spinner } from 'react-bootstrap';
 import { api } from '../lib/api.js';
-import { supabase } from '../lib/supabase.js';
 import { ACCEPT, checkFile, formatSize } from '../lib/files.js';
+import FilterDropdown from '../components/FilterDropdown.jsx';
+import '../styles/library.css';
 
 const STEPS = { url: 'Đang chuẩn bị…', upload: 'Đang tải tệp lên…', confirm: 'Đang kiểm tra tệp…' };
 
@@ -22,6 +23,38 @@ export default function DocumentNew() {
   const [fileErr, setFileErr] = useState('');
   const [err, setErr] = useState('');
   const [step, setStep] = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const [progress, setProgress] = useState(0); // 0–1, tiến trình tải tệp lên Storage
+  const fileInput = useRef(null);
+  const dropRef = useRef(null);
+  const chipRef = useRef(null);
+
+  // Bỏ tệp đã chọn; xóa giá trị của ô chọn tệp để có thể chọn lại đúng tệp đó.
+  function clearFile() {
+    setFile(null);
+    setFileErr('');
+    if (fileInput.current) fileInput.current.value = '';
+  }
+
+  // Thẻ tệp bay từ vùng kéo thả vào vị trí của nó (kỹ thuật FLIP: đặt lệch về phía vùng thả rồi trượt về).
+  useLayoutEffect(() => {
+    const drop = dropRef.current;
+    const chip = chipRef.current;
+    if (!file || !drop || !chip) return;
+    const a = drop.getBoundingClientRect();
+    const b = chip.getBoundingClientRect();
+    const dx = a.left + a.width / 2 - (b.left + b.width / 2);
+    const dy = a.top + a.height / 2 - (b.top + b.height / 2);
+    chip.style.transition = 'none';
+    chip.style.transform = `translate(${dx}px, ${dy}px) scale(0.85)`;
+    chip.style.opacity = '0.3';
+    const raf = requestAnimationFrame(() => {
+      chip.style.transition = 'transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.35s ease';
+      chip.style.transform = '';
+      chip.style.opacity = '1';
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [file]);
 
   useEffect(() => {
     let alive = true;
@@ -35,11 +68,31 @@ export default function DocumentNew() {
     return () => { alive = false; };
   }, []);
 
-  function pickFile(e) {
-    const f = e.target.files?.[0] ?? null;
+  function pickFileObj(f) {
+    if (!f) return;
     setFile(f);
-    setFileErr(f ? checkFile(f) ?? '' : '');
-    if (f && !title) setTitle(f.name.replace(/\.[^.]+$/, '').slice(0, 200));
+    setFileErr(checkFile(f) ?? '');
+    if (!title) setTitle(f.name.replace(/\.[^.]+$/, '').slice(0, 200));
+  }
+
+  function pickFile(e) {
+    pickFileObj(e.target.files?.[0] ?? null);
+  }
+
+  // Tải tệp thẳng lên signed URL bằng XHR để có tiến trình thật (fetch không báo tiến trình tải lên).
+  function uploadWithProgress(url, body, contentType, onProgress) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('PUT', url);
+      xhr.setRequestHeader('Content-Type', contentType);
+      xhr.upload.onprogress = (ev) => { if (ev.lengthComputable) onProgress(ev.loaded / ev.total); };
+      xhr.onload = () => {
+        if (xhr.status >= 200 && xhr.status < 300) { onProgress(1); resolve(); }
+        else reject(new Error('Tải tệp lên thất bại, hãy thử lại'));
+      };
+      xhr.onerror = () => reject(new Error('Mất kết nối khi tải tệp lên'));
+      xhr.send(body);
+    });
   }
 
   async function submit(e) {
@@ -54,11 +107,9 @@ export default function DocumentNew() {
         method: 'POST',
         body: { ...meta, file_name: file.name, mime_type: file.type || undefined, file_size: file.size },
       });
-      setStep('upload');
-      // Bọc lại với MIME chuẩn: supabase-js dùng file.type, có thể rỗng với DOCX/PPTX.
-      const body = new Blob([file], { type: up.content_type });
-      const { error } = await supabase.storage.from('documents').uploadToSignedUrl(up.path, up.token, body);
-      if (error) throw new Error('Tải tệp lên thất bại, hãy thử lại');
+      setStep('upload'); setProgress(0);
+      // Bọc lại với MIME chuẩn (Content-Type khớp với MIME backend trả về, bucket chỉ nhận MIME này).
+      await uploadWithProgress(up.signed_url, new Blob([file], { type: up.content_type }), up.content_type, setProgress);
       setStep('confirm');
       const doc = await api('/documents', { method: 'POST', body: { ...meta, path: up.path } });
       nav(`/library/${doc.id}`, { replace: true });
@@ -84,20 +135,53 @@ export default function DocumentNew() {
   } else {
     content = (
       <Form onSubmit={submit} noValidate>
-        {err && <Alert variant="danger">{err}</Alert>}
+        {err && <Alert variant="danger" className="shake">{err}</Alert>}
         <Form.Group className="mb-3" controlId="doc-group">
           <Form.Label>Nhóm học phần</Form.Label>
-          <Form.Select value={groupId} onChange={(e) => setGroupId(e.target.value)} disabled={busy} required>
-            {groups.map((g) => <option key={g.id} value={g.id}>{g.code ? `${g.code} – ${g.name}` : g.name}</option>)}
-          </Form.Select>
+          <FilterDropdown id="doc-group-dd" label="Nhóm học phần" value={groupId}
+            onChange={setGroupId}
+            options={groups.map((g) => ({ value: g.id, label: g.code ? `${g.code} – ${g.name}` : g.name }))} />
         </Form.Group>
-        <Form.Group className="mb-3" controlId="doc-file">
-          <Form.Label>Tệp</Form.Label>
-          <Form.Control type="file" accept={ACCEPT} onChange={pickFile} disabled={busy} isInvalid={!!fileErr} required />
-          <Form.Control.Feedback type="invalid">{fileErr}</Form.Control.Feedback>
-          <Form.Text>
-            {file && !fileErr ? `${file.name} · ${formatSize(file.size)}` : 'PDF, DOCX, PPTX, PNG, JPG, WEBP, tối đa 10 MB'}
-          </Form.Text>
+        <Form.Group className="mb-3">
+          <Form.Label htmlFor="doc-file">Tệp</Form.Label>
+          <label ref={dropRef} htmlFor="doc-file"
+            className={`dropzone ${dragging ? 'dragging' : ''} ${fileErr ? 'is-invalid' : ''}`}
+            onDragOver={(e) => { e.preventDefault(); if (!busy) setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={(e) => { e.preventDefault(); setDragging(false); if (!busy) pickFileObj(e.dataTransfer.files?.[0]); }}>
+            <input ref={fileInput} id="doc-file" type="file" accept={ACCEPT} onChange={pickFile} disabled={busy} className="visually-hidden" />
+            <span className="dz-icon" aria-hidden="true">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 16V4M6 10l6-6 6 6" />
+                <path d="M4 20h16" />
+              </svg>
+            </span>
+            <span className="fw-semibold text-break">
+              {file ? 'Kéo thả hoặc bấm để đổi tệp' : 'Kéo thả tệp vào đây hoặc bấm để chọn'}
+            </span>
+            <span className="small text-muted">PDF, DOCX, PPTX, PNG, JPG, WEBP · tối đa 10 MB</span>
+          </label>
+          {file && (
+            <div ref={chipRef} className={`file-chip mt-3 ${fileErr ? 'is-invalid' : ''}`}>
+              <span className={`file-badge file-${(file.name.split('.').pop() || '').toLowerCase()}`} aria-hidden="true">
+                {(file.name.split('.').pop() || '').toUpperCase()}
+              </span>
+              <div className="min-w-0 flex-grow-1">
+                <div className="fw-semibold text-break">{file.name}</div>
+                <div className="small text-muted">{formatSize(file.size)}</div>
+              </div>
+              <button type="button" className="btn-remove" onClick={clearFile} disabled={busy}
+                aria-label="Bỏ tệp này" title="Bỏ tệp này">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+                  <path d="M6 6l12 12M18 6L6 18" />
+                </svg>
+              </button>
+            </div>
+          )}
+          {step === 'upload' && (
+            <ProgressBar now={Math.round(progress * 100)} animated className="mt-2" aria-label="Tiến trình tải tệp lên" />
+          )}
+          {fileErr && <div className="invalid-feedback d-block">{fileErr}</div>}
         </Form.Group>
         <Form.Group className="mb-3" controlId="doc-title">
           <Form.Label>Tiêu đề</Form.Label>
@@ -119,7 +203,7 @@ export default function DocumentNew() {
   }
 
   return (
-    <Container className="py-4" style={{ maxWidth: 640 }}>
+    <Container className="py-4 library-page" style={{ maxWidth: 640 }}>
       <Card body>
         <h1 className="h4 mb-3">Tải lên tài liệu</h1>
         {content}

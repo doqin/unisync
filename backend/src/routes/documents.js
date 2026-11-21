@@ -236,6 +236,10 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
     try {
       const sb = db();
       const doc = await loadDocument(sb, req.params.id);
+      // Tên người tải lên: hồ sơ hiển thị cho mọi sinh viên đã đăng nhập (SRS 2.4.2, RLS profiles_select).
+      const { data: uploader, error: upErr } = await sb.from('profiles').select('full_name')
+        .eq('id', doc.uploader_id).maybeSingle();
+      if (upErr) throw upErr;
       const { data: ratings, error } = await sb.from('document_ratings').select('user_id, stars')
         .eq('document_id', doc.id);
       if (error) throw error;
@@ -243,6 +247,7 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       const sum = ratings.reduce((a, x) => a + x.stars, 0);
       res.json({
         ...doc,
+        uploader_name: uploader?.full_name ?? null,
         rating_avg: count ? Math.round((sum / count) * 10) / 10 : null,
         rating_count: count,
         my_rating: ratings.find((x) => x.user_id === req.user.id)?.stars ?? null,

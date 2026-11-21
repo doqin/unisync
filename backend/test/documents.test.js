@@ -31,6 +31,7 @@ function fakeSupabase() {
     ],
     documents: [],
     document_ratings: [],
+    profiles: [{ id: USER, full_name: 'Người dùng thử' }, { id: OTHER, full_name: 'Nguyễn Văn B' }],
   };
   const objects = {}; // path → { size, contentType, head }
   const removed = [];
@@ -372,9 +373,11 @@ const ownDoc = (extra = {}) => {
   return doc;
 };
 
-test('detail: trả tài liệu, 404 khi không có, 400 khi id sai', async () => {
-  const doc = ownDoc();
-  assert.equal((await (await fetch(`${base}/${doc.id}`)).json()).title, 'Đề cương');
+test('detail: trả tài liệu kèm tên người tải lên, 404 khi không có, 400 khi id sai', async () => {
+  const doc = ownDoc({ uploader_id: OTHER });
+  const body = await (await fetch(`${base}/${doc.id}`)).json();
+  assert.equal(body.title, 'Đề cương');
+  assert.equal(body.uploader_name, 'Nguyễn Văn B');
   assert.equal((await fetch(`${base}/${randomUUID()}`)).status, 404);
   assert.equal((await fetch(`${base}/khong-phai-uuid`)).status, 400);
 });

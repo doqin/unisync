@@ -1,6 +1,6 @@
 // Hồ sơ người dùng /u/:id (FR-PRO-01, FR-PRO-03) – phụ trách: Khang.
-// Nút Theo dõi / nhãn Mutual (FR-SOC-05) do issue #16 thêm vào khối đầu trang.
-import { useCallback, useEffect, useState } from 'react';
+// Nút Theo dõi / nhãn Mutual (FR-SOC-05) do issue #16 thêm vào `.profile-actions` ở khối đầu trang.
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { Button, Card, Container } from 'react-bootstrap';
 import AsyncState from '../components/AsyncState.jsx';
@@ -8,8 +8,52 @@ import Avatar from '../components/Avatar.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ProfilePosts from '../components/ProfilePosts.jsx';
 import { api } from '../lib/api.js';
+import '../styles/profile.css';
 
-const details = (p) => [p.major, p.school, p.year ? `Năm ${p.year}` : null].filter(Boolean);
+const chips = (p) => [p.major, p.school, p.year ? `Năm ${p.year}` : null].filter(Boolean);
+const num = (n) => Number(n ?? 0).toLocaleString('vi-VN');
+
+/** Giới thiệu: tối đa 3 dòng, có "Xem thêm" khi dài hơn để bài đăng không bị đẩy khỏi màn hình đầu. */
+function Bio({ text }) {
+  const id = useId();
+  const ref = useRef(null);
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return undefined;
+    const measure = () => { if (!expanded) setOverflows(el.scrollHeight > el.clientHeight + 1); };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [text, expanded]);
+
+  return (
+    <div className="profile-bio-wrap">
+      <p id={id} ref={ref} className={expanded ? 'profile-bio' : 'profile-bio is-clamped'}>{text}</p>
+      {(overflows || expanded) && (
+        <button type="button" className="profile-more" aria-expanded={expanded} aria-controls={id}
+          onClick={() => setExpanded((v) => !v)}>
+          {expanded ? 'Thu gọn' : 'Xem thêm'}
+        </button>
+      )}
+    </div>
+  );
+}
+
+function EduMark() {
+  return (
+    <p className="profile-edu">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+        strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="9" /><path d="m8.5 12.5 2.5 2.5 4.5-5" />
+      </svg>
+      Tài khoản sinh viên .edu.vn
+    </p>
+  );
+}
 
 export default function Profile() {
   const { id } = useParams();
@@ -40,26 +84,37 @@ export default function Profile() {
       <AsyncState loading={!profile && !error} error={error} onRetry={load} errorTitle="Không tải được hồ sơ">
         {profile && (
           <>
-            <Card body className="mb-4">
-              <div className="d-flex flex-column flex-sm-row align-items-center align-items-sm-start gap-3">
-                <Avatar src={profile.avatar_url} name={profile.full_name} size={112} />
-                <div className="flex-grow-1 text-center text-sm-start">
-                  <h1 className="h3 mb-1 text-break">{profile.full_name}</h1>
-                  {details(profile).length > 0 && (
-                    <p className="text-body-secondary mb-2">{details(profile).join(' · ')}</p>
-                  )}
-                  <p className="mb-2">
-                    <strong>{profile.followers_count}</strong> người theo dõi · <strong>{profile.following_count}</strong> đang theo dõi
-                  </p>
-                  {profile.bio
-                    ? <p className="mb-0 text-break" style={{ whiteSpace: 'pre-wrap' }}>{profile.bio}</p>
-                    : profile.is_self && <p className="mb-0 text-body-secondary">Bạn chưa viết giới thiệu.</p>}
+            <Card as="section" className="profile-card mb-4" aria-labelledby="profile-name">
+              <div className="profile-band" aria-hidden="true" />
+              <div className="profile-body">
+                <div className="profile-top">
+                  <Avatar src={profile.avatar_url} name={profile.full_name} size={96} className="profile-avatar" />
+                  <div className="profile-actions">
+                    {profile.is_self && (
+                      <Button as={Link} to="/settings" variant="outline-primary" className="profile-edit">
+                        Chỉnh sửa hồ sơ
+                      </Button>
+                    )}
+                  </div>
                 </div>
-                {profile.is_self && (
-                  <Button as={Link} to="/settings" variant="outline-primary" size="sm" className="flex-shrink-0">
-                    Chỉnh sửa hồ sơ
-                  </Button>
+                <h1 id="profile-name" className="profile-name">{profile.full_name}</h1>
+                {chips(profile).length > 0 && (
+                  <ul className="profile-chips">
+                    {chips(profile).map((c) => <li key={c}>{c}</li>)}
+                  </ul>
                 )}
+                <EduMark />
+                <p className="profile-stats">
+                  <span><strong>{num(profile.followers_count)}</strong> người theo dõi</span>
+                  <span><strong>{num(profile.following_count)}</strong> đang theo dõi</span>
+                </p>
+                {profile.bio
+                  ? <Bio text={profile.bio} />
+                  : profile.is_self && (
+                    <p className="profile-bio-empty">
+                      Bạn chưa viết giới thiệu. <Link to="/settings">Viết giới thiệu</Link>
+                    </p>
+                  )}
               </div>
             </Card>
             <ProfilePosts userId={profile.id} isSelf={profile.is_self} />

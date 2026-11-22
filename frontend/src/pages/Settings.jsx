@@ -5,9 +5,11 @@ import { Container } from 'react-bootstrap';
 import AsyncState from '../components/AsyncState.jsx';
 import ChangePassword from '../components/ChangePassword.jsx';
 import ProfileSettings from '../components/ProfileSettings.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../lib/api.js';
 
 export default function Settings() {
+  const { setProfile: syncNavbarProfile } = useAuth();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
 
@@ -21,7 +23,7 @@ export default function Settings() {
     <Container className="py-4" style={{ maxWidth: 720 }}>
       <h1 className="h3 mb-4">Cài đặt</h1>
       <AsyncState loading={!profile && !error} error={error} onRetry={load} errorTitle="Không tải được hồ sơ">
-        {profile && <ProfileSettings profile={profile} onChange={setProfile} />}
+        {profile && <ProfileSettings profile={profile} onChange={(p) => { setProfile(p); syncNavbarProfile(p); }} />}
       </AsyncState>
       <ChangePassword />
     </Container>

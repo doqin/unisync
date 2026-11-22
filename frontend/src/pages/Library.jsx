@@ -2,11 +2,13 @@
 // Duyệt theo môn, lọc theo loại tệp, tìm kiếm từ khóa không dấu, sắp xếp. Dữ liệu qua Express (api()).
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Alert, Button, Card, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
+import { Button, Card, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
 import { api } from '../lib/api.js';
 import { getRecent, removeRecent } from '../lib/recent.js';
 import FilterDropdown from '../components/FilterDropdown.jsx';
 import DocCard from '../components/DocCard.jsx';
+import ErrorRetry from '../components/ErrorRetry.jsx';
+import FileBadge from '../components/FileBadge.jsx';
 import '../styles/library.css';
 
 const FILE_TYPES = ['pdf', 'docx', 'pptx', 'png', 'jpg', 'webp'];
@@ -179,12 +181,7 @@ export default function Library() {
     );
   } else if (err && items.length === 0) {
     results = (
-      <Alert variant="danger" className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <span>Không tải được tài liệu: {err}</span>
-        <Button variant="outline-danger" size="sm" className="rounded-pill px-3" onClick={() => setReloadKey((k) => k + 1)}>
-          Thử lại
-        </Button>
-      </Alert>
+      <ErrorRetry message={`Không tải được tài liệu: ${err}`} onRetry={() => setReloadKey((k) => k + 1)} />
     );
   } else if (items.length === 0) {
     results = (
@@ -221,12 +218,7 @@ export default function Library() {
           ))}
         </Row>
         {err && (
-          <Alert variant="danger" className="mt-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <span>Không tải thêm được: {err}</span>
-            <Button variant="outline-danger" size="sm" className="rounded-pill px-3" onClick={() => { setErr(''); loadMore(); }}>
-              Thử lại
-            </Button>
-          </Alert>
+          <ErrorRetry className="mt-3" message={`Không tải thêm được: ${err}`} onRetry={() => { setErr(''); loadMore(); }} />
         )}
         {hasMore && !err && (
           <div ref={sentinelRef} className="text-center mt-4" style={{ minHeight: 40 }}>
@@ -270,9 +262,7 @@ export default function Library() {
             {recent.map((d) => (
               <div key={d.id} className="lib-recent-chip">
                 <Link to={`/library/${d.id}`} className="lib-recent-link">
-                  <span className={`lib-file-badge lib-file-${d.file_type}`} style={{ width: 28, height: 28, fontSize: '0.55rem', borderRadius: 7 }} aria-hidden="true">
-                    {(d.file_type || '').toUpperCase()}
-                  </span>
+                  <FileBadge type={d.file_type || ''} size="xs" />
                   <span className="text-truncate">{d.title}</span>
                 </Link>
                 <button type="button" className="lib-recent-x" aria-label={`Xóa ${d.title} khỏi xem gần đây`} title="Xóa khỏi xem gần đây"

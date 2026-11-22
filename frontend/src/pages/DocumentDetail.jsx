@@ -8,7 +8,10 @@ import { formatSize } from '../lib/files.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { pushRecent, removeRecent } from '../lib/recent.js';
 import StarRating from '../components/StarRating.jsx';
+import BackLink from '../components/BackLink.jsx';
 import DocCard from '../components/DocCard.jsx';
+import ErrorRetry from '../components/ErrorRetry.jsx';
+import FileBadge from '../components/FileBadge.jsx';
 import '../styles/library.css';
 
 export default function DocumentDetail() {
@@ -173,12 +176,7 @@ export default function DocumentDetail() {
     );
   } else if (!doc) {
     content = (
-      <Alert variant="danger" className="d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <span>{err || 'Không tìm thấy tài liệu'}</span>
-        <Button variant="outline-danger" size="sm" className="rounded-pill px-3" onClick={() => setReloadKey((k) => k + 1)}>
-          Thử lại
-        </Button>
-      </Alert>
+      <ErrorRetry message={err || 'Không tìm thấy tài liệu'} onRetry={() => setReloadKey((k) => k + 1)} />
     );
   } else {
     content = (
@@ -221,7 +219,7 @@ export default function DocumentDetail() {
           <>
             <div className="d-flex justify-content-between align-items-start gap-2 flex-wrap">
               <h1 className="h4 text-break mb-1">{doc.title}</h1>
-              <span className={`lib-file-badge lib-file-${doc.file_type}`} aria-label={`Tệp ${doc.file_type}`}>{doc.file_type.toUpperCase()}</span>
+              <FileBadge type={doc.file_type} label={`Tệp ${doc.file_type}`} />
             </div>
             <div className="small text-muted mb-1">
               {doc.uploader_name ? <>Tải lên bởi {doc.uploader_name} · </> : null}
@@ -291,12 +289,7 @@ export default function DocumentDetail() {
 
   return (
     <Container className="py-4 library-page" style={{ maxWidth: 720 }}>
-      <Link to="/library" className="lib-back-link mb-3">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M19 12H5M11 6l-6 6 6 6" />
-        </svg>
-        Thư viện tài liệu
-      </Link>
+      <BackLink />
       {content}
 
       {doc && related.length > 0 && (

@@ -3,6 +3,7 @@
 import { Link } from 'react-router-dom';
 import { Card } from 'react-bootstrap';
 import { formatSize } from '../lib/files.js';
+import FileBadge from './FileBadge.jsx';
 
 export default function DocCard({ doc: d, subject = '', view = 'grid', index = 0 }) {
   const list = view === 'list';
@@ -12,10 +13,7 @@ export default function DocCard({ doc: d, subject = '', view = 'grid', index = 0
       <Card className="lib-doc-card h-100 lib-fade-up" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}>
         <Card.Body className={list ? 'py-2' : undefined}>
           <div className={`d-flex gap-3 ${list ? 'align-items-center' : 'align-items-start'}`}>
-            <span className={`lib-file-badge lib-file-${d.file_type}`} aria-hidden="true"
-              style={list ? { width: 40, height: 40, borderRadius: 10, fontSize: '0.65rem' } : undefined}>
-              {d.file_type.toUpperCase()}
-            </span>
+            <FileBadge type={d.file_type} size={list ? 'sm' : 'md'} />
             <div className="lib-min-w-0 flex-grow-1">
               <div className="fw-semibold text-break lib-doc-title">{d.title}</div>
               <div className="small text-muted text-break">

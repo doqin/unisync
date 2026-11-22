@@ -6,6 +6,8 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form, ProgressBar, Spinner } from 'react-bootstrap';
 import { api } from '../lib/api.js';
 import { ACCEPT, checkFile, formatSize } from '../lib/files.js';
+import BackLink from '../components/BackLink.jsx';
+import FileBadge from '../components/FileBadge.jsx';
 import FilterDropdown from '../components/FilterDropdown.jsx';
 import '../styles/library.css';
 
@@ -182,9 +184,7 @@ export default function DocumentNew() {
           </label>
           {file && (
             <div ref={chipRef} className={`lib-file-chip mt-3 ${fileErr ? 'is-invalid' : ''}`}>
-              <span className={`lib-file-badge lib-file-${(file.name.split('.').pop() || '').toLowerCase()}`} aria-hidden="true">
-                {(file.name.split('.').pop() || '').toUpperCase()}
-              </span>
+              <FileBadge type={file.name.split('.').pop() || ''} />
               <div className="lib-min-w-0 flex-grow-1">
                 <div className="fw-semibold text-break">{file.name}</div>
                 <div className="small text-muted">{formatSize(file.size)}</div>
@@ -240,12 +240,7 @@ export default function DocumentNew() {
 
   return (
     <Container className="py-4 library-page" style={{ maxWidth: 720 }}>
-      <Link to="/library" className="lib-back-link mb-3">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M19 12H5M11 6l-6 6 6 6" />
-        </svg>
-        Thư viện tài liệu
-      </Link>
+      <BackLink />
       <Card body>
         <h1 className="h4 mb-3">Tải lên tài liệu</h1>
         {content}

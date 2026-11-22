@@ -300,7 +300,7 @@ export default function DocumentDetail() {
 
       {doc && related.length > 0 && (
         <section className="mt-4" aria-label="Tài liệu cùng môn">
-          <h2 className="h6 mb-2 px-1">Tài liệu cùng môn</h2>
+          <h2 className="h6 mb-2">Tài liệu cùng môn</h2>
           <div className="d-grid gap-2">
             {related.map((d) => (
               <Link key={d.id} to={`/library/${d.id}`} className="lib-doc-card-link text-decoration-none text-reset">

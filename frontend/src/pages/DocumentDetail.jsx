@@ -58,7 +58,9 @@ export default function DocumentDetail() {
       const body = { title: form.title.trim() };
       body.description = form.description.trim() || null;
       const updated = await api(`/documents/${id}`, { method: 'PATCH', body });
-      setDoc(updated);
+      // PATCH chỉ trả hàng documents thô (không có rating_avg, rating_count, my_rating).
+      // Gộp vào trạng thái hiện tại thay vì thay thế, để không mất phần đánh giá đã tính từ GET.
+      setDoc((d) => ({ ...d, ...updated }));
       setEditing(false);
       setNotice('Đã lưu thay đổi');
     } catch (e2) {

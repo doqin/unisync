@@ -61,11 +61,6 @@ body { background: var(--us-bg); color: var(--us-text); }
   display: inline-flex; align-items: center; gap: 0.5rem;
   font-weight: 700; color: var(--us-primary) !important;
 }
-.app-brand-mark {
-  display: inline-grid; place-items: center;
-  width: 2rem; height: 2rem; border-radius: 0.5rem;
-  background: var(--us-primary); color: #fff; font-size: 1rem;
-}
 .app-brand-logo { display: block; width: 2rem; height: 2rem; }
 .app-navbar .nav-link { color: var(--us-text); border-radius: 0.375rem; padding-inline: 0.75rem; }
 .app-navbar .nav-icon-link, .app-navbar .dropdown > .nav-link { display: flex; align-items: center; }

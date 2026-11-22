@@ -141,7 +141,7 @@ function FeatureOrbit() {
       <div className="landing-orbit-ring landing-orbit-ring-outer" />
       <div className="landing-orbit-ring landing-orbit-ring-inner" />
       <div className="landing-orbit-core" data-aos="zoom-in">
-        <span className="app-brand-mark mb-2">U</span>
+        <img src="/logo.svg" alt="" width="32" height="32" className="app-brand-logo mb-2" />
         <span className="fw-bold">Tài khoản UniSync</span>
       </div>
       {ORBIT.map((o, i) => (

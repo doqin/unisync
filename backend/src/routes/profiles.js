@@ -17,6 +17,7 @@ import { HEAD_BYTES } from '../lib/files.js';
 import {
   IMAGES_BUCKET, buildAvatarPath, checkDeclaredAvatar, checkStoredAvatar, parseAvatarPath, signAvatar,
 } from '../lib/avatar.js';
+import { hydratePosts } from '../lib/posts.js';
 import { validate } from '../middleware/validate.js';
 import { uploadLimiter } from '../middleware/rateLimit.js';
 
@@ -44,7 +45,6 @@ const idParam = z.object({ id: z.uuid('Hồ sơ không hợp lệ') });
 const postsQuery = z.object({ page: z.coerce.number().int().min(1).max(1000).default(1) });
 
 const POSTS_PER_PAGE = 10;
-const POST_IMAGE_TTL = 60 * 60; // giây
 
 // Hồ sơ công khai (FR-PRO-01): mọi sinh viên đã đăng nhập xem được (SRS 4). Không có email, role, is_locked.
 const PUBLIC_FIELDS = 'id, full_name, avatar_url, bio, major, school, year, created_at';
@@ -54,27 +54,6 @@ async function countWhere(sb, table, column, value) {
   const { count, error } = await sb.from(table).select('*', { count: 'exact', head: true }).eq(column, value);
   if (error) throw error;
   return count ?? 0;
-}
-
-/** Đếm theo post_id cho một nhóm bài: Map<post_id, số dòng>. */
-async function countByPost(sb, table, postIds) {
-  const { data, error } = await sb.from(table).select('post_id').in('post_id', postIds);
-  if (error) throw error;
-  const m = new Map();
-  for (const row of data ?? []) m.set(row.post_id, (m.get(row.post_id) ?? 0) + 1);
-  return m;
-}
-
-/**
- * Ảnh bài đăng: `posts.image_urls` chứa đường dẫn trong bucket riêng tư `images`; đổi sang signed URL ngắn hạn.
- * Mục không ký được thì bỏ, không làm hỏng cả trang.
- */
-async function signImages(sb, posts) {
-  const paths = [...new Set(posts.flatMap((p) => p.image_urls ?? []))];
-  if (!paths.length) return new Map();
-  const { data, error } = await sb.storage.from(IMAGES_BUCKET).createSignedUrls(paths, POST_IMAGE_TTL);
-  if (error) throw error;
-  return new Map((data ?? []).filter((d) => d.signedUrl && !d.error).map((d) => [d.path, d.signedUrl]));
 }
 
 /** Đọc vài byte đầu của ảnh trên Storage qua signed URL ngắn hạn (không tải cả ảnh vào bộ nhớ). */
@@ -216,29 +195,10 @@ export function createProfilesRouter({ db = supabaseAdmin, readHead = readHeadFr
       const posts = (rows ?? []).slice(0, POSTS_PER_PAGE);
       if (!posts.length) return res.json({ items: [], page, has_more: false });
 
-      const ids = posts.map((p) => p.id);
-      const gIds = [...new Set(posts.map((p) => p.group_id).filter(Boolean))];
-      const [likes, comments, images, myLikes, groups] = await Promise.all([
-        countByPost(sb, 'likes', ids),
-        countByPost(sb, 'comments', ids),
-        signImages(sb, posts),
-        sb.from('likes').select('post_id').eq('user_id', req.user.id).in('post_id', ids),
-        gIds.length ? sb.from('groups').select('id, name').in('id', gIds) : { data: [], error: null },
-      ]);
-      if (myLikes.error) throw myLikes.error;
-      if (groups.error) throw groups.error;
-      const liked = new Set((myLikes.data ?? []).map((l) => l.post_id));
-      const groupName = new Map((groups.data ?? []).map((g) => [g.id, g.name]));
-
+      // Dạng bài đăng dùng chung với bảng tin (lib/posts.js); hồ sơ không cần `author` và đường dẫn gốc của ảnh.
+      const items = (await hydratePosts(sb, posts, req.user.id)).map(({ author, image_paths, ...p }) => p);
       res.json({
-        items: posts.map((p) => ({
-          ...p,
-          image_urls: (p.image_urls ?? []).map((u) => images.get(u)).filter(Boolean),
-          group: p.group_id ? { id: p.group_id, name: groupName.get(p.group_id) ?? null } : null,
-          like_count: likes.get(p.id) ?? 0,
-          comment_count: comments.get(p.id) ?? 0,
-          liked_by_me: liked.has(p.id),
-        })),
+        items,
         page,
         has_more: hasMore,
       });

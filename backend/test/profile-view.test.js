@@ -223,10 +223,14 @@ test('bài đăng: đúng 10 bài thì không còn trang sau', async () => {
   assert.equal(body.has_more, false);
 });
 
-test('bài đăng: ảnh đổi sang signed URL, ảnh không ký được thì bỏ', async () => {
-  tables.posts.push(post(1, { image_urls: ['posts/a.webp', 'missing/b.webp'] }));
+test('bài đăng: ảnh đổi sang signed URL, ảnh không ký được thì bỏ; không lộ đường dẫn gốc', async () => {
+  // Đường dẫn đúng dạng của #10: posts/<user_id>/<uuid>.<loại>
+  const good = `posts/${AUTHOR}/${randomUUID()}.webp`;
+  tables.posts.push(post(1, { image_urls: [good, 'missing/b.webp'] }));
   const { body } = await get(`/${AUTHOR}/posts`);
-  assert.deepEqual(body.items[0].image_urls, ['https://sb.test/object/posts/a.webp']);
+  assert.deepEqual(body.items[0].image_urls, [`https://sb.test/object/${good}`]);
+  assert.equal('image_paths' in body.items[0], false);
+  assert.equal('author' in body.items[0], false);
 });
 
 test('bài đăng: chưa có bài → danh sách rỗng; người không tồn tại → 404; tham số sai → 400', async () => {

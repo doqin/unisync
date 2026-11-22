@@ -1,0 +1,513 @@
+/* Giao diện riêng của module thư viện tài liệu (Đức Trọng). Không thay đổi theme chung. */
+
+/* Thẻ tài liệu */
+.lib-doc-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.lib-doc-card-link:hover .lib-doc-card,
+.lib-doc-card-link:focus-visible .lib-doc-card {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+  border-color: rgba(13, 110, 253, 0.35);
+}
+.lib-doc-card-link:focus-visible { outline: none; }
+.lib-doc-title { line-height: 1.35; }
+.lib-min-w-0 { min-width: 0; }
+
+/* Huy hiệu loại tệp */
+.lib-file-badge {
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: #fff;
+  background: #6c757d;
+}
+.lib-file-pdf { background: #dc3545; }
+.lib-file-pptx { background: #fd7e14; }
+.lib-file-docx { background: #0d6efd; }
+.lib-file-png, .lib-file-jpg, .lib-file-webp { background: #198754; }
+
+/* Hiệu ứng xuất hiện */
+@keyframes lib-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.lib-fade-up { animation: lib-fade-up 0.35s ease both; }
+
+/* Khung chờ (lib-skeleton) */
+@keyframes lib-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+.lib-skeleton {
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eef0f3 25%, #f8f9fb 37%, #eef0f3 63%);
+  background-size: 400px 100%;
+  animation: lib-shimmer 1.2s ease-in-out infinite;
+}
+
+/* Vùng kéo thả tệp */
+.lib-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 28px 16px;
+  border: 2px dashed #b6c2d2;
+  border-radius: 14px;
+  background: #fafbfd;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.lib-dropzone:hover, .lib-dropzone.dragging { border-color: #0d6efd; background: #f0f6ff; }
+.lib-dropzone.is-invalid { border-color: #dc3545; }
+.lib-dz-icon { display: inline-grid; place-items: center; color: #6b7280; margin-bottom: 4px; }
+.lib-dropzone:hover .lib-dz-icon, .lib-dropzone.dragging .lib-dz-icon { color: var(--bs-primary); }
+
+/* Sao đánh giá */
+.lib-star-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  margin-left: -2px; /* bù khoảng hở bên trái của glyph ★ để thẳng hàng với chữ */
+  font-size: 1.6rem;
+  line-height: 1;
+  color: #d0d4da;
+  transition: transform 0.12s ease, color 0.12s ease;
+}
+.lib-star-btn.on { color: #f5b301; }
+.lib-star-btn:hover:not(:disabled) { transform: scale(1.15); }
+.lib-star-btn:focus-visible { outline: 2px solid #0d6efd; outline-offset: 2px; border-radius: 4px; }
+.lib-star-btn:disabled { cursor: not-allowed; }
+
+.lib-stars-readonly { position: relative; display: inline-block; font-size: 1.25rem; line-height: 1; letter-spacing: 2px; }
+.lib-stars-track { color: #d0d4da; }
+.lib-stars-fill { position: absolute; left: 0; top: 0; overflow: hidden; white-space: nowrap; color: #f5b301; }
+
+/* Ô tìm kiếm: icon và ô nhập là MỘT khung duy nhất; viền và vòng sáng nằm ở khung ngoài. */
+.lib-search-group {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  background: #fff;
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.lib-search-group:focus-within {
+  border-color: var(--bs-primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
+}
+.lib-search-icon {
+  background: transparent;
+  border: 0;
+  color: #6b7280;
+  padding-right: 0;
+}
+.lib-search-group:focus-within .lib-search-icon { color: var(--bs-primary); }
+.library-page .lib-search-group > .form-control,
+.library-page .lib-search-group > .form-control:focus,
+.library-page .lib-search-group > .form-control:focus-visible {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  outline: none;
+  background: transparent;
+}
+/* Viền focus của ô nhập trong module thư viện dùng màu chính của site, không dùng màu cam của theme chung.
+   Chỉ áp dụng trong .library-page để không ảnh hưởng các trang khác. */
+.library-page .form-control:focus,
+.library-page .form-select:focus {
+  border-color: var(--bs-primary);
+  box-shadow: none;
+}
+/* Viền đổi màu mượt khi focus và khi rê chuột (không giật như mặc định) */
+.library-page .form-control,
+.library-page .form-select,
+.library-page .lib-filter-dd-toggle {
+  transition: border-color 0.25s ease, background-color 0.25s ease;
+}
+.library-page .form-control:hover:not(:focus):not(:disabled),
+.library-page .form-select:hover:not(:focus):not(:disabled) {
+  border-color: #b6c2d2;
+}
+/* Vòng focus dùng box-shadow (chuyển đổi được) thay vì outline (bật ngay lập tức) */
+.library-page .form-control,
+.library-page .form-select,
+.library-page .lib-filter-dd-toggle {
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+}
+.library-page .form-control:focus-visible,
+.library-page .form-select:focus-visible,
+.library-page .lib-filter-dd-toggle:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+}
+.library-page .lib-search-group > .form-control:focus { position: relative; z-index: 1; }
+/* Theme chung đặt viền ngoài khi focus bằng màu cam (--us-focus). Giữ viền để đảm bảo trợ năng,
+   nhưng trong thư viện dùng màu chính, mỏng hơn và sát ô nhập hơn. */
+.library-page :focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 0;
+}
+
+/* Nút bấm: có bóng khi rê chuột, lún nhẹ khi nhấn (không nhấc lên) */
+.library-page .btn {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.library-page .btn:hover:not(:disabled) {
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+}
+.library-page .btn:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow: none;
+}
+/* Ô lọc không đổ bóng khi rê chuột hay nhấn */
+.library-page .btn.lib-filter-dd-toggle:hover:not(:disabled),
+.library-page .btn.lib-filter-dd-toggle:active:not(:disabled) {
+  box-shadow: none;
+  transform: none;
+}
+.library-page .btn:disabled { opacity: 0.6; }
+
+/* Menu lọc tự thiết kế (FilterDropdown) */
+.library-page .lib-filter-dd { width: 100%; }
+/* Hàng bộ lọc: ô tìm kiếm và ô môn giãn theo chỗ còn lại, các ô còn lại vừa đủ nội dung */
+.lib-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: stretch;
+}
+.lib-filter-search { flex: 1 1 200px; min-width: 0; }
+.lib-filter-subject { flex: 1 1 230px; min-width: 0; }
+.lib-filter-type { flex: 0 0 92px; }
+.lib-filter-sort { flex: 0 0 148px; }
+.lib-filter-submit { flex: 0 0 auto; display: flex; }
+.lib-filter-submit .btn { padding-left: 1.25rem; padding-right: 1.25rem; }
+@media (max-width: 575.98px) {
+  .lib-filter-search { flex-basis: 100%; }
+  .lib-filter-subject { flex-basis: 100%; }
+  .lib-filter-type, .lib-filter-sort { flex: 1 1 0; }
+  .lib-filter-submit { flex: 1 1 100%; }
+  .lib-filter-submit .btn { width: 100%; }
+}
+.library-page .lib-filter-dd-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  background: #fff;
+  color: #1f2430;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  padding: 0.375rem 0.6rem;
+  text-align: left;
+  box-shadow: none;
+}
+.library-page .lib-filter-dd-toggle:hover { border-color: #b6c2d2; background: #fff; }
+.library-page .lib-filter-dd-toggle.show { border-color: var(--bs-primary); }
+/* Mũi tên xoay lên khi menu mở, xoay xuống khi đóng */
+.library-page .lib-filter-dd-toggle::after {
+  transition: transform 0.2s ease;
+}
+.library-page .lib-filter-dd-toggle.show::after { transform: rotate(180deg); }
+
+/* Menu trượt xuống và hiện dần khi mở (khi đóng vẫn ẩn tức thì) */
+/* Dùng thuộc tính translate (không phải transform) để không ghi đè vị trí do Popper đặt. */
+@keyframes lib-dd-in {
+  from { opacity: 0; translate: 0 -6px; }
+  to { opacity: 1; translate: 0 0; }
+}
+.library-page .lib-filter-dd-menu.show { animation: lib-dd-in 0.18s ease-out; }
+.library-page .lib-filter-dd-menu {
+  min-width: 100%;
+  padding: 0.35rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+.library-page .lib-filter-dd-item {
+  border-radius: 0.5rem;
+  padding: 0.45rem 0.75rem;
+  color: #1f2430;
+}
+.library-page .lib-filter-dd-item:hover,
+.library-page .lib-filter-dd-item:focus { background: #f3f4f6; color: #1f2430; }
+.library-page .lib-filter-dd-item.active,
+.library-page .lib-filter-dd-item:active { background: var(--bs-primary-bg-subtle); color: var(--bs-primary); font-weight: 600; }
+
+/* Thông báo nhỏ dạng viên (ví dụ "Đã ghi nhận đánh giá") */
+.lib-notice-pill {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 1px 3px rgba(22, 163, 74, 0.1);
+}
+/* Tên môn trong trang chi tiết: link về thư viện đã lọc theo môn */
+.lib-subject-link { color: inherit; text-decoration: none; text-underline-offset: 3px; transition: color 0.2s ease; }
+.lib-subject-link:hover, .lib-subject-link:focus-visible { color: var(--bs-primary); text-decoration: underline; }
+
+/* Link "Xóa bộ lọc": chữ nhỏ, không nền, không bóng, không nhấc */
+.library-page .lib-filter-clear {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
+.library-page .lib-filter-clear:hover,
+.library-page .lib-filter-clear:focus-visible {
+  background: none;
+  box-shadow: none;
+  transform: none;
+  color: var(--bs-primary);
+}
+
+/* Link quay lại: chữ có mũi tên, là điều hướng nên không dùng dạng nút */
+.lib-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--bs-secondary-color);
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.lib-back-link svg { transition: transform 0.2s ease; }
+.lib-back-link:hover,
+.lib-back-link:focus-visible { color: var(--bs-primary); }
+.lib-back-link:hover svg { transform: translateX(-3px); }
+
+/* Toast cố định ở đáy, giữa màn hình; trượt lên và hiện dần, không đẩy nội dung */
+.lib-toast-layer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 24px;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+  z-index: 1080;
+}
+.lib-notice-toast {
+  width: auto;
+  max-width: 100%;
+  pointer-events: auto;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.12);
+  animation: lib-toast-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes lib-toast-in {
+  from { opacity: 0; translate: 0 16px; }
+  to { opacity: 1; translate: 0 0; }
+}
+.lib-notice-icon {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #fff;
+}
+
+/* Thẻ tệp đã chọn (bay từ vùng kéo thả, xem DocumentNew.jsx) */
+.lib-file-chip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}
+.lib-file-chip.is-invalid { border-color: #dc3545; }
+/* Nút bỏ tệp: tròn nhỏ, nằm gọn trong khung tệp, đổi nền khi rê chuột */
+.lib-file-chip .lib-btn-remove {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #f1f3f6;
+  color: #6b7280;
+  font-size: 0.8rem;
+  line-height: 1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.lib-file-chip .lib-btn-remove:hover:not(:disabled) { background: #fde8e8; color: #dc3545; }
+.lib-file-chip .lib-btn-remove:disabled { opacity: 0.5; }
+
+/* Tệp "bay" vào khung khi được chọn hoặc thả */
+@keyframes lib-fly-in {
+  0% { opacity: 0; transform: translateY(-28px) scale(0.92); }
+  60% { opacity: 1; transform: translateY(3px) scale(1.02); }
+  100% { opacity: 1; transform: none; }
+}
+.lib-fly-in { display: inline-block; animation: lib-fly-in 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+
+/* Rung nhẹ khi có lỗi */
+@keyframes lib-shake {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+.lib-shake { animation: lib-shake 0.4s ease; }
+
+/* Tôn trọng người dùng không thích chuyển động */
+/* Chỉ áp dụng trong module thư viện, không ảnh hưởng animation của các trang khác. */
+@media (prefers-reduced-motion: reduce) {
+  .library-page *, .library-page *::before, .library-page *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Kết quả cũ mờ nhẹ trong lúc tải lại khi đổi bộ lọc */
+.lib-results-loading { opacity: 0.55; transition: opacity 0.2s ease; }
+
+/* Màn hình hẹp (360px): tên môn dài trong menu lọc được xuống dòng thay vì tràn ra ngoài */
+.library-page .lib-filter-dd-item { white-space: normal; }
+/* Menu lọc dài (nhiều môn học): chỉ vùng danh sách cuộn, ô lọc nhanh phía trên đứng yên */
+.library-page .lib-filter-dd-list {
+  max-height: min(280px, 52vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+@media (max-width: 575.98px) {
+  .library-page .lib-filter-dd-menu { max-width: calc(100vw - 32px); }
+}
+
+/* Nút chỉ có icon (ví dụ sao chép liên kết) */
+.library-page .lib-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+}
+
+/* Tab "Tất cả" / "Của tôi" */
+.lib-tabs { display: flex; gap: 8px; }
+.lib-tab {
+  border: 1px solid var(--bs-border-color);
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--bs-secondary-color);
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.lib-tab:hover { border-color: #b6c2d2; }
+.lib-tab.active {
+  background: var(--bs-primary-bg-subtle);
+  border-color: rgba(79, 70, 229, 0.3);
+  color: var(--bs-primary);
+}
+
+/* Chuyển dạng xem lưới / danh sách */
+.lib-view-toggle { display: inline-flex; gap: 2px; }
+.lib-view-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.lib-view-btn:hover { background: #eef0f3; }
+.lib-view-btn[aria-pressed="true"] { background: var(--bs-primary-bg-subtle); color: var(--bs-primary); }
+
+/* Xem gần đây */
+.lib-recent { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0; }
+.lib-recent-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  max-width: 260px;
+  padding: 5px 6px 5px 5px;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+}
+.lib-recent-chip:hover { border-color: rgba(79, 70, 229, 0.3); }
+.lib-recent-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+.lib-recent-link:hover { color: inherit; }
+.lib-recent-x {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  line-height: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #9ca3af;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.lib-recent-x svg { display: block; }
+.lib-recent-x:hover { background: #eef0f3; color: #4b5563; }
+
+/* Ô lọc nhanh nằm đầu menu dài, ngoài vùng cuộn */
+.library-page .lib-filter-dd-search {
+  margin: -0.35rem -0.35rem 0.25rem;
+  padding: 0.4rem;
+  background: #fff;
+  border-bottom: 1px solid var(--bs-border-color);
+  border-radius: 0.75rem 0.75rem 0 0;
+}
+.library-page .lib-filter-dd-search input {
+  width: 100%;
+  padding: 0.3rem 0.6rem;
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+.library-page .lib-filter-dd-search input:focus { border-color: var(--bs-primary); }
+
+/* Giữ chỗ cho thanh cuộn dọc để nội dung không dịch ngang khi trang đổi giữa dài và ngắn (ví dụ tab Tất cả ↔ Của tôi).
+   Chỉ áp dụng khi đang ở trang thư viện, không ảnh hưởng các trang khác. */
+html:has(.library-page) { scrollbar-gutter: stable; }

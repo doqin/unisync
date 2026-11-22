@@ -61,19 +61,64 @@ body { background: var(--us-bg); color: var(--us-text); }
   display: inline-flex; align-items: center; gap: 0.5rem;
   font-weight: 700; color: var(--us-primary) !important;
 }
-.app-brand-mark {
-  display: inline-grid; place-items: center;
-  width: 2rem; height: 2rem; border-radius: 0.5rem;
-  background: var(--us-primary); color: #fff; font-size: 1rem;
-}
+.app-brand-logo { display: block; width: 2rem; height: 2rem; }
 .app-navbar .nav-link { color: var(--us-text); border-radius: 0.375rem; padding-inline: 0.75rem; }
 .app-navbar .nav-link:hover { color: var(--us-primary-hover); background: var(--us-primary-subtle); }
 .app-navbar .nav-link.active {
   color: var(--us-primary-active); background: var(--us-primary-subtle); font-weight: 600;
 }
+/* Mục chỉ có biểu tượng: vùng bấm tối thiểu 44×44px, cách nhau 0.5rem. Chữ ẩn trực quan nhưng vẫn là tên truy cập. */
+.app-main-nav, .app-actions { gap: 0.5rem; }
+.app-navbar .nav-icon-link {
+  display: flex; align-items: center; justify-content: center; min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem;
+}
+.nav-label {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+/* Từ 1200px: 5 mục chính đủ chỗ để hiện cả chữ */
+@media (min-width: 1200px) {
+  .app-navbar .nav-icon-link-wide { justify-content: flex-start; padding-inline: 0.75rem; }
+  .app-navbar .nav-label-wide {
+    position: static; width: auto; height: auto; margin: 0 0 0 0.5rem; overflow: visible; clip: auto; white-space: nowrap;
+  }
+}
+
+/* Nút Đăng nhập / Đăng ký của khách luôn nằm trên một dòng, nhỏ gọn trên điện thoại */
+.app-navbar .btn { white-space: nowrap; }
+@media (max-width: 575.98px) {
+  .app-navbar .btn { --bs-btn-padding-x: 0.75rem; --bs-btn-padding-y: 0.375rem; --bs-btn-font-size: 0.875rem; }
+}
+
+/* Nút tài khoản = ảnh đại diện của người dùng (chữ cái đầu khi chưa có ảnh) */
+.account-toggle {
+  display: grid; place-items: center; width: 2.75rem; height: 2.75rem; padding: 0;
+  background: transparent; border: 2px solid transparent; border-radius: 50%; cursor: pointer;
+}
+.account-toggle:hover, .account-toggle.show { border-color: var(--us-primary); }
+
+/* ---------- Thanh điều hướng dưới (dưới 992px, chỉ biểu tượng) ---------- */
+.bottom-nav {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: 1030; display: flex;
+  background: var(--us-surface); border-top: 1px solid var(--us-border);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.bottom-nav-link {
+  flex: 1 1 0; display: flex; align-items: center; justify-content: center; min-height: 3.5rem;
+  color: var(--us-text-muted); text-decoration: none;
+}
+.bottom-nav-link:focus-visible { outline-offset: -4px; }
+.bottom-nav-pill {
+  display: grid; place-items: center; min-width: 3.5rem; height: 2.25rem; border-radius: 999px;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.bottom-nav-link.active { color: var(--us-primary-active); }
+.bottom-nav-link.active .bottom-nav-pill { background: var(--us-primary-subtle); }
+@media (hover: hover) {
+  .bottom-nav-link:hover { color: var(--us-primary-hover); }
+}
 @media (max-width: 991.98px) {
-  .app-navbar .nav-link { padding-block: 0.65rem; }
-  .app-navbar .btn { width: 100%; padding-block: 0.6rem; }
+  .app-shell.has-bottom-nav { padding-bottom: calc(3.5rem + env(safe-area-inset-bottom)); }
 }
 
 /* ---------- Footer ---------- */

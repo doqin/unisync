@@ -3,7 +3,10 @@ import health from './health.js';
 import auth from './auth.js';
 import documents from './documents.js';
 import groups from './groups.js';
+import profiles from './profiles.js';
 import { requireAuth } from '../middleware/auth.js';
+import { supabaseAdmin } from '../lib/supabase.js';
+import { signAvatar } from '../lib/avatar.js';
 import { stub } from './_stub.js';
 
 const r = Router();
@@ -15,10 +18,16 @@ r.use('/auth', auth);
 // Từ đây trở xuống mọi API đều cần JWT hợp lệ (NFR-03)
 r.use(requireAuth);
 
-r.get('/me', (req, res) => res.json({ id: req.user.id, email: req.user.email, profile: req.profile }));
+r.get('/me', async (req, res, next) => {
+  try {
+    res.json({ id: req.user.id, email: req.user.email, profile: await signAvatar(supabaseAdmin(), req.profile) });
+  } catch (e) {
+    next(e);
+  }
+});
 
 // Mỗi module do một thành viên phụ trách (SRS 12.2). Thay stub bằng router thật.
-r.use('/profiles',      stub('Hồ sơ',            'FR-PRO-01..04',  'Khang'));
+r.use('/profiles',      profiles);
 r.use('/posts',         stub('Bài đăng',         'FR-SOC-01..04',  'Đức Huy'));
 r.use('/feed',          stub('Bảng tin',         'FR-SOC-02',      'Đức Huy'));
 r.use('/follows',       stub('Theo dõi',         'FR-SOC-05',      'Đức Huy'));

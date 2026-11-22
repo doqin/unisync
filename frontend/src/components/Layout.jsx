@@ -1,12 +1,46 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Container, Nav, Navbar, NavDropdown } from 'react-bootstrap';
+import { Button, Container, Nav, Navbar, NavDropdown, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import Icon from './Icon.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const mainLinks = [
-  ['/home', 'Trang chủ'], ['/groups', 'Nhóm'], ['/library', 'Thư viện'],
-  ['/study', 'Góc học tập'], ['/teamups', 'Team-up'],
+  ['/home', 'Trang chủ', 'home'], ['/groups', 'Nhóm', 'groups'], ['/library', 'Thư viện', 'library'],
+  ['/study', 'Góc học tập', 'study'], ['/teamups', 'Team-up', 'teamup'],
 ];
+
+// Từ 992px (navbar mở rộng) menu chỉ còn biểu tượng; dưới đó menu xổ dọc nên giữ cả chữ.
+const DESKTOP = '(min-width: 992px)';
+
+function useIsDesktop() {
+  const [on, setOn] = useState(() => window.matchMedia(DESKTOP).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(DESKTOP);
+    const onChange = () => setOn(mq.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return on;
+}
+
+/** Nội dung của liên kết: biểu tượng + chữ (chữ ẩn trực quan từ 992px nhưng vẫn là tên truy cập). */
+const NavContent = ({ icon, label }) => (
+  <>
+    <Icon name={icon} />
+    <span className="nav-label">{label}</span>
+  </>
+);
+
+/** Liên kết điều hướng chỉ có biểu tượng trên màn hình rộng, kèm chú thích khi rê chuột hoặc focus bàn phím. */
+function NavIconLink({ to, label, icon, desktop }) {
+  const link = <Nav.Link as={NavLink} to={to} className="nav-icon-link"><NavContent icon={icon} label={label} /></Nav.Link>;
+  if (!desktop) return link;
+  return (
+    <OverlayTrigger placement="bottom" rootClose delay={{ show: 250, hide: 0 }} overlay={<Tooltip id={`tip-${icon}`}>{label}</Tooltip>}>
+      {link}
+    </OverlayTrigger>
+  );
+}
 
 const footerLinks = [
   ['/groups', 'Nhóm học phần'], ['/library', 'Thư viện tài liệu'],
@@ -18,6 +52,7 @@ export default function Layout() {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [expanded, setExpanded] = useState(false);
+  const desktop = useIsDesktop();
   const mainRef = useRef(null);
   const firstRender = useRef(true);
 
@@ -45,24 +80,24 @@ export default function Layout() {
         >
           <Container>
             <Navbar.Brand as={Link} to={user ? '/home' : '/'} className="app-brand">
-              <span className="app-brand-mark" aria-hidden="true">U</span>
+              <img src="/logo.svg" alt="" width="32" height="32" className="app-brand-logo" />
               UniSync
             </Navbar.Brand>
             <Navbar.Toggle aria-controls="main-nav" aria-label={expanded ? 'Đóng menu' : 'Mở menu'} />
             <Navbar.Collapse id="main-nav">
               {user && (
                 <Nav as="nav" aria-label="Điều hướng chính" className="me-auto">
-                  {mainLinks.map(([to, label]) => (
-                    <Nav.Link key={to} as={NavLink} to={to}>{label}</Nav.Link>
+                  {mainLinks.map(([to, label, icon]) => (
+                    <NavIconLink key={to} to={to} label={label} icon={icon} desktop={desktop} />
                   ))}
                 </Nav>
               )}
               <Nav className="ms-auto align-items-lg-center gap-lg-2 py-2 py-lg-0">
                 {user ? (
                   <>
-                    <Nav.Link as={NavLink} to="/search">Tìm kiếm</Nav.Link>
-                    <Nav.Link as={NavLink} to="/notifications">Thông báo</Nav.Link>
-                    <NavDropdown title="Tài khoản" id="account-menu" align="end">
+                    <NavIconLink to="/search" label="Tìm kiếm" icon="search" desktop={desktop} />
+                    <NavIconLink to="/notifications" label="Thông báo" icon="bell" desktop={desktop} />
+                    <NavDropdown title={<NavContent icon="user" label="Tài khoản" />} id="account-menu" align="end">
                       <NavDropdown.Item as={Link} to={`/u/${user.id}`}>Hồ sơ của tôi</NavDropdown.Item>
                       <NavDropdown.Item as={Link} to="/settings">Cài đặt</NavDropdown.Item>
                       <NavDropdown.Divider />

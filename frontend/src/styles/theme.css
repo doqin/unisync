@@ -66,10 +66,23 @@ body { background: var(--us-bg); color: var(--us-text); }
   width: 2rem; height: 2rem; border-radius: 0.5rem;
   background: var(--us-primary); color: #fff; font-size: 1rem;
 }
+.app-brand-logo { display: block; width: 2rem; height: 2rem; }
 .app-navbar .nav-link { color: var(--us-text); border-radius: 0.375rem; padding-inline: 0.75rem; }
+.app-navbar .nav-icon-link, .app-navbar .dropdown > .nav-link { display: flex; align-items: center; }
+.nav-label { margin-inline-start: 0.5rem; }
 .app-navbar .nav-link:hover { color: var(--us-primary-hover); background: var(--us-primary-subtle); }
 .app-navbar .nav-link.active {
   color: var(--us-primary-active); background: var(--us-primary-subtle); font-weight: 600;
+}
+/* Từ 992px: chỉ biểu tượng, vùng bấm tối thiểu 44×44px; chữ vẫn có cho trình đọc màn hình */
+@media (min-width: 992px) {
+  .app-navbar .nav-icon-link, .app-navbar .dropdown > .nav-link {
+    justify-content: center; min-width: 2.75rem; min-height: 2.75rem; padding: 0.5rem;
+  }
+  .app-navbar .nav-label {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+  }
 }
 @media (max-width: 991.98px) {
   .app-navbar .nav-link { padding-block: 0.65rem; }

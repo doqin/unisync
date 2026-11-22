@@ -4,6 +4,9 @@ import auth from './auth.js';
 import documents from './documents.js';
 import groups from './groups.js';
 import profiles from './profiles.js';
+import posts from './posts.js';
+import feed from './feed.js';
+import follows from './follows.js';
 import { requireAuth } from '../middleware/auth.js';
 import { supabaseAdmin } from '../lib/supabase.js';
 import { signAvatar } from '../lib/avatar.js';
@@ -28,9 +31,9 @@ r.get('/me', async (req, res, next) => {
 
 // Mỗi module do một thành viên phụ trách (SRS 12.2). Thay stub bằng router thật.
 r.use('/profiles',      profiles);
-r.use('/posts',         stub('Bài đăng',         'FR-SOC-01..04',  'Đức Huy'));
-r.use('/feed',          stub('Bảng tin',         'FR-SOC-02',      'Đức Huy'));
-r.use('/follows',       stub('Theo dõi',         'FR-SOC-05',      'Đức Huy'));
+r.use('/posts',         posts);
+r.use('/feed',          feed);
+r.use('/follows',       follows);
 r.use('/users',         stub('Tìm người dùng',   'FR-SOC-06',      'Minh Trọng'));
 r.use('/notifications', stub('Thông báo',        'FR-SOC-07',      'Đức Huy'));
 r.use('/groups',        groups);

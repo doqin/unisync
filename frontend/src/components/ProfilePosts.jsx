@@ -1,11 +1,13 @@
 // Danh sách bài đăng trên trang hồ sơ (FR-PRO-03): mới nhất trước, "Tải thêm".
 import { Link } from 'react-router-dom';
-import { Badge, Card } from 'react-bootstrap';
+import { Card } from 'react-bootstrap';
+import Icon from './Icon.jsx';
 import AsyncState from './AsyncState.jsx';
 import LoadMore from './LoadMore.jsx';
 import usePagedList from '../hooks/usePagedList.js';
 import { api } from '../lib/api.js';
 
+const n = (v) => Number(v ?? 0).toLocaleString('vi-VN');
 const when = (iso) => new Date(iso).toLocaleString('vi-VN', { dateStyle: 'medium', timeStyle: 'short' });
 
 function PostItem({ post }) {
@@ -15,7 +17,11 @@ function PostItem({ post }) {
         <Link to={`/posts/${post.id}`} className="text-body-secondary">
           <time dateTime={post.created_at}>{when(post.created_at)}</time>
         </Link>
-        {post.group && <Badge bg="secondary" pill>Nhóm {post.group.name ?? ''}</Badge>}
+        {post.group && (
+          <Link to={`/groups/${post.group.id}`} className="post-group-badge">
+            <Icon name="groups" size={14} />{post.group.name || 'Nhóm'}
+          </Link>
+        )}
       </div>
       <p className="mb-2 text-break" style={{ whiteSpace: 'pre-wrap' }}>{post.content}</p>
       {post.image_urls.length > 0 && (
@@ -29,7 +35,7 @@ function PostItem({ post }) {
         </div>
       )}
       <div className="small text-body-secondary">
-        {post.like_count} lượt thích · {post.comment_count} bình luận
+        {n(post.like_count)} lượt thích · {n(post.comment_count)} bình luận
       </div>
     </Card>
   );

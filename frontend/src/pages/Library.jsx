@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Alert, Button, Card, Col, Container, Form, InputGroup, Row } from 'react-bootstrap';
 import { api } from '../lib/api.js';
-import { formatSize } from '../lib/files.js';
 import { getRecent, removeRecent } from '../lib/recent.js';
 import FilterDropdown from '../components/FilterDropdown.jsx';
+import DocCard from '../components/DocCard.jsx';
 import '../styles/library.css';
 
 const FILE_TYPES = ['pdf', 'docx', 'pptx', 'png', 'jpg', 'webp'];
@@ -216,39 +216,7 @@ export default function Library() {
         <Row {...gridCols} className={view === 'list' ? 'g-2' : 'g-3'}>
           {items.map((d, i) => (
             <Col key={d.id}>
-              <Link to={`/library/${d.id}`} className="lib-doc-card-link text-decoration-none text-reset d-block h-100">
-                <Card className="lib-doc-card h-100 lib-fade-up" style={{ animationDelay: `${Math.min(i, 8) * 40}ms` }}>
-                  <Card.Body className={view === 'list' ? 'py-2' : undefined}>
-                    <div className={`d-flex gap-3 ${view === 'list' ? 'align-items-center' : 'align-items-start'}`}>
-                      <span className={`lib-file-badge lib-file-${d.file_type}`} aria-hidden="true"
-                        style={view === 'list' ? { width: 40, height: 40, borderRadius: 10, fontSize: '0.65rem' } : undefined}>
-                        {d.file_type.toUpperCase()}
-                      </span>
-                      <div className="lib-min-w-0 flex-grow-1">
-                        <div className="fw-semibold text-break lib-doc-title">{d.title}</div>
-                        <div className="small text-muted text-break">
-                          {subjectName(d.group_id)}
-                          {view === 'list' && (
-                            <span className="d-sm-none"> · {formatSize(d.file_size)} · {new Date(d.created_at).toLocaleDateString('vi-VN')}</span>
-                          )}
-                        </div>
-                      </div>
-                      {view === 'list' && (
-                        <div className="small text-muted text-end flex-shrink-0 d-none d-sm-block">
-                          <div>{formatSize(d.file_size)}</div>
-                          <div>{new Date(d.created_at).toLocaleDateString('vi-VN')}</div>
-                        </div>
-                      )}
-                    </div>
-                    {view !== 'list' && (
-                      <div className="small text-muted mt-3 d-flex justify-content-between">
-                        <span>{formatSize(d.file_size)}</span>
-                        <span>{new Date(d.created_at).toLocaleDateString('vi-VN')}</span>
-                      </div>
-                    )}
-                  </Card.Body>
-                </Card>
-              </Link>
+              <DocCard doc={d} subject={subjectName(d.group_id)} view={view} index={i} />
             </Col>
           ))}
         </Row>

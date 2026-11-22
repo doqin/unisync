@@ -8,6 +8,7 @@ import { formatSize } from '../lib/files.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { pushRecent, removeRecent } from '../lib/recent.js';
 import StarRating from '../components/StarRating.jsx';
+import DocCard from '../components/DocCard.jsx';
 import '../styles/library.css';
 
 export default function DocumentDetail() {
@@ -303,17 +304,7 @@ export default function DocumentDetail() {
           <h2 className="h6 mb-2">Tài liệu cùng môn</h2>
           <div className="d-grid gap-2">
             {related.map((d) => (
-              <Link key={d.id} to={`/library/${d.id}`} className="lib-doc-card-link text-decoration-none text-reset">
-                <Card body className="lib-doc-card py-2 px-3">
-                  <div className="d-flex align-items-center gap-3">
-                    <span className={`lib-file-badge lib-file-${d.file_type}`} style={{ width: 32, height: 32, borderRadius: 8, fontSize: '0.55rem' }} aria-hidden="true">
-                      {d.file_type.toUpperCase()}
-                    </span>
-                    <div className="lib-min-w-0 flex-grow-1 fw-semibold text-break">{d.title}</div>
-                    <div className="small text-muted flex-shrink-0">{formatSize(d.file_size)}</div>
-                  </div>
-                </Card>
-              </Link>
+              <DocCard key={d.id} doc={d} subject={subject} view="list" />
             ))}
           </div>
         </section>

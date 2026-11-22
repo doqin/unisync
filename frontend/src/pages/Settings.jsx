@@ -1,8 +1,9 @@
 // Trang cài đặt – phụ trách: Khang. Mỗi mục là một component riêng để các issue sau thêm mục mà không đụng nhau:
-// đổi mật khẩu (FR-AUTH-05, #19), cài đặt Pomodoro (FR-STU-02, Minh Trọng).
+// đổi mật khẩu (FR-AUTH-05), cài đặt Pomodoro (FR-STU-02, Minh Trọng).
 import { useCallback, useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
 import AsyncState from '../components/AsyncState.jsx';
+import ChangePassword from '../components/ChangePassword.jsx';
 import ProfileSettings from '../components/ProfileSettings.jsx';
 import { api } from '../lib/api.js';
 
@@ -22,6 +23,7 @@ export default function Settings() {
       <AsyncState loading={!profile && !error} error={error} onRetry={load} errorTitle="Không tải được hồ sơ">
         {profile && <ProfileSettings profile={profile} onChange={setProfile} />}
       </AsyncState>
+      <ChangePassword />
     </Container>
   );
 }

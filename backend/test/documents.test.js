@@ -31,6 +31,7 @@ function fakeSupabase() {
     ],
     documents: [],
     document_ratings: [],
+    profiles: [{ id: USER, full_name: 'Người dùng thử' }, { id: OTHER, full_name: 'Nguyễn Văn B' }],
   };
   const objects = {}; // path → { size, contentType, head }
   const removed = [];
@@ -48,6 +49,7 @@ function fakeSupabase() {
       eq: (k, v) => (filters.push([k, v]), q),
       in: (k, v) => (filters.push([k, v]), q),
       order: () => q,
+      range: () => q,
       insert: (r) => ((row = r), (op = 'insert'), q),
       update: (p) => ((patch = p), (op = 'update'), q),
       delete: () => ((op = 'delete'), q),
@@ -372,9 +374,11 @@ const ownDoc = (extra = {}) => {
   return doc;
 };
 
-test('detail: trả tài liệu, 404 khi không có, 400 khi id sai', async () => {
-  const doc = ownDoc();
-  assert.equal((await (await fetch(`${base}/${doc.id}`)).json()).title, 'Đề cương');
+test('detail: trả tài liệu kèm tên người tải lên, 404 khi không có, 400 khi id sai', async () => {
+  const doc = ownDoc({ uploader_id: OTHER });
+  const body = await (await fetch(`${base}/${doc.id}`)).json();
+  assert.equal(body.title, 'Đề cương');
+  assert.equal(body.uploader_name, 'Nguyễn Văn B');
   assert.equal((await fetch(`${base}/${randomUUID()}`)).status, 404);
   assert.equal((await fetch(`${base}/khong-phai-uuid`)).status, 400);
 });
@@ -453,11 +457,21 @@ test('download: mỗi lần tải xuống tăng download_count', async () => {
   assert.equal(sb.tables.documents.find((d) => d.id === doc.id).download_count, 2);
 });
 
-test('preview: chỉ PDF được xem trước, loại khác → 400', async () => {
+test('download: bộ đếm lượt tải lỗi vẫn không chặn tải xuống', async () => {
+  const doc = ownDoc({ download_count: 0 });
+  sb.rpc = async () => ({ data: null, error: { message: 'function public.increment_download(uuid) does not exist' } });
+  const res = await fetch(`${base}/${doc.id}/download`);
+  assert.equal(res.status, 200);
+  assert.match((await res.json()).url, /^https:\/\/sb\.test\//);
+});
+
+test('preview: PDF và ảnh được xem trước, loại khác → 400', async () => {
   const pdf = ownDoc();
   const pptx = ownDoc({ file_type: 'pptx' });
   assert.equal((await fetch(`${base}/${pdf.id}/preview`)).status, 200);
   assert.equal((await fetch(`${base}/${pptx.id}/preview`)).status, 400);
+  const png = ownDoc({ file_type: 'png' });
+  assert.equal((await fetch(`${base}/${png.id}/preview`)).status, 200);
 });
 
 test('rating: đánh giá 1–5 sao, sửa được, chi tiết hiện điểm trung bình', async () => {
@@ -485,4 +499,18 @@ test('browse: sort=rating đưa tài liệu điểm cao lên đầu', async () =
   assert.equal(newest.items[0].title, 'Điểm thấp');
   const byRating = await (await fetch(`${base}/?sort=rating`)).json();
   assert.equal(byRating.items[0].title, 'Điểm cao');
+});
+
+// ───── GET /mine (Tài liệu của tôi) ─────
+
+test('mine: chỉ trả tài liệu do chính mình tải lên', async () => {
+  ownDoc({ title: 'Của tôi' });
+  ownDoc({ uploader_id: OTHER, title: 'Của người khác' });
+  const body = await (await fetch(`${base}/mine`)).json();
+  assert.deepEqual(body.items.map((d) => d.title), ['Của tôi']);
+  assert.equal(body.has_more, false);
+});
+
+test('mine: page không hợp lệ → 400', async () => {
+  assert.equal((await fetch(`${base}/mine?page=0`)).status, 400);
 });

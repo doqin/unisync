@@ -52,6 +52,8 @@ const browseSchema = z.object({
 
 const idParam = z.object({ id: z.uuid('Tài liệu không hợp lệ') });
 
+const mineSchema = z.object({ page: z.coerce.number().int().min(1).max(1000).default(1) });
+
 const editSchema = z.object({
   title: z.string().trim().min(1, 'Nhập tiêu đề').max(200, 'Tiêu đề tối đa 200 ký tự').optional(),
   // `.nullish()` (không phải `.optional()`): client gửi `description: null` khi người dùng xóa hết mô tả.
@@ -62,6 +64,7 @@ const editSchema = z.object({
 const ratingSchema = z.object({ stars: z.number().int().min(1, 'Số sao từ 1 đến 5').max(5, 'Số sao từ 1 đến 5') });
 
 const DOWNLOAD_TTL = 60; // giây
+const PREVIEW_TYPES = ['pdf', 'png', 'jpg', 'webp']; // loại tệp xem trước được (FR-DOC-09 mở rộng cho ảnh)
 
 /** Lấy tài liệu theo id, 404 nếu không có. */
 async function loadDocument(sb, id) {
@@ -231,11 +234,30 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
     }
   });
 
+  // Tài liệu do chính người dùng tải lên. Truy vấn đơn giản trên bảng documents, không dùng hàm tìm kiếm.
+  r.get('/mine', validate({ query: mineSchema }), async (req, res, next) => {
+    try {
+      const limit = 20;
+      const page = Number(req.query.page ?? 1);
+      const { data, error } = await db().from('documents').select('*')
+        .eq('uploader_id', req.user.id).order('created_at', { ascending: false })
+        .range((page - 1) * limit, page * limit - 1);
+      if (error) throw error;
+      res.json({ items: data, page, has_more: data.length === limit });
+    } catch (e) {
+      next(e);
+    }
+  });
+
   // Chi tiết một tài liệu (FR-DOC-05, FR-DOC-06).
   r.get('/:id', validate({ params: idParam }), async (req, res, next) => {
     try {
       const sb = db();
       const doc = await loadDocument(sb, req.params.id);
+      // Tên người tải lên: hồ sơ hiển thị cho mọi sinh viên đã đăng nhập (SRS 2.4.2, RLS profiles_select).
+      const { data: uploader, error: upErr } = await sb.from('profiles').select('full_name')
+        .eq('id', doc.uploader_id).maybeSingle();
+      if (upErr) throw upErr;
       const { data: ratings, error } = await sb.from('document_ratings').select('user_id, stars')
         .eq('document_id', doc.id);
       if (error) throw error;
@@ -243,6 +265,7 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       const sum = ratings.reduce((a, x) => a + x.stars, 0);
       res.json({
         ...doc,
+        uploader_name: uploader?.full_name ?? null,
         rating_avg: count ? Math.round((sum / count) * 10) / 10 : null,
         rating_count: count,
         my_rating: ratings.find((x) => x.user_id === req.user.id)?.stars ?? null,
@@ -260,7 +283,9 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
         .createSignedUrl(doc.file_path, DOWNLOAD_TTL, { download: downloadName(doc) });
       if (error) throw error;
       const { error: incErr } = await db().rpc('increment_download', { p_id: doc.id });
-      if (incErr) throw incErr;
+      // Bộ đếm lượt tải chỉ là tính năng phụ (FR-DOC-07): lỗi hoặc chưa có hàm trên CSDL thì ghi nhật ký,
+      // không được chặn việc tải xuống (FR-DOC-05).
+      if (incErr) console.error('increment_download thất bại:', incErr.message);
       res.json({ url: data.signedUrl, expires_in: DOWNLOAD_TTL });
     } catch (e) {
       next(e);
@@ -298,11 +323,11 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
     }
   });
 
-  // Xem trước PDF ngay trên trang (FR-DOC-09): signed URL không ép tải về.
+  // Xem trước PDF và ảnh ngay trên trang (FR-DOC-09): signed URL không ép tải về.
   r.get('/:id/preview', validate({ params: idParam }), async (req, res, next) => {
     try {
       const doc = await loadDocument(db(), req.params.id);
-      if (doc.file_type !== 'pdf') throw badRequest('Chỉ xem trước được tệp PDF');
+      if (!PREVIEW_TYPES.includes(doc.file_type)) throw badRequest('Chỉ xem trước được tệp PDF hoặc ảnh');
       const { data, error } = await db().storage.from(DOCUMENTS_BUCKET).createSignedUrl(doc.file_path, DOWNLOAD_TTL);
       if (error) throw error;
       res.json({ url: data.signedUrl, expires_in: DOWNLOAD_TTL });

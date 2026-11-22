@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-labelledby="unisync-logo-title">
   <title id="unisync-logo-title">UniSync</title>
-  <!-- Biểu tượng, không dùng chữ: khung chat (mạng xã hội) khoét hình cuốn sách mở (học tập). Lề ngoài 12px; sách cách thành khung đều khoảng 7px ở cả bốn phía, góc bo tròn theo khung chat; đọc rõ ở 16px nên dùng cả làm favicon. -->
+  <!-- Biểu tượng, không dùng chữ: khung chat (mạng xã hội) khoét hình cuốn sách mở (học tập). Lề ngoài 12px; sách cách thành khung đều khoảng 7px ở cả bốn phía, góc bo tròn theo khung chat, khe giữa hai trang rộng 4 đơn vị (đủ thấy ở 24px); đọc rõ ở 16px nên dùng cả làm favicon. -->
   <rect width="64" height="64" rx="16" fill="#4f46e5"/>
   <path d="M21 13H43a9 9 0 0 1 9 9V34a9 9 0 0 1 -9 9H30L19 52V43H21a9 9 0 0 1 -9 -9V22a9 9 0 0 1 9 -9z" fill="#fff" stroke="#fff" stroke-width="1" stroke-linejoin="round"/>
-  <path transform="translate(32 28)" d="M-1.6 -4.2C-5.1 -6.4 -9.1 -7.2 -12.2 -7.2V4.7C-9.1 4.7 -5.1 5.3 -1.6 7.7zM1.6 -4.2C5.1 -6.4 9.1 -7.2 12.2 -7.2V4.7C9.1 4.7 5.1 5.3 1.6 7.7z" fill="#4f46e5" stroke="#4f46e5" stroke-width="1.6" stroke-linejoin="round"/>
+  <path transform="translate(32 28)" d="M-2.8 -4.2C-6.3 -6.4 -10.3 -7.2 -12.2 -7.2V4.7C-10.3 4.7 -6.3 5.3 -2.8 7.7zM2.8 -4.2C6.3 -6.4 10.3 -7.2 12.2 -7.2V4.7C10.3 4.7 6.3 5.3 2.8 7.7z" fill="#4f46e5" stroke="#4f46e5" stroke-width="1.6" stroke-linejoin="round"/>
 </svg>

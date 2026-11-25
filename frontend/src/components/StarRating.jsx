@@ -14,10 +14,10 @@ export default function StarRating({ value = 0, onChange, disabled = false, labe
     );
   }
 
-  // Đang rê (hoặc focus): tô nhạt tới sao đang rê để xem trước; còn lại: tô đậm theo điểm đã chọn.
+  // Sao đã chọn luôn tô đậm; đang rê (hoặc focus) vượt quá điểm đã chọn thì các sao thêm vào tô nhạt.
   const starClass = (n) => {
-    if (hover) return n <= hover ? 'preview' : '';
-    return n <= value ? 'on' : '';
+    if (n <= value) return 'on';
+    return n <= hover ? 'preview' : '';
   };
   return (
     <div className="d-inline-flex align-items-center" role="group" aria-label={label}

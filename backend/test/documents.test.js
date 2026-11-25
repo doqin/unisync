@@ -31,6 +31,7 @@ function fakeSupabase() {
     ],
     documents: [],
     document_ratings: [],
+    reports: [],
     profiles: [{ id: USER, full_name: 'Người dùng thử' }, { id: OTHER, full_name: 'Nguyễn Văn B' }],
   };
   const objects = {}; // path → { size, contentType, head }
@@ -513,4 +514,61 @@ test('mine: chỉ trả tài liệu do chính mình tải lên', async () => {
 
 test('mine: page không hợp lệ → 400', async () => {
   assert.equal((await fetch(`${base}/mine?page=0`)).status, 400);
+});
+
+// ───── Báo cáo vi phạm (FR-DOC-10) ─────
+
+const report = (id, body) => post(`/${id}/report`, body);
+
+test('report: báo cáo tài liệu của người khác → 201, chi tiết hiện đã báo cáo', async () => {
+  const doc = ownDoc({ uploader_id: OTHER });
+  assert.equal((await (await fetch(`${base}/${doc.id}`)).json()).my_report_pending, false);
+
+  const res = await report(doc.id, { reason: 'copyright', detail: '  Sao chép giáo trình  ' });
+  assert.equal(res.status, 201);
+  assert.equal(res.body.status, 'pending');
+  const saved = sb.tables.reports[0];
+  assert.deepEqual(
+    { target_type: saved.target_type, target_id: saved.target_id, reporter_id: saved.reporter_id, detail: saved.detail },
+    { target_type: 'document', target_id: doc.id, reporter_id: USER, detail: 'Sao chép giáo trình' },
+  );
+  assert.equal((await (await fetch(`${base}/${doc.id}`)).json()).my_report_pending, true);
+});
+
+test('report: báo cáo lần hai khi còn chờ xử lý → 409; đã xử lý thì báo cáo lại được', async () => {
+  const doc = ownDoc({ uploader_id: OTHER });
+  assert.equal((await report(doc.id, { reason: 'spam' })).status, 201);
+  assert.equal((await report(doc.id, { reason: 'copyright' })).status, 409);
+  assert.equal(sb.tables.reports.length, 1);
+
+  sb.tables.reports[0].status = 'dismissed';
+  assert.equal((await report(doc.id, { reason: 'copyright' })).status, 201);
+});
+
+test('report: không báo cáo được tài liệu của chính mình', async () => {
+  const mine = ownDoc();
+  assert.equal((await report(mine.id, { reason: 'copyright' })).status, 400);
+  assert.equal(sb.tables.reports.length, 0);
+});
+
+test('report: lý do sai, thiếu mô tả khi chọn "khác", tài liệu không có → lỗi', async () => {
+  const doc = ownDoc({ uploader_id: OTHER });
+  assert.equal((await report(doc.id, { reason: 'khong-co' })).status, 400);
+  assert.equal((await report(doc.id, {})).status, 400);
+  assert.equal((await report(doc.id, { reason: 'other', detail: '   ' })).status, 400);
+  assert.equal((await report(doc.id, { reason: 'spam', detail: 'x'.repeat(1001) })).status, 400);
+  assert.equal((await report(randomUUID(), { reason: 'spam' })).status, 404);
+  assert.equal(sb.tables.reports.length, 0);
+  assert.equal((await report(doc.id, { reason: 'other', detail: 'Nội dung sai lệch' })).status, 201);
+});
+
+test('detail: đọc reports lỗi (CSDL chưa có bảng) vẫn trả chi tiết tài liệu', async () => {
+  const doc = ownDoc({ uploader_id: OTHER });
+  const from = sb.from;
+  sb.from = (t) => (t === 'reports'
+    ? { select: () => ({ eq() { return this; }, maybeSingle: async () => ({ data: null, error: { message: 'relation "reports" does not exist' } }) }) }
+    : from(t));
+  const res = await fetch(`${base}/${doc.id}`);
+  assert.equal(res.status, 200);
+  assert.equal((await res.json()).my_report_pending, false);
 });

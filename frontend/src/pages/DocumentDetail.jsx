@@ -390,7 +390,12 @@ export default function DocumentDetail() {
               ))}
             </fieldset>
             <Form.Group controlId="report-detail">
-              <Form.Label>Mô tả {detailRequired ? '' : <span className="text-muted">(không bắt buộc)</span>}</Form.Label>
+              <Form.Label>
+                Mô tả{' '}
+                {detailRequired
+                  ? <span className="text-danger" aria-hidden="true">*</span>
+                  : <span className="text-muted">(không bắt buộc)</span>}
+              </Form.Label>
               <Form.Control as="textarea" rows={3} maxLength={1000} required={detailRequired}
                 value={reportForm.detail} disabled={busy === 'report'}
                 placeholder={reportForm.reason === 'copyright' ? 'Ví dụ: tài liệu sao chép giáo trình có bản quyền của…' : ''}

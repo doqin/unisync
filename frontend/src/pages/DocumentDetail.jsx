@@ -100,22 +100,25 @@ export default function DocumentDetail() {
     }
   }
 
+  // Hiện thông tin mới và đóng form ngay, lưu ở sau; lỗi thì trả lại như cũ và mở lại form (giữ nội dung đã nhập).
   async function save(e) {
     e.preventDefault();
-    setBusy('save'); setErr(''); setNotice('');
+    const body = { title: form.title.trim(), description: form.description.trim() || null };
+    const before = { title: doc.title, description: doc.description };
+    setErr('');
+    setDoc((d) => ({ ...d, ...body }));
+    setEditing(false);
+    setNotice('Đã lưu thay đổi');
     try {
-      const body = { title: form.title.trim() };
-      body.description = form.description.trim() || null;
       const updated = await api(`/documents/${id}`, { method: 'PATCH', body });
       // PATCH chỉ trả hàng documents thô (không có rating_avg, rating_count, my_rating).
       // Gộp vào trạng thái hiện tại thay vì thay thế, để không mất phần đánh giá đã tính từ GET.
       setDoc((d) => ({ ...d, ...updated }));
-      setEditing(false);
-      setNotice('Đã lưu thay đổi');
     } catch (e2) {
-      setErr(e2.message);
-    } finally {
-      setBusy('');
+      setDoc((d) => ({ ...d, ...before }));
+      setNotice('');
+      setEditing(true);
+      setErr(`Chưa lưu được: ${e2.message}`);
     }
   }
 
@@ -174,24 +177,24 @@ export default function DocumentDetail() {
     }
   }
 
-  // Tô sao ngay khi bấm (lưu lên server mất 1–2 giây), lỗi thì trả lại như cũ.
+  // Tô sao và báo đã ghi nhận ngay khi bấm (lưu lên server mất 1–2 giây), lỗi thì trả lại như cũ.
   // rateSeq: bấm liên tiếp nhiều lần thì chỉ lấy kết quả của lần bấm cuối.
   const rateSeq = useRef(0);
   async function rate(stars) {
     const seq = ++rateSeq.current;
     const before = doc.my_rating;
-    setErr(''); setNotice('');
+    setErr('');
     setDoc((d) => ({ ...d, my_rating: stars }));
+    setNotice('Đã ghi nhận đánh giá của bạn');
     try {
       await api(`/documents/${id}/rating`, { method: 'PUT', body: { stars } });
       const fresh = await api(`/documents/${id}`); // cập nhật điểm trung bình và số lượt
-      if (seq !== rateSeq.current) return;
-      setDoc(fresh);
-      setNotice('Đã ghi nhận đánh giá của bạn');
+      if (seq === rateSeq.current) setDoc(fresh);
     } catch (e) {
       if (seq !== rateSeq.current) return;
       setDoc((d) => ({ ...d, my_rating: before }));
-      setErr(e.message);
+      setNotice('');
+      setErr(`Chưa lưu được đánh giá: ${e.message}`);
     }
   }
 
@@ -199,28 +202,24 @@ export default function DocumentDetail() {
     setReportForm(EMPTY_REPORT); setReportErr(''); setReportOpen(true);
   }
 
+  // Đóng hộp, đánh dấu đã báo cáo và báo thành công ngay; gửi ở sau. Lỗi thì trả lại và mở lại hộp (giữ nội dung).
   async function sendReport(e) {
     e.preventDefault();
-    setBusy('report'); setReportErr('');
+    const body = { reason: reportForm.reason };
+    const detail = reportForm.detail.trim();
+    if (detail) body.detail = detail;
+    setReportErr('');
+    setDoc((d) => ({ ...d, my_report_pending: true }));
+    setReportOpen(false);
+    setNotice('Đã gửi báo cáo, quản trị viên sẽ xem xét');
     try {
-      const body = { reason: reportForm.reason };
-      const detail = reportForm.detail.trim();
-      if (detail) body.detail = detail;
       await api(`/documents/${id}/report`, { method: 'POST', body });
-      setDoc((d) => ({ ...d, my_report_pending: true }));
-      setReportOpen(false);
-      setNotice('Đã gửi báo cáo, quản trị viên sẽ xem xét');
     } catch (e2) {
-      if (e2.status === 409) {
-        // Đã báo cáo từ trước (ví dụ ở tab khác): coi như đã gửi.
-        setDoc((d) => ({ ...d, my_report_pending: true }));
-        setReportOpen(false);
-        setNotice(e2.message);
-      } else {
-        setReportErr(e2.details?.fieldErrors?.detail?.[0] ?? e2.message);
-      }
-    } finally {
-      setBusy('');
+      if (e2.status === 409) return; // Đã báo cáo từ trước (ví dụ ở tab khác): đúng như đang hiển thị.
+      setDoc((d) => ({ ...d, my_report_pending: false }));
+      setNotice('');
+      setReportErr(e2.details?.fieldErrors?.detail?.[0] ?? `Chưa gửi được báo cáo: ${e2.message}`);
+      setReportOpen(true);
     }
   }
 
@@ -275,7 +274,7 @@ export default function DocumentDetail() {
             </Form.Group>
             <div className="d-flex gap-2">
               <Button type="submit" disabled={busy !== '' || !form.title.trim()}>
-                {busy === 'save' ? 'Đang lưu…' : 'Lưu'}
+                Lưu
               </Button>
               <Button variant="outline-secondary" onClick={() => { setEditing(false); setForm({ title: doc.title, description: doc.description ?? '' }); }} disabled={busy !== ''}>
                 Hủy
@@ -401,10 +400,10 @@ export default function DocumentDetail() {
       </Modal>
 
       {/* Modal nằm ngoài .library-page (portal vào body) nên gắn class để dùng chung style thư viện. */}
-      <Modal show={reportOpen} onHide={() => busy !== 'report' && setReportOpen(false)} centered
+      <Modal show={reportOpen} onHide={() => setReportOpen(false)} centered
         className="library-page lib-report-modal" aria-labelledby="report-title">
         <Form onSubmit={sendReport}>
-          <Modal.Header closeButton={busy !== 'report'} className="border-0 pb-0 align-items-start">
+          <Modal.Header closeButton className="border-0 pb-0 align-items-start">
             <div className="d-flex align-items-center gap-3 lib-min-w-0">
               <span className="lib-report-head-icon" aria-hidden="true"><FlagIcon /></span>
               <div className="lib-min-w-0">
@@ -415,7 +414,7 @@ export default function DocumentDetail() {
           </Modal.Header>
           <Modal.Body className="pt-3">
             {reportErr && <Alert variant="danger" className="lib-shake py-2">{reportErr}</Alert>}
-            <fieldset disabled={busy === 'report'} className="mb-3">
+            <fieldset className="mb-3">
               <legend className="form-label fs-6 fw-semibold mb-2">Tài liệu này có vấn đề gì?</legend>
               {REPORT_REASONS.map(([value, label]) => (
                 <Form.Check key={value} type="radio" name="report-reason" id={`report-${value}`} label={label}
@@ -431,7 +430,7 @@ export default function DocumentDetail() {
                   : <span className="text-muted fw-normal">(không bắt buộc)</span>}
               </Form.Label>
               <Form.Control as="textarea" rows={3} maxLength={1000} required={detailRequired}
-                value={reportForm.detail} disabled={busy === 'report'}
+                value={reportForm.detail}
                 placeholder={REPORT_PLACEHOLDERS[reportForm.reason]}
                 onChange={(e) => setReportForm({ ...reportForm, detail: e.target.value })} />
               <div className="d-flex justify-content-between gap-2 mt-2 small text-muted">
@@ -446,11 +445,11 @@ export default function DocumentDetail() {
             </Form.Group>
           </Modal.Body>
           <Modal.Footer className="border-0 pt-0">
-            <Button variant="outline-secondary" onClick={() => setReportOpen(false)} disabled={busy === 'report'}>
+            <Button variant="outline-secondary" onClick={() => setReportOpen(false)}>
               Hủy
             </Button>
-            <Button type="submit" variant="danger" disabled={busy === 'report' || (detailRequired && !reportForm.detail.trim())}>
-              {busy === 'report' ? 'Đang gửi…' : 'Gửi báo cáo'}
+            <Button type="submit" variant="danger" disabled={detailRequired && !reportForm.detail.trim()}>
+              Gửi báo cáo
             </Button>
           </Modal.Footer>
         </Form>

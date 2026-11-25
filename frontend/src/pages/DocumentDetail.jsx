@@ -15,25 +15,18 @@ import ErrorRetry from '../components/ErrorRetry.jsx';
 import FileBadge from '../components/FileBadge.jsx';
 import '../styles/library.css';
 
-// Khớp REPORT_REASONS ở backend/src/routes/documents.js. [giá trị, nhãn, gợi ý, biểu tượng]
+// Khớp REPORT_REASONS ở backend/src/routes/documents.js.
 const REPORT_REASONS = [
-  ['copyright', 'Vi phạm bản quyền', 'Sao chép sách, giáo trình, đề thi có bản quyền', 'copyright'],
-  ['inappropriate', 'Không phù hợp', 'Phản cảm, xúc phạm hoặc sai lệch', 'alert'],
-  ['spam', 'Spam, quảng cáo', 'Liên kết rác, tệp không liên quan', 'ban'],
-  ['other', 'Lý do khác', 'Mô tả cụ thể ở ô bên dưới', 'more'],
+  ['copyright', 'Vi phạm bản quyền'],
+  ['inappropriate', 'Nội dung không phù hợp'],
+  ['spam', 'Spam hoặc quảng cáo'],
+  ['other', 'Lý do khác'],
 ];
 const REPORT_PLACEHOLDERS = {
   copyright: 'Ví dụ: tài liệu chụp lại giáo trình có bản quyền của…',
   inappropriate: 'Nội dung nào không phù hợp, ở trang mấy…',
   spam: 'Tệp quảng cáo gì, không liên quan đến môn học ra sao…',
   other: 'Mô tả vi phạm để quản trị viên xem xét',
-};
-const svgProps = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' };
-const REASON_ICONS = {
-  copyright: <svg {...svgProps}><circle cx="12" cy="12" r="9" /><path d="M14.8 9.5a3.5 3.5 0 1 0 0 5" /></svg>,
-  alert: <svg {...svgProps}><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>,
-  ban: <svg {...svgProps}><circle cx="12" cy="12" r="9" /><path d="m5.6 5.6 12.8 12.8" /></svg>,
-  more: <svg {...svgProps}><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></svg>,
 };
 const EMPTY_REPORT = { reason: 'copyright', detail: '' };
 
@@ -415,20 +408,11 @@ export default function DocumentDetail() {
             {reportErr && <Alert variant="danger" className="lib-shake py-2">{reportErr}</Alert>}
             <fieldset disabled={busy === 'report'} className="mb-3">
               <legend className="form-label fs-6 fw-semibold mb-2">Tài liệu này có vấn đề gì?</legend>
-              <div className="lib-reason-grid">
-                {REPORT_REASONS.map(([value, label, hint, icon]) => (
-                  <label key={value} className={`lib-reason${reportForm.reason === value ? ' active' : ''}`}>
-                    <input type="radio" name="report-reason" value={value} className="visually-hidden"
-                      checked={reportForm.reason === value}
-                      onChange={() => setReportForm({ ...reportForm, reason: value })} />
-                    <span className="lib-reason-icon" aria-hidden="true">{REASON_ICONS[icon]}</span>
-                    <span className="lib-min-w-0">
-                      <span className="d-block fw-semibold">{label}</span>
-                      <span className="d-block small text-muted">{hint}</span>
-                    </span>
-                  </label>
-                ))}
-              </div>
+              {REPORT_REASONS.map(([value, label]) => (
+                <Form.Check key={value} type="radio" name="report-reason" id={`report-${value}`} label={label}
+                  className="mb-2" checked={reportForm.reason === value}
+                  onChange={() => setReportForm({ ...reportForm, reason: value })} />
+              ))}
             </fieldset>
             <Form.Group controlId="report-detail">
               <Form.Label className="fw-semibold">

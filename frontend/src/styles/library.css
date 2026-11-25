@@ -85,6 +85,8 @@
   transition: transform 0.12s ease, color 0.12s ease;
 }
 .lib-star-btn.on { color: #f5b301; }
+/* Đang rê chuột: vàng nhạt để phân biệt với số sao đã chọn */
+.lib-star-btn.preview { color: #fcdc7c; }
 .lib-star-btn:hover:not(:disabled) { transform: scale(1.15); }
 .lib-star-btn:focus-visible { outline: 2px solid #0d6efd; outline-offset: 2px; border-radius: 4px; }
 .lib-star-btn:disabled { cursor: not-allowed; }

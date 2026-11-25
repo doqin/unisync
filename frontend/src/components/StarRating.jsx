@@ -14,13 +14,17 @@ export default function StarRating({ value = 0, onChange, disabled = false, labe
     );
   }
 
-  const shown = hover || value;
+  // Đang rê (hoặc focus): tô nhạt tới sao đang rê để xem trước; còn lại: tô đậm theo điểm đã chọn.
+  const starClass = (n) => {
+    if (hover) return n <= hover ? 'preview' : '';
+    return n <= value ? 'on' : '';
+  };
   return (
     <div className="d-inline-flex align-items-center" role="group" aria-label={label}
       onMouseLeave={() => setHover(0)}>
       {[1, 2, 3, 4, 5].map((n) => (
         <button key={n} type="button" disabled={disabled}
-          className={`lib-star-btn ${n <= shown ? 'on' : ''}`}
+          className={`lib-star-btn ${starClass(n)}`}
           onMouseEnter={() => setHover(n)} onFocus={() => setHover(n)} onBlur={() => setHover(0)}
           onClick={() => onChange(n)} aria-label={`${n} sao`} aria-pressed={value === n}>
           ★

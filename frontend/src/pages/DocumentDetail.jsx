@@ -343,13 +343,13 @@ export default function DocumentDetail() {
               {!isOwner && (doc.my_report_pending ? (
                 // Nút mờ kèm chú thích (bọc ngoài vì nút bị vô hiệu không nhận chuột).
                 <span className="d-inline-block" title="Bạn đã báo cáo tài liệu này, quản trị viên đang xem xét">
-                  <Button variant="outline-secondary" className="lib-icon-btn" disabled style={{ pointerEvents: 'none' }}
+                  <Button variant="outline-danger" className="lib-icon-btn lib-report-btn" disabled style={{ pointerEvents: 'none' }}
                     aria-label="Đã báo cáo vi phạm, đang chờ xem xét">
                     <FlagIcon filled />
                   </Button>
                 </span>
               ) : (
-                <Button variant="outline-secondary" className="lib-icon-btn" onClick={openReport}
+                <Button variant="outline-danger" className="lib-icon-btn lib-report-btn" onClick={openReport}
                   disabled={busy !== ''} aria-label="Báo cáo vi phạm" title="Báo cáo vi phạm">
                   <FlagIcon />
                 </Button>

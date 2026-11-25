@@ -1,7 +1,7 @@
 // Chi tiết tài liệu (FR-DOC-05, FR-DOC-06, FR-DOC-10) – phụ trách: Đức Trọng (ImDT06).
 // Tải xuống bằng signed URL ngắn hạn; người tải lên được sửa thông tin và xóa tài liệu;
 // người khác báo cáo được tài liệu vi phạm.
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form, Modal } from 'react-bootstrap';
 import { api } from '../lib/api.js';
@@ -174,14 +174,23 @@ export default function DocumentDetail() {
     }
   }
 
+  // Tô sao ngay khi bấm (lưu lên server mất 1–2 giây), lỗi thì trả lại như cũ.
+  // rateSeq: bấm liên tiếp nhiều lần thì chỉ lấy kết quả của lần bấm cuối.
+  const rateSeq = useRef(0);
   async function rate(stars) {
+    const seq = ++rateSeq.current;
+    const before = doc.my_rating;
     setErr(''); setNotice('');
+    setDoc((d) => ({ ...d, my_rating: stars }));
     try {
       await api(`/documents/${id}/rating`, { method: 'PUT', body: { stars } });
-      const fresh = await api(`/documents/${id}`);
+      const fresh = await api(`/documents/${id}`); // cập nhật điểm trung bình và số lượt
+      if (seq !== rateSeq.current) return;
       setDoc(fresh);
       setNotice('Đã ghi nhận đánh giá của bạn');
     } catch (e) {
+      if (seq !== rateSeq.current) return;
+      setDoc((d) => ({ ...d, my_rating: before }));
       setErr(e.message);
     }
   }

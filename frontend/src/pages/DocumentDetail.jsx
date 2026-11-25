@@ -15,13 +15,26 @@ import ErrorRetry from '../components/ErrorRetry.jsx';
 import FileBadge from '../components/FileBadge.jsx';
 import '../styles/library.css';
 
-// Khớp REPORT_REASONS ở backend/src/routes/documents.js.
+// Khớp REPORT_REASONS ở backend/src/routes/documents.js. [giá trị, nhãn, gợi ý, biểu tượng]
 const REPORT_REASONS = [
-  ['copyright', 'Vi phạm bản quyền'],
-  ['inappropriate', 'Nội dung không phù hợp'],
-  ['spam', 'Spam hoặc quảng cáo'],
-  ['other', 'Lý do khác'],
+  ['copyright', 'Vi phạm bản quyền', 'Sao chép sách, giáo trình, đề thi có bản quyền', 'copyright'],
+  ['inappropriate', 'Không phù hợp', 'Phản cảm, xúc phạm hoặc sai lệch', 'alert'],
+  ['spam', 'Spam, quảng cáo', 'Liên kết rác, tệp không liên quan', 'ban'],
+  ['other', 'Lý do khác', 'Mô tả cụ thể ở ô bên dưới', 'more'],
 ];
+const REPORT_PLACEHOLDERS = {
+  copyright: 'Ví dụ: tài liệu chụp lại giáo trình có bản quyền của…',
+  inappropriate: 'Nội dung nào không phù hợp, ở trang mấy…',
+  spam: 'Tệp quảng cáo gì, không liên quan đến môn học ra sao…',
+  other: 'Mô tả vi phạm để quản trị viên xem xét',
+};
+const svgProps = { width: 18, height: 18, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' };
+const REASON_ICONS = {
+  copyright: <svg {...svgProps}><circle cx="12" cy="12" r="9" /><path d="M14.8 9.5a3.5 3.5 0 1 0 0 5" /></svg>,
+  alert: <svg {...svgProps}><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" /><path d="M12 9v4" /><path d="M12 17h.01" /></svg>,
+  ban: <svg {...svgProps}><circle cx="12" cy="12" r="9" /><path d="m5.6 5.6 12.8 12.8" /></svg>,
+  more: <svg {...svgProps}><circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /></svg>,
+};
 const EMPTY_REPORT = { reason: 'copyright', detail: '' };
 
 /** Lá cờ báo cáo; `filled` khi đã báo cáo. */
@@ -385,36 +398,61 @@ export default function DocumentDetail() {
         </Modal.Body>
       </Modal>
 
-      <Modal show={reportOpen} onHide={() => busy !== 'report' && setReportOpen(false)} centered>
+      {/* Modal nằm ngoài .library-page (portal vào body) nên gắn class để dùng chung style thư viện. */}
+      <Modal show={reportOpen} onHide={() => busy !== 'report' && setReportOpen(false)} centered
+        className="library-page lib-report-modal" aria-labelledby="report-title">
         <Form onSubmit={sendReport}>
-          <Modal.Header closeButton={busy !== 'report'}>
-            <Modal.Title as="h2" className="h5">Báo cáo tài liệu vi phạm</Modal.Title>
+          <Modal.Header closeButton={busy !== 'report'} className="border-0 pb-0 align-items-start">
+            <div className="d-flex align-items-center gap-3 lib-min-w-0">
+              <span className="lib-report-head-icon" aria-hidden="true"><FlagIcon /></span>
+              <div className="lib-min-w-0">
+                <Modal.Title as="h2" id="report-title" className="h5 mb-0">Báo cáo tài liệu</Modal.Title>
+                <div className="small text-muted text-truncate" title={doc?.title}>{doc?.title}</div>
+              </div>
+            </div>
           </Modal.Header>
-          <Modal.Body>
-            {reportErr && <Alert variant="danger">{reportErr}</Alert>}
-            <fieldset className="mb-3" disabled={busy === 'report'}>
-              <legend className="form-label fs-6 mb-2">Lý do</legend>
-              {REPORT_REASONS.map(([value, label]) => (
-                <Form.Check key={value} type="radio" name="report-reason" id={`report-${value}`} label={label}
-                  checked={reportForm.reason === value}
-                  onChange={() => setReportForm({ ...reportForm, reason: value })} />
-              ))}
+          <Modal.Body className="pt-3">
+            {reportErr && <Alert variant="danger" className="lib-shake py-2">{reportErr}</Alert>}
+            <fieldset disabled={busy === 'report'} className="mb-3">
+              <legend className="form-label fs-6 fw-semibold mb-2">Tài liệu này có vấn đề gì?</legend>
+              <div className="lib-reason-grid">
+                {REPORT_REASONS.map(([value, label, hint, icon]) => (
+                  <label key={value} className={`lib-reason${reportForm.reason === value ? ' active' : ''}`}>
+                    <input type="radio" name="report-reason" value={value} className="visually-hidden"
+                      checked={reportForm.reason === value}
+                      onChange={() => setReportForm({ ...reportForm, reason: value })} />
+                    <span className="lib-reason-icon" aria-hidden="true">{REASON_ICONS[icon]}</span>
+                    <span className="lib-min-w-0">
+                      <span className="d-block fw-semibold">{label}</span>
+                      <span className="d-block small text-muted">{hint}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
             </fieldset>
             <Form.Group controlId="report-detail">
-              <Form.Label>
-                Mô tả{' '}
+              <Form.Label className="fw-semibold">
+                Mô tả thêm{' '}
                 {detailRequired
                   ? <span className="text-danger" aria-hidden="true">*</span>
-                  : <span className="text-muted">(không bắt buộc)</span>}
+                  : <span className="text-muted fw-normal">(không bắt buộc)</span>}
               </Form.Label>
               <Form.Control as="textarea" rows={3} maxLength={1000} required={detailRequired}
                 value={reportForm.detail} disabled={busy === 'report'}
-                placeholder={reportForm.reason === 'copyright' ? 'Ví dụ: tài liệu sao chép giáo trình có bản quyền của…' : ''}
+                placeholder={REPORT_PLACEHOLDERS[reportForm.reason]}
                 onChange={(e) => setReportForm({ ...reportForm, detail: e.target.value })} />
-              <Form.Text>Báo cáo chỉ gửi tới quản trị viên, người tải lên không biết ai đã báo cáo.</Form.Text>
+              <div className="d-flex justify-content-between gap-2 mt-2 small text-muted">
+                <span className="d-inline-flex align-items-center gap-1">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
+                  </svg>
+                  Chỉ quản trị viên thấy báo cáo này
+                </span>
+                <span aria-hidden="true">{reportForm.detail.length}/1000</span>
+              </div>
             </Form.Group>
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer className="border-0 pt-0">
             <Button variant="outline-secondary" onClick={() => setReportOpen(false)} disabled={busy === 'report'}>
               Hủy
             </Button>

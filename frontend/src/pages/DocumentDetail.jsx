@@ -24,6 +24,14 @@ const REPORT_REASONS = [
 ];
 const EMPTY_REPORT = { reason: 'copyright', detail: '' };
 
+/** Lá cờ báo cáo; `filled` khi đã báo cáo. */
+const FlagIcon = ({ filled = false }) => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" fill={filled ? 'currentColor' : 'none'} />
+    <path d="M4 22v-7" />
+  </svg>
+);
+
 export default function DocumentDetail() {
   const { id } = useParams();
   const nav = useNavigate();
@@ -319,21 +327,24 @@ export default function DocumentDetail() {
                   <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5" />
                 </svg>
               </Button>
+              {!isOwner && (doc.my_report_pending ? (
+                // Nút mờ kèm chú thích (bọc ngoài vì nút bị vô hiệu không nhận chuột).
+                <span className="d-inline-block" title="Bạn đã báo cáo tài liệu này, quản trị viên đang xem xét">
+                  <Button variant="outline-secondary" className="lib-icon-btn" disabled style={{ pointerEvents: 'none' }}
+                    aria-label="Đã báo cáo vi phạm, đang chờ xem xét">
+                    <FlagIcon filled />
+                  </Button>
+                </span>
+              ) : (
+                <Button variant="outline-secondary" className="lib-icon-btn" onClick={openReport}
+                  disabled={busy !== ''} aria-label="Báo cáo vi phạm" title="Báo cáo vi phạm">
+                  <FlagIcon />
+                </Button>
+              ))}
             </div>
             {!PREVIEWABLE.includes(doc.file_type) && (
               <div className="small text-muted mt-2">
                 Tệp {doc.file_type.toUpperCase()} không xem trước được trên trình duyệt, hãy tải xuống để xem.
-              </div>
-            )}
-            {!isOwner && (
-              <div className="small mt-3 pt-3 border-top">
-                {doc.my_report_pending ? (
-                  <span className="text-muted">Bạn đã báo cáo tài liệu này, quản trị viên đang xem xét.</span>
-                ) : (
-                  <Button variant="link" size="sm" className="p-0 text-danger" onClick={openReport} disabled={busy !== ''}>
-                    Báo cáo vi phạm
-                  </Button>
-                )}
               </div>
             )}
           </>

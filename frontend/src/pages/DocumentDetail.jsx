@@ -1,5 +1,6 @@
-// Chi tiết tài liệu (FR-DOC-05, FR-DOC-06) – phụ trách: Đức Trọng (ImDT06).
-// Tải xuống bằng signed URL ngắn hạn; người tải lên được sửa thông tin và xóa tài liệu.
+// Chi tiết tài liệu (FR-DOC-05, FR-DOC-06, FR-DOC-10) – phụ trách: Đức Trọng (ImDT06).
+// Tải xuống bằng signed URL ngắn hạn; người tải lên được sửa thông tin và xóa tài liệu;
+// người khác báo cáo được tài liệu vi phạm.
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form, Modal } from 'react-bootstrap';
@@ -13,6 +14,15 @@ import DocCard from '../components/DocCard.jsx';
 import ErrorRetry from '../components/ErrorRetry.jsx';
 import FileBadge from '../components/FileBadge.jsx';
 import '../styles/library.css';
+
+// Khớp REPORT_REASONS ở backend/src/routes/documents.js.
+const REPORT_REASONS = [
+  ['copyright', 'Vi phạm bản quyền'],
+  ['inappropriate', 'Nội dung không phù hợp'],
+  ['spam', 'Spam hoặc quảng cáo'],
+  ['other', 'Lý do khác'],
+];
+const EMPTY_REPORT = { reason: 'copyright', detail: '' };
 
 export default function DocumentDetail() {
   const { id } = useParams();
@@ -38,6 +48,9 @@ export default function DocumentDetail() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [reloadKey, setReloadKey] = useState(0); // tăng lên để tải lại (nút "Thử lại")
   const [related, setRelated] = useState([]); // tài liệu khác cùng môn
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportForm, setReportForm] = useState(EMPTY_REPORT);
+  const [reportErr, setReportErr] = useState('');
 
   useEffect(() => {
     let alive = true;
@@ -158,6 +171,37 @@ export default function DocumentDetail() {
       setErr(e.message);
     }
   }
+
+  function openReport() {
+    setReportForm(EMPTY_REPORT); setReportErr(''); setReportOpen(true);
+  }
+
+  async function sendReport(e) {
+    e.preventDefault();
+    setBusy('report'); setReportErr('');
+    try {
+      const body = { reason: reportForm.reason };
+      const detail = reportForm.detail.trim();
+      if (detail) body.detail = detail;
+      await api(`/documents/${id}/report`, { method: 'POST', body });
+      setDoc((d) => ({ ...d, my_report_pending: true }));
+      setReportOpen(false);
+      setNotice('Đã gửi báo cáo, quản trị viên sẽ xem xét');
+    } catch (e2) {
+      if (e2.status === 409) {
+        // Đã báo cáo từ trước (ví dụ ở tab khác): coi như đã gửi.
+        setDoc((d) => ({ ...d, my_report_pending: true }));
+        setReportOpen(false);
+        setNotice(e2.message);
+      } else {
+        setReportErr(e2.details?.fieldErrors?.detail?.[0] ?? e2.message);
+      }
+    } finally {
+      setBusy('');
+    }
+  }
+
+  const detailRequired = reportForm.reason === 'other';
 
   let content;
   if (loading) {
@@ -281,6 +325,17 @@ export default function DocumentDetail() {
                 Tệp {doc.file_type.toUpperCase()} không xem trước được trên trình duyệt, hãy tải xuống để xem.
               </div>
             )}
+            {!isOwner && (
+              <div className="small mt-3 pt-3 border-top">
+                {doc.my_report_pending ? (
+                  <span className="text-muted">Bạn đã báo cáo tài liệu này, quản trị viên đang xem xét.</span>
+                ) : (
+                  <Button variant="link" size="sm" className="p-0 text-danger" onClick={openReport} disabled={busy !== ''}>
+                    Báo cáo vi phạm
+                  </Button>
+                )}
+              </div>
+            )}
           </>
         )}
       </Card>
@@ -317,6 +372,41 @@ export default function DocumentDetail() {
             ? <img src={preview} alt={`Xem trước ${doc?.title}`} className="img-fluid" />
             : <iframe title={`Xem trước ${doc?.title}`} src={preview} className="w-100 d-block" style={{ height: '75vh', border: 0 }} />)}
         </Modal.Body>
+      </Modal>
+
+      <Modal show={reportOpen} onHide={() => busy !== 'report' && setReportOpen(false)} centered>
+        <Form onSubmit={sendReport}>
+          <Modal.Header closeButton={busy !== 'report'}>
+            <Modal.Title as="h2" className="h5">Báo cáo tài liệu vi phạm</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {reportErr && <Alert variant="danger">{reportErr}</Alert>}
+            <fieldset className="mb-3" disabled={busy === 'report'}>
+              <legend className="form-label fs-6 mb-2">Lý do</legend>
+              {REPORT_REASONS.map(([value, label]) => (
+                <Form.Check key={value} type="radio" name="report-reason" id={`report-${value}`} label={label}
+                  checked={reportForm.reason === value}
+                  onChange={() => setReportForm({ ...reportForm, reason: value })} />
+              ))}
+            </fieldset>
+            <Form.Group controlId="report-detail">
+              <Form.Label>Mô tả {detailRequired ? '' : <span className="text-muted">(không bắt buộc)</span>}</Form.Label>
+              <Form.Control as="textarea" rows={3} maxLength={1000} required={detailRequired}
+                value={reportForm.detail} disabled={busy === 'report'}
+                placeholder={reportForm.reason === 'copyright' ? 'Ví dụ: tài liệu sao chép giáo trình có bản quyền của…' : ''}
+                onChange={(e) => setReportForm({ ...reportForm, detail: e.target.value })} />
+              <Form.Text>Báo cáo chỉ gửi tới quản trị viên, người tải lên không biết ai đã báo cáo.</Form.Text>
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="outline-secondary" onClick={() => setReportOpen(false)} disabled={busy === 'report'}>
+              Hủy
+            </Button>
+            <Button type="submit" variant="danger" disabled={busy === 'report' || (detailRequired && !reportForm.detail.trim())}>
+              {busy === 'report' ? 'Đang gửi…' : 'Gửi báo cáo'}
+            </Button>
+          </Modal.Footer>
+        </Form>
       </Modal>
 
       <Modal show={confirmDelete} onHide={() => busy !== 'delete' && setConfirmDelete(false)} centered>

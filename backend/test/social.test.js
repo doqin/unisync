@@ -852,6 +852,22 @@ test('GET /api/feed: chỉ hiện bài cá nhân của mình + người theo dõ
   assert.deepEqual(isoPage.body.items.map((p) => p.content), ['Cũ nhất (Alice)']);
 
   assert.equal((await req('GET', '/feed?cursor=invalid-cursor', { user: ALICE })).status, 400);
+  assert.equal((await req('GET', '/feed?limit=0', { user: ALICE })).status, 400);
+  assert.equal((await req('GET', '/feed?limit=100', { user: ALICE })).status, 400);
+
+  // Bỏ theo dõi Bob → bài của Bob biến mất khỏi bảng tin của Alice
+  await req('DELETE', `/follows/${BOB}`, { user: ALICE });
+  const afterUnfollow = await req('GET', '/feed?limit=10', { user: ALICE });
+  assert.equal(afterUnfollow.status, 200);
+  assert.deepEqual(
+    afterUnfollow.body.items.map((p) => p.content),
+    ['Cùng giờ - id lớn (Alice)', 'Cũ nhất (Alice)'],
+  );
+
+  // Người chưa theo dõi ai và chưa có bài → trả mảng rỗng
+  const emptyFeed = await req('GET', '/feed', { user: CHARLIE });
+  assert.equal(emptyFeed.status, 200);
+  assert.deepEqual(emptyFeed.body, { items: [], next_cursor: null, has_more: false });
 });
 
 // ───────────────────── FR-SOC-05: Theo dõi & Mutual ─────────────────────

@@ -261,11 +261,11 @@ export default function PostCard({ post, onUpdated, onDeleted, onCommentClick })
         <div className="d-flex justify-content-between align-items-start gap-2 mb-3">
           <div className="d-flex align-items-center gap-2 gap-sm-3" style={{ minWidth: 0 }}>
             <Link to={`/u/${authorId}`} className="text-decoration-none flex-shrink-0">
-              <Avatar src={post.author?.avatar_url} name={authorName} size={42} decorative />
+              <Avatar src={post.author?.avatar_url} name={authorName} size={42} className="soc-post-avatar" decorative />
             </Link>
             <div style={{ minWidth: 0 }}>
               <div className="d-flex align-items-center flex-wrap gap-2">
-                <Link to={`/u/${authorId}`} className="fw-semibold text-reset text-decoration-none text-break">
+                <Link to={`/u/${authorId}`} className="fw-semibold text-reset text-decoration-none text-break soc-author-link">
                   {authorName}
                 </Link>
                 {post.group?.name && (
@@ -276,7 +276,7 @@ export default function PostCard({ post, onUpdated, onDeleted, onCommentClick })
                 )}
               </div>
               <div className="small text-body-secondary">
-                <Link to={`/posts/${post.id}`} className="text-reset text-decoration-none">
+                <Link to={`/posts/${post.id}`} className="text-reset text-decoration-none soc-time-link">
                   <time dateTime={post.created_at} title={formatFullDateTime(post.created_at)}>
                     {formatRelativeTime(post.created_at)}
                   </time>
@@ -482,12 +482,19 @@ export default function PostCard({ post, onUpdated, onDeleted, onCommentClick })
                   />
                   <Button
                     type="button"
-                    variant="outline-secondary"
+                    variant="outline-primary"
                     size="sm"
+                    className="soc-composer-media-btn"
                     disabled={editBusy || totalEditImages >= MAX_POST_IMAGES}
                     onClick={() => editFileRef.current?.click()}
                   >
-                    Thêm ảnh ({totalEditImages}/{MAX_POST_IMAGES})
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <circle cx="8.5" cy="8.5" r="1.5" />
+                      <polyline points="21 15 16 10 5 21" />
+                    </svg>
+                    <span>Thêm ảnh ({totalEditImages}/{MAX_POST_IMAGES})</span>
                   </Button>
                 </div>
               </>

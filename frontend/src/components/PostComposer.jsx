@@ -139,7 +139,7 @@ export default function PostComposer({
   }
 
   return (
-    <Card body className="soc-post-card mb-4">
+    <Card body className="soc-post-card soc-composer-card mb-3">
       <Form onSubmit={handleSubmit} noValidate>
         <div className="d-flex align-items-start gap-2 gap-sm-3 mb-2">
           <Avatar src={profile?.avatar_url} name={displayName} size={42} decorative />
@@ -203,15 +203,22 @@ export default function PostComposer({
             />
             <Button
               type="button"
-              variant="outline-secondary"
+              variant="outline-primary"
               size="sm"
+              className="soc-composer-media-btn"
               disabled={busy || images.length >= MAX_POST_IMAGES}
               onClick={() => fileInputRef.current?.click()}
             >
-              Thêm ảnh ({images.length}/{MAX_POST_IMAGES})
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
+              </svg>
+              <span>Thêm ảnh ({images.length}/{MAX_POST_IMAGES})</span>
             </Button>
           </div>
-          <Button type="submit" disabled={busy || !content.trim()}>
+          <Button type="submit" variant="primary" className="px-3 fw-semibold" disabled={busy || !content.trim()}>
             {busy ? <LoadingSpinner inline label={statusLabel || 'Đang đăng…'} /> : 'Đăng bài'}
           </Button>
         </div>

@@ -152,8 +152,12 @@ export default function Profile() {
                 )}
                 <EduMark />
                 <p className="profile-stats">
-                  <span><strong>{num(profile.followers_count)}</strong> người theo dõi</span>
-                  <span><strong>{num(profile.following_count)}</strong> đang theo dõi</span>
+                  <Link to={`/u/${profile.id}/followers`} state={{ ownerProfile: profile }} className="profile-stat-link">
+                    <strong>{num(profile.followers_count)}</strong> người theo dõi
+                  </Link>
+                  <Link to={`/u/${profile.id}/following`} state={{ ownerProfile: profile }} className="profile-stat-link">
+                    <strong>{num(profile.following_count)}</strong> đang theo dõi
+                  </Link>
                 </p>
                 {profile.bio
                   ? <Bio text={profile.bio} />

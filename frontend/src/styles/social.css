@@ -577,3 +577,25 @@
     max-width: calc(100vw - 1.5rem);
   }
 }
+
+/* Danh sách người theo dõi / đang theo dõi (FR-SOC-10) */
+.soc-follow-tabs .ui-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+}
+
+.soc-follow-row-btn {
+  min-width: 7rem;
+}
+
+@media (max-width: 575.98px) {
+  .soc-follow-row-btn {
+    min-width: 6.25rem;
+  }
+  .soc-follow-avatar {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    font-size: 1.1rem !important;
+  }
+}

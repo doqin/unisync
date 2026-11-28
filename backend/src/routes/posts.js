@@ -9,10 +9,14 @@
 //   - DELETE /api/posts/:id                   Xóa bài đăng (tác giả hoặc Admin) và dọn ảnh trên Storage
 //   - POST   /api/posts/:id/like              Thích bài đăng (idempotent) → { post_id, liked_by_me: true, like_count }
 //   - DELETE /api/posts/:id/like              Bỏ thích bài đăng → { post_id, liked_by_me: false, like_count }
+//   - PUT    /api/posts/:id/reaction          Thả / đổi cảm xúc bài đăng (6 loại)
+//   - DELETE /api/posts/:id/reaction          Bỏ cảm xúc khỏi bài đăng
+//   - GET    /api/posts/:id/reactions         Danh sách người thả cảm xúc bài đăng (ưu tiên Mutual lên đầu)
 //   - GET    /api/posts/:id/comments                    Danh sách bình luận (?page=1&limit=20&sort=oldest|newest)
 //   - POST   /api/posts/:id/comments                    Thêm bình luận / phản hồi (1–2000 ký tự, parent_id?)
 //   - PATCH  /api/posts/:id/comments/:cid               Sửa bình luận (chỉ tác giả bình luận)
 //   - DELETE /api/posts/:id/comments/:cid               Xóa bình luận (tác giả bình luận hoặc Admin)
+//   - GET    /api/posts/:id/comments/:cid/reactions     Danh sách người thả cảm xúc bình luận
 //   - PUT    /api/posts/:id/comments/:cid/reaction      Thả / đổi cảm xúc bình luận
 //   - DELETE /api/posts/:id/comments/:cid/reaction      Bỏ cảm xúc bình luận
 import { Router } from 'express';
@@ -41,7 +45,9 @@ import {
   encodeCursor,
   hydrateComments,
   hydratePosts,
+  isMissingReactionCol,
   loadPost,
+  signAvatars,
 } from '../lib/posts.js';
 import { validate } from '../middleware/validate.js';
 import { uploadLimiter } from '../middleware/rateLimit.js';
@@ -157,6 +163,83 @@ async function countPostLikes(sb, postId) {
     .eq('post_id', postId);
   if (error) throw error;
   return count ?? 0;
+}
+
+/** Đọc các dòng cảm xúc của 1 bài đăng (hỗ trợ fallback nếu DB chưa có cột `reaction`). */
+async function fetchPostReactionRows(sb, postId) {
+  let { data, error } = await sb
+    .from('likes')
+    .select('user_id, reaction, created_at')
+    .eq('post_id', postId);
+  if (isMissingReactionCol(error)) {
+    ({ data, error } = await sb.from('likes').select('user_id, created_at').eq('post_id', postId));
+  }
+  if (error) throw error;
+  return (data ?? []).map((row) => ({ ...row, reaction: row.reaction || 'love' }));
+}
+
+/** Tổng hợp thống kê cảm xúc cho một bài đăng dưới góc nhìn viewerId. */
+async function summarizePostReactions(sb, postId, viewerId) {
+  const rows = await fetchPostReactionRows(sb, postId);
+  const reaction_counts = {};
+  let my_reaction = null;
+  for (const row of rows) {
+    reaction_counts[row.reaction] = (reaction_counts[row.reaction] ?? 0) + 1;
+    if (row.user_id === viewerId) my_reaction = row.reaction;
+  }
+  return {
+    post_id: postId,
+    liked_by_me: Boolean(my_reaction),
+    my_reaction,
+    like_count: rows.length,
+    reaction_counts,
+  };
+}
+
+/** Hydrate danh sách người thả cảm xúc kèm avatar đã ký và cờ Mutual; ưu tiên Mutual lên đầu. */
+async function buildReactionUsersList(sb, rows, viewerId) {
+  if (!rows.length) return [];
+  const userIds = [...new Set(rows.map((r) => r.user_id).filter(Boolean))];
+  const otherIds = userIds.filter((uid) => uid !== viewerId);
+
+  const [profilesRes, myFollowingRes, myFollowersRes] = await Promise.all([
+    sb.from('profiles').select('id, full_name, avatar_url, major, school').in('id', userIds),
+    otherIds.length
+      ? sb.from('follows').select('followee_id').eq('follower_id', viewerId).in('followee_id', otherIds)
+      : { data: [], error: null },
+    otherIds.length
+      ? sb.from('follows').select('follower_id').eq('followee_id', viewerId).in('follower_id', otherIds)
+      : { data: [], error: null },
+  ]);
+  if (profilesRes.error) throw profilesRes.error;
+  if (myFollowingRes.error) throw myFollowingRes.error;
+  if (myFollowersRes.error) throw myFollowersRes.error;
+
+  const signed = await signAvatars(sb, profilesRes.data ?? []);
+  const profileMap = new Map(signed.map((p) => [p.id, p]));
+  const followingSet = new Set((myFollowingRes.data ?? []).map((r) => r.followee_id));
+  const followedBySet = new Set((myFollowersRes.data ?? []).map((r) => r.follower_id));
+
+  return rows
+    .map((r) => {
+      const profile = profileMap.get(r.user_id);
+      if (!profile) return null;
+      const isSelf = r.user_id === viewerId;
+      const isMutual = !isSelf && followingSet.has(r.user_id) && followedBySet.has(r.user_id);
+      return {
+        ...profile,
+        reaction: r.reaction || 'love',
+        is_self: isSelf,
+        is_mutual: isMutual,
+        reacted_at: r.created_at ?? null,
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => {
+      const mDiff = (b.is_mutual ? 1 : 0) - (a.is_mutual ? 1 : 0);
+      if (mDiff !== 0) return mDiff;
+      return String(b.reacted_at ?? '').localeCompare(String(a.reacted_at ?? ''));
+    });
 }
 
 /**
@@ -489,6 +572,72 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
     }
   });
 
+  // FR-SOC-04: Thả hoặc đổi cảm xúc (6 loại) cho bài đăng.
+  r.put('/:id/reaction', validate({ params: postIdParam, body: reactionSchema }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const post = await loadPost(sb, req.params.id);
+      await assertPostAccess(sb, post, req.user.id, req.profile);
+
+      let { error } = await sb
+        .from('likes')
+        .upsert(
+          { post_id: post.id, user_id: req.user.id, reaction: req.body.reaction },
+          { onConflict: 'post_id,user_id' },
+        );
+      if (isMissingReactionCol(error)) {
+        ({ error } = await sb.from('likes').insert({ post_id: post.id, user_id: req.user.id }));
+        if (error?.code === '23505') error = null;
+      }
+      if (error) throw error;
+
+      res.json(await summarizePostReactions(sb, post.id, req.user.id));
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // FR-SOC-04: Bỏ cảm xúc của mình khỏi bài đăng.
+  r.delete('/:id/reaction', validate({ params: postIdParam }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const post = await loadPost(sb, req.params.id);
+      await assertPostAccess(sb, post, req.user.id, req.profile);
+
+      const { error } = await sb
+        .from('likes')
+        .delete()
+        .eq('post_id', post.id)
+        .eq('user_id', req.user.id);
+      if (error) throw error;
+
+      res.json(await summarizePostReactions(sb, post.id, req.user.id));
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // FR-SOC-04: Danh sách người đã thả cảm xúc bài đăng (ưu tiên bạn Mutual lên đầu).
+  r.get('/:id/reactions', validate({ params: postIdParam }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const post = await loadPost(sb, req.params.id);
+      await assertPostAccess(sb, post, req.user.id, req.profile);
+
+      const rows = await fetchPostReactionRows(sb, post.id);
+      const reaction_counts = {};
+      let my_reaction = null;
+      for (const row of rows) {
+        reaction_counts[row.reaction] = (reaction_counts[row.reaction] ?? 0) + 1;
+        if (row.user_id === req.user.id) my_reaction = row.reaction;
+      }
+      const items = await buildReactionUsersList(sb, rows, req.user.id);
+      res.json({ post_id: post.id, total: rows.length, my_reaction, reaction_counts, items });
+    } catch (e) {
+      next(e);
+    }
+  });
+
   // FR-SOC-03: Danh sách bình luận phân trang theo bình luận gốc (kèm toàn bộ phản hồi cấp 1 của từng gốc).
   r.get('/:id/comments', validate({ params: postIdParam, query: commentsQuerySchema }), async (req, res, next) => {
     try {
@@ -595,6 +744,34 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
 
       const [hydrated] = await hydrateComments(sb, [updated], req.user.id);
       res.json(hydrated);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // FR-SOC-03: Danh sách người đã thả cảm xúc cho bình luận (ưu tiên Mutual lên đầu).
+  r.get('/:id/comments/:commentId/reactions', validate({ params: commentParams }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const post = await loadPost(sb, req.params.id);
+      await assertPostAccess(sb, post, req.user.id, req.profile);
+      const comment = await loadPostComment(sb, post.id, req.params.commentId);
+
+      const { data: rows, error } = await sb
+        .from('comment_reactions')
+        .select('user_id, reaction, created_at')
+        .eq('comment_id', comment.id);
+      if (error) throw error;
+
+      const list = rows ?? [];
+      const reaction_counts = {};
+      let my_reaction = null;
+      for (const row of list) {
+        reaction_counts[row.reaction] = (reaction_counts[row.reaction] ?? 0) + 1;
+        if (row.user_id === req.user.id) my_reaction = row.reaction;
+      }
+      const items = await buildReactionUsersList(sb, list, req.user.id);
+      res.json({ comment_id: comment.id, total: list.length, my_reaction, reaction_counts, items });
     } catch (e) {
       next(e);
     }

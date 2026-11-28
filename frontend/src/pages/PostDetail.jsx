@@ -5,7 +5,6 @@ import { Button, Card, Container } from 'react-bootstrap';
 import CommentSection from '../components/CommentSection.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorAlert from '../components/ErrorAlert.jsx';
-import HomeSidebar from '../components/HomeSidebar.jsx';
 import Icon from '../components/Icon.jsx';
 import PostCard from '../components/PostCard.jsx';
 import { api } from '../lib/api.js';
@@ -165,14 +164,14 @@ export default function PostDetail() {
 
   return (
     <Container className="py-4 soc-dashboard-wrap">
-      <div className="soc-dashboard-grid">
+      <div className="soc-dashboard-grid soc-dashboard-grid--single">
         <div className="soc-dashboard-main">
           <header className="d-flex align-items-center gap-2 gap-sm-3 mb-3">
             <button
               type="button"
               onClick={goBack}
               className="soc-back-icon-btn"
-              aria-label="Quay lại bảng tin"
+              aria-label="Quay lại"
               title="Quay lại"
             >
               <svg
@@ -192,16 +191,18 @@ export default function PostDetail() {
             </button>
             <div style={{ minWidth: 0 }}>
               <h1 className="h5 fw-bold mb-0">Bài viết</h1>
-              <p className="small text-body-secondary mb-0">Thảo luận &amp; phản hồi</p>
+              {post && (
+                <p className="small text-body-secondary mb-0 text-truncate">
+                  {post.author?.full_name || 'Sinh viên'}
+                  {post.group?.name ? ` · ${post.group.name}` : ''}
+                </p>
+              )}
             </div>
           </header>
 
           {body}
         </div>
 
-        <aside className="soc-dashboard-aside d-none d-lg-block" aria-label="Thông tin và gợi ý kết nối">
-          <HomeSidebar onToast={showToast} />
-        </aside>
       </div>
 
       <div className="soc-toast-layer" role="status" aria-live="polite">

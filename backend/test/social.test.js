@@ -84,6 +84,7 @@ function fakeSupabase() {
     ],
     posts: [],
     comments: [],
+    comment_reactions: [],
     likes: [],
     follows: [],
   };
@@ -103,6 +104,7 @@ function fakeSupabase() {
     let rangeSlice = null;
     let op = 'select';
     let payload = null;
+    let conflictCols = [];
 
     const project = (r) =>
       (cols ? Object.fromEntries(cols.filter((c) => c in r).map((c) => [c, r[c]])) : { ...r });
@@ -151,13 +153,41 @@ function fakeSupabase() {
     const doDelete = () => {
       const toDelete = matched();
       const delSet = new Set(toDelete);
+      if (table === 'comments') {
+        const delIds = new Set(toDelete.map((c) => c.id));
+        let added = true;
+        while (added) {
+          added = false;
+          for (const c of tables.comments) {
+            if (c.parent_id && delIds.has(c.parent_id) && !delIds.has(c.id)) {
+              delIds.add(c.id);
+              delSet.add(c);
+              added = true;
+            }
+          }
+        }
+        tables.comment_reactions = tables.comment_reactions.filter((r) => !delIds.has(r.comment_id));
+      }
       tables[table] = tables[table].filter((r) => !delSet.has(r));
       if (table === 'posts') {
         const delIds = new Set(toDelete.map((p) => p.id));
+        const delComments = new Set(tables.comments.filter((c) => delIds.has(c.post_id)).map((c) => c.id));
         tables.comments = tables.comments.filter((c) => !delIds.has(c.post_id));
+        tables.comment_reactions = tables.comment_reactions.filter((r) => !delComments.has(r.comment_id));
         tables.likes = tables.likes.filter((l) => !delIds.has(l.post_id));
       }
       return { data: null, error: null };
+    };
+
+    const doUpsert = () => {
+      const hit = tables[table].find((r) => conflictCols.every((k) => r[k] === payload[k]));
+      if (hit) {
+        Object.assign(hit, payload);
+        return { data: hit, error: null };
+      }
+      const row = { ...payload, created_at: new Date(Date.UTC(2026, 10, 22, 10, 0, ++tick)).toISOString() };
+      tables[table].push(row);
+      return { data: row, error: null };
     };
 
     const q = {
@@ -177,6 +207,12 @@ function fakeSupabase() {
       limit: (n) => ((limitN = n), q),
       range: (a, b) => ((rangeSlice = [a, b]), q),
       insert: (r) => ((op = 'insert'), (payload = r), q),
+      upsert: (r, opts) => {
+        op = 'upsert';
+        payload = r;
+        conflictCols = opts?.onConflict?.split(',').map((x) => x.trim()) ?? [];
+        return q;
+      },
       update: (p) => ((op = 'update'), (payload = p), q),
       delete: () => ((op = 'delete'), q),
       maybeSingle: async () => ({ data: sortedAndSliced()[0] ?? null, error: null }),
@@ -195,6 +231,7 @@ function fakeSupabase() {
       then: (ok, fail) => {
         let result;
         if (op === 'insert') result = doInsert();
+        else if (op === 'upsert') result = doUpsert();
         else if (op === 'delete') result = doDelete();
         else if (head) result = { count: matched().length, data: null, error: null };
         else result = { data: sortedAndSliced(), error: null };
@@ -507,6 +544,31 @@ test('Bình luận: thêm, liệt kê phân trang kèm avatar đã ký, xóa ch�
   assert.deepEqual(p2.body.items.map((x) => x.content), ['Bình luận 3']);
   assert.equal(p2.body.has_more, false);
 
+  // Tác giả bình luận sửa được; người khác (kể cả Admin) không được sửa; rỗng/trường lạ → 400
+  const editedC1 = await req('PATCH', `/posts/${post.id}/comments/${c1.body.id}`, {
+    user: BOB,
+    body: { content: 'Bình luận 1 (đã sửa)' },
+  });
+  assert.equal(editedC1.status, 200);
+  assert.equal(editedC1.body.content, 'Bình luận 1 (đã sửa)');
+  assert.equal(editedC1.body.author.full_name, 'Trần Văn B');
+  assert.equal(
+    (await req('PATCH', `/posts/${post.id}/comments/${c1.body.id}`, { user: ALICE, body: { content: 'hack' } })).status,
+    403,
+  );
+  assert.equal(
+    (await req('PATCH', `/posts/${post.id}/comments/${c1.body.id}`, { user: ADMIN, body: { content: 'admin' } })).status,
+    403,
+  );
+  assert.equal(
+    (await req('PATCH', `/posts/${post.id}/comments/${c1.body.id}`, { user: BOB, body: { content: '  ' } })).status,
+    400,
+  );
+  assert.equal(
+    (await req('PATCH', `/posts/${post.id}/comments/${c1.body.id}`, { user: BOB, body: { content: 'ok', author_id: ALICE } })).status,
+    400,
+  );
+
   // Chủ bài không có quyền xóa bình luận của người khác (chỉ tác giả bình luận hoặc Admin)
   assert.equal((await req('DELETE', `/posts/${post.id}/comments/${c1.body.id}`, { user: ALICE })).status, 403);
   // Chính chủ xóa được
@@ -528,6 +590,114 @@ test('Bình luận: thêm, liệt kê phân trang kèm avatar đã ký, xóa ch�
   assert.equal((await req('GET', `/posts/${groupPost.id}/comments`, { user: STRANGER })).status, 403);
   assert.equal(
     (await req('POST', `/posts/${groupPost.id}/comments`, { user: STRANGER, body: { content: 'lén' } })).status,
+    403,
+  );
+});
+
+test('Bình luận phản hồi dạng cây (parent_id): trả lời nhiều cấp, chặn parent ở bài khác và xóa cha xóa luôn con', async () => {
+  const post = (await req('POST', '/posts', { user: ALICE, body: { content: 'Bài test reply tree' } })).body;
+  const otherPost = (await req('POST', '/posts', { user: ALICE, body: { content: 'Bài khác' } })).body;
+
+  const root = (await req('POST', `/posts/${post.id}/comments`, {
+    user: ALICE, body: { content: 'Bình luận gốc' },
+  })).body;
+  assert.equal(root.parent_id, null);
+
+  // Trả lời cấp 1 và cấp 2
+  const r1 = await req('POST', `/posts/${post.id}/comments`, {
+    user: BOB, body: { content: '@Nguyễn Đức Huy đồng ý', parent_id: root.id },
+  });
+  assert.equal(r1.status, 201);
+  assert.equal(r1.body.parent_id, root.id);
+
+  const r2 = await req('POST', `/posts/${post.id}/comments`, {
+    user: CHARLIE, body: { content: '@Trần Văn B chuẩn luôn', parent_id: r1.body.id },
+  });
+  assert.equal(r2.status, 201);
+  assert.equal(r2.body.parent_id, r1.body.id);
+
+  // Không cho gắn parent_id thuộc bài đăng khác → 404
+  const crossPost = await req('POST', `/posts/${otherPost.id}/comments`, {
+    user: BOB, body: { content: 'trả lời nhầm bài', parent_id: root.id },
+  });
+  assert.equal(crossPost.status, 404);
+
+  // Danh sách bình luận giữ đúng parent_id
+  const list = await req('GET', `/posts/${post.id}/comments?page=1&limit=20`);
+  assert.equal(list.body.items.length, 3);
+  assert.equal(list.body.items.find((x) => x.id === r1.body.id).parent_id, root.id);
+  assert.equal(list.body.items.find((x) => x.id === r2.body.id).parent_id, r1.body.id);
+
+  // Xóa bình luận gốc → cascade xóa cả r1 và r2
+  assert.equal((await req('DELETE', `/posts/${post.id}/comments/${root.id}`, { user: ALICE })).status, 204);
+  const afterDel = await req('GET', `/posts/${post.id}/comments?page=1&limit=20`);
+  assert.equal(afterDel.body.items.length, 0);
+});
+
+test('Cảm xúc bình luận (PUT/DELETE reaction): thả, đổi loại, bỏ cảm xúc, thống kê và chặn người ngoài nhóm', async () => {
+  const post = (await req('POST', '/posts', { user: ALICE, body: { content: 'Bài test reaction' } })).body;
+  const cmt = (await req('POST', `/posts/${post.id}/comments`, {
+    user: ALICE, body: { content: 'Bình luận hay' },
+  })).body;
+  assert.equal(cmt.reaction_count, 0);
+  assert.equal(cmt.my_reaction, null);
+
+  // Bob thả love, Charlie thả haha
+  const r1 = await req('PUT', `/posts/${post.id}/comments/${cmt.id}/reaction`, {
+    user: BOB, body: { reaction: 'love' },
+  });
+  assert.equal(r1.status, 200);
+  assert.deepEqual(r1.body, {
+    comment_id: cmt.id,
+    my_reaction: 'love',
+    reaction_count: 1,
+    reaction_counts: { love: 1 },
+  });
+
+  // Bob đổi sang haha (không tăng trùng)
+  const r1Change = await req('PUT', `/posts/${post.id}/comments/${cmt.id}/reaction`, {
+    user: BOB, body: { reaction: 'haha' },
+  });
+  assert.equal(r1Change.status, 200);
+  assert.equal(r1Change.body.my_reaction, 'haha');
+  assert.equal(r1Change.body.reaction_count, 1);
+
+  await req('PUT', `/posts/${post.id}/comments/${cmt.id}/reaction`, {
+    user: CHARLIE, body: { reaction: 'love' },
+  });
+
+  // Lấy danh sách bình luận thấy đủ thống kê + my_reaction đúng theo người xem
+  const listBob = await req('GET', `/posts/${post.id}/comments`, { user: BOB });
+  assert.equal(listBob.body.items[0].reaction_count, 2);
+  assert.equal(listBob.body.items[0].my_reaction, 'haha');
+  assert.deepEqual(listBob.body.items[0].reaction_counts, { haha: 1, love: 1 });
+
+  const listAlice = await req('GET', `/posts/${post.id}/comments`, { user: ALICE });
+  assert.equal(listAlice.body.items[0].my_reaction, null);
+
+  // Bob bỏ cảm xúc
+  const delReact = await req('DELETE', `/posts/${post.id}/comments/${cmt.id}/reaction`, { user: BOB });
+  assert.equal(delReact.status, 200);
+  assert.deepEqual(delReact.body, {
+    comment_id: cmt.id,
+    my_reaction: null,
+    reaction_count: 1,
+    reaction_counts: { love: 1 },
+  });
+
+  // Loại cảm xúc lạ → 400; bài nhóm kín → 403
+  assert.equal(
+    (await req('PUT', `/posts/${post.id}/comments/${cmt.id}/reaction`, { user: BOB, body: { reaction: 'fire' } })).status,
+    400,
+  );
+  const groupPost = (await req('POST', '/posts', {
+    user: ALICE, body: { content: 'Nhóm kín', group_id: GROUP_SE347 },
+  })).body;
+  const groupCmt = (await req('POST', `/posts/${groupPost.id}/comments`, {
+    user: ALICE, body: { content: 'trong nhóm' },
+  })).body;
+  assert.equal(
+    (await req('PUT', `/posts/${groupPost.id}/comments/${groupCmt.id}/reaction`, { user: STRANGER, body: { reaction: 'like' } })).status,
     403,
   );
 });

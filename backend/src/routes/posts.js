@@ -9,9 +9,12 @@
 //   - DELETE /api/posts/:id                   Xóa bài đăng (tác giả hoặc Admin) và dọn ảnh trên Storage
 //   - POST   /api/posts/:id/like              Thích bài đăng (idempotent) → { post_id, liked_by_me: true, like_count }
 //   - DELETE /api/posts/:id/like              Bỏ thích bài đăng → { post_id, liked_by_me: false, like_count }
-//   - GET    /api/posts/:id/comments          Danh sách bình luận (?page=1&limit=20)
-//   - POST   /api/posts/:id/comments          Thêm bình luận (1–2000 ký tự)
-//   - DELETE /api/posts/:id/comments/:cid     Xóa bình luận (tác giả bình luận hoặc Admin)
+//   - GET    /api/posts/:id/comments                    Danh sách bình luận (?page=1&limit=20)
+//   - POST   /api/posts/:id/comments                    Thêm bình luận / phản hồi (1–2000 ký tự, parent_id?)
+//   - PATCH  /api/posts/:id/comments/:cid               Sửa bình luận (chỉ tác giả bình luận)
+//   - DELETE /api/posts/:id/comments/:cid               Xóa bình luận (tác giả bình luận hoặc Admin)
+//   - PUT    /api/posts/:id/comments/:cid/reaction      Thả / đổi cảm xúc bình luận
+//   - DELETE /api/posts/:id/comments/:cid/reaction      Bỏ cảm xúc bình luận
 import { Router } from 'express';
 import { z } from 'zod';
 import { supabaseAdmin } from '../lib/supabase.js';
@@ -29,6 +32,7 @@ import {
 } from '../lib/postImages.js';
 import {
   COMMENT_SELECT,
+  COMMENT_SELECT_LEGACY,
   DEFAULT_FEED_LIMIT,
   MAX_FEED_LIMIT,
   POST_SELECT,
@@ -38,6 +42,7 @@ import {
   encodeCursor,
   hydrateComments,
   hydratePosts,
+  isMissingSchemaError,
   loadPost,
 } from '../lib/posts.js';
 import { validate } from '../middleware/validate.js';
@@ -90,13 +95,50 @@ const commentsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 
+const commentContentField = z
+  .string()
+  .trim()
+  .min(1, 'Nội dung bình luận không được trống')
+  .max(2000, 'Bình luận tối đa 2000 ký tự');
+
 const createCommentSchema = z.strictObject({
-  content: z
-    .string()
-    .trim()
-    .min(1, 'Nội dung bình luận không được trống')
-    .max(2000, 'Bình luận tối đa 2000 ký tự'),
+  content: commentContentField,
+  parent_id: z.uuid('Bình luận cha không hợp lệ').nullish().transform((v) => v ?? null),
 });
+
+const updateCommentSchema = z.strictObject({
+  content: commentContentField,
+});
+
+const REACTION_TYPES = ['like', 'love', 'haha', 'wow', 'sad', 'angry'];
+
+const reactionSchema = z.strictObject({
+  reaction: z.enum(REACTION_TYPES, { message: 'Loại cảm xúc không hợp lệ' }),
+});
+
+/** Lỗi do CSDL chưa chạy migration 0008 (chưa có cột comments.parent_id). */
+const isMissingParentCol = (error) => isMissingSchemaError(error);
+
+/** Tổng hợp số lượng từng loại cảm xúc của 1 bình luận dưới góc nhìn viewerId. */
+async function summarizeCommentReactions(sb, commentId, viewerId) {
+  const { data, error } = await sb
+    .from('comment_reactions')
+    .select('user_id, reaction')
+    .eq('comment_id', commentId);
+  if (error) throw error;
+  const reaction_counts = {};
+  let my_reaction = null;
+  for (const row of data ?? []) {
+    reaction_counts[row.reaction] = (reaction_counts[row.reaction] ?? 0) + 1;
+    if (row.user_id === viewerId) my_reaction = row.reaction;
+  }
+  return {
+    comment_id: commentId,
+    my_reaction,
+    reaction_count: (data ?? []).length,
+    reaction_counts,
+  };
+}
 
 /** Đếm số lượt thích của một bài đăng. */
 async function countPostLikes(sb, postId) {
@@ -449,44 +491,205 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       const limit = Number(req.query.limit ?? 20);
       const from = (page - 1) * limit;
 
-      const { data: rows, error } = await sb
+      let { data: rows, error } = await sb
         .from('comments')
         .select(COMMENT_SELECT)
         .eq('post_id', post.id)
         .order('created_at', { ascending: true })
         .order('id', { ascending: true })
         .range(from, from + limit);
+      if (isMissingParentCol(error)) {
+        const legacy = await sb
+          .from('comments')
+          .select(COMMENT_SELECT_LEGACY)
+          .eq('post_id', post.id)
+          .order('created_at', { ascending: true })
+          .order('id', { ascending: true })
+          .range(from, from + limit);
+        rows = (legacy.data ?? []).map((r) => ({ ...r, parent_id: null }));
+        error = legacy.error;
+      }
       if (error) throw error;
 
       const list = rows ?? [];
       const hasMore = list.length > limit;
-      const items = await hydrateComments(sb, list.slice(0, limit));
+      const items = await hydrateComments(sb, list.slice(0, limit), req.user.id);
       res.json({ items, page, has_more: hasMore });
     } catch (e) {
       next(e);
     }
   });
 
-  // FR-SOC-03: Thêm bình luận vào bài đăng.
+  // FR-SOC-03: Thêm bình luận hoặc phản hồi bình luận (`parent_id`) vào bài đăng.
   r.post('/:id/comments', validate({ params: postIdParam, body: createCommentSchema }), async (req, res, next) => {
     try {
       const sb = db();
       const post = await loadPost(sb, req.params.id);
       await assertPostAccess(sb, post, req.user.id, req.profile);
 
-      const { data: created, error } = await sb
+      const parentId = req.body.parent_id ?? null;
+      if (parentId) {
+        const { data: parent, error: pErr } = await sb
+          .from('comments')
+          .select('id')
+          .eq('id', parentId)
+          .eq('post_id', post.id)
+          .maybeSingle();
+        if (pErr) throw pErr;
+        if (!parent) throw notFound('Không tìm thấy bình luận cần trả lời');
+      }
+
+      let { data: created, error } = await sb
         .from('comments')
         .insert({
           post_id: post.id,
           author_id: req.user.id,
+          parent_id: parentId,
           content: req.body.content,
         })
         .select(COMMENT_SELECT)
         .single();
+      if (isMissingParentCol(error)) {
+        const legacy = await sb
+          .from('comments')
+          .insert({
+            post_id: post.id,
+            author_id: req.user.id,
+            content: req.body.content,
+          })
+          .select(COMMENT_SELECT_LEGACY)
+          .single();
+        created = legacy.data ? { ...legacy.data, parent_id: parentId } : null;
+        error = legacy.error;
+      }
       if (error) throw error;
 
-      const [hydrated] = await hydrateComments(sb, [created]);
+      const [hydrated] = await hydrateComments(sb, [created], req.user.id);
       res.status(201).json(hydrated);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // FR-SOC-03: Sửa bình luận (chỉ tác giả bình luận).
+  r.patch('/:id/comments/:commentId', validate({ params: commentParams, body: updateCommentSchema }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const post = await loadPost(sb, req.params.id);
+      await assertPostAccess(sb, post, req.user.id, req.profile);
+
+      const { data: comment, error: cErr } = await sb
+        .from('comments')
+        .select('id, post_id, author_id')
+        .eq('id', req.params.commentId)
+        .eq('post_id', post.id)
+        .maybeSingle();
+      if (cErr) throw cErr;
+      if (!comment) throw notFound('Không tìm thấy bình luận');
+
+      if (comment.author_id !== req.user.id) {
+        throw forbidden('Chỉ tác giả mới được sửa bình luận này');
+      }
+
+      let { data: updated, error } = await sb
+        .from('comments')
+        .update({ content: req.body.content })
+        .eq('id', comment.id)
+        .select(COMMENT_SELECT)
+        .single();
+      if (isMissingParentCol(error)) {
+        const legacy = await sb
+          .from('comments')
+          .update({ content: req.body.content })
+          .eq('id', comment.id)
+          .select(COMMENT_SELECT_LEGACY)
+          .single();
+        updated = legacy.data ? { ...legacy.data, parent_id: null } : null;
+        error = legacy.error;
+      }
+      if (error) throw error;
+
+      const [hydrated] = await hydrateComments(sb, [updated], req.user.id);
+      res.json(hydrated);
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // FR-SOC-03: Thả hoặc đổi cảm xúc cho bình luận.
+  r.put('/:id/comments/:commentId/reaction', validate({ params: commentParams, body: reactionSchema }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const post = await loadPost(sb, req.params.id);
+      await assertPostAccess(sb, post, req.user.id, req.profile);
+
+      const { data: comment, error: cErr } = await sb
+        .from('comments')
+        .select('id')
+        .eq('id', req.params.commentId)
+        .eq('post_id', post.id)
+        .maybeSingle();
+      if (cErr) throw cErr;
+      if (!comment) throw notFound('Không tìm thấy bình luận');
+
+      const { error } = await sb
+        .from('comment_reactions')
+        .upsert(
+          { comment_id: comment.id, user_id: req.user.id, reaction: req.body.reaction },
+          { onConflict: 'comment_id,user_id' },
+        );
+      if (error) {
+        if (isMissingSchemaError(error)) {
+          return res.json({
+            comment_id: comment.id,
+            my_reaction: req.body.reaction,
+            reaction_count: null,
+            reaction_counts: null,
+          });
+        }
+        throw error;
+      }
+
+      res.json(await summarizeCommentReactions(sb, comment.id, req.user.id));
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // FR-SOC-03: Bỏ cảm xúc của mình khỏi bình luận.
+  r.delete('/:id/comments/:commentId/reaction', validate({ params: commentParams }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const post = await loadPost(sb, req.params.id);
+      await assertPostAccess(sb, post, req.user.id, req.profile);
+
+      const { data: comment, error: cErr } = await sb
+        .from('comments')
+        .select('id')
+        .eq('id', req.params.commentId)
+        .eq('post_id', post.id)
+        .maybeSingle();
+      if (cErr) throw cErr;
+      if (!comment) throw notFound('Không tìm thấy bình luận');
+
+      const { error } = await sb
+        .from('comment_reactions')
+        .delete()
+        .eq('comment_id', comment.id)
+        .eq('user_id', req.user.id);
+      if (error) {
+        if (isMissingSchemaError(error)) {
+          return res.json({
+            comment_id: comment.id,
+            my_reaction: null,
+            reaction_count: null,
+            reaction_counts: null,
+          });
+        }
+        throw error;
+      }
+
+      res.json(await summarizeCommentReactions(sb, comment.id, req.user.id));
     } catch (e) {
       next(e);
     }
@@ -499,7 +702,7 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       const post = await loadPost(sb, req.params.id);
       const { data: comment, error: cErr } = await sb
         .from('comments')
-        .select(COMMENT_SELECT)
+        .select('id, post_id, author_id')
         .eq('id', req.params.commentId)
         .eq('post_id', post.id)
         .maybeSingle();

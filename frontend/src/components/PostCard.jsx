@@ -28,10 +28,11 @@ function pairExistingImages(post) {
 /**
  * @param {object} props
  * @param {object} props.post
- * @param {(post: object) => void} [props.onUpdated]
+ * @param {(post: object, source?: 'edit' | 'like') => void} [props.onUpdated]
  * @param {(postId: string) => void} [props.onDeleted]
+ * @param {() => void} [props.onCommentClick] có thì dùng nút cuộn tới ô bình luận thay vì link (trang chi tiết)
  */
-export default function PostCard({ post, onUpdated, onDeleted }) {
+export default function PostCard({ post, onUpdated, onDeleted, onCommentClick }) {
   const { user, profile } = useAuth();
   const isAuthor = user?.id === post.author_id;
   const canDelete = isAuthor || profile?.role === 'admin';
@@ -323,19 +324,81 @@ export default function PostCard({ post, onUpdated, onDeleted }) {
 
         <div className="soc-post-actions d-flex align-items-center justify-content-between flex-wrap gap-2">
           <div className="d-flex align-items-center gap-2">
-            <Button
+            <button
               type="button"
-              size="sm"
-              variant={post.liked_by_me ? 'primary' : 'outline-secondary'}
+              className={`soc-action-btn${post.liked_by_me ? ' is-liked' : ''}`}
               aria-pressed={Boolean(post.liked_by_me)}
+              aria-label={post.liked_by_me ? `Bỏ thích bài đăng (${post.like_count ?? 0} lượt thích)` : `Thích bài đăng (${post.like_count ?? 0} lượt thích)`}
+              title={post.liked_by_me ? 'Bỏ thích' : 'Thích'}
               disabled={likeBusy}
               onClick={toggleLike}
             >
-              {post.liked_by_me ? 'Đã thích' : 'Thích'} ({post.like_count ?? 0})
-            </Button>
-            <Button as={Link} to={`/posts/${post.id}`} size="sm" variant="outline-secondary">
-              Bình luận ({post.comment_count ?? 0})
-            </Button>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill={post.liked_by_me ? 'currentColor' : 'none'}
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+                className="soc-action-heart"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              <span>{post.like_count ?? 0}</span>
+            </button>
+
+            {onCommentClick ? (
+              <button
+                type="button"
+                className="soc-action-btn"
+                aria-label={`Bình luận (${post.comment_count ?? 0} bình luận)`}
+                title="Bình luận"
+                onClick={onCommentClick}
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+                <span>{post.comment_count ?? 0}</span>
+              </button>
+            ) : (
+              <Link
+                to={`/posts/${post.id}`}
+                className="soc-action-btn text-decoration-none"
+                aria-label={`Bình luận (${post.comment_count ?? 0} bình luận)`}
+                title="Bình luận"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+                </svg>
+                <span>{post.comment_count ?? 0}</span>
+              </Link>
+            )}
           </div>
         </div>
       </Card>

@@ -1,8 +1,9 @@
 // Trang chủ – bảng tin (FR-SOC-01, FR-SOC-02) – phụ trách: Đức Huy (dhuyy-06).
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Button, Card, Container } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 import AsyncState from '../components/AsyncState.jsx';
+import FeedSkeleton from '../components/FeedSkeleton.jsx';
 import Icon from '../components/Icon.jsx';
 import LoadMore from '../components/LoadMore.jsx';
 import PostCard from '../components/PostCard.jsx';
@@ -11,38 +12,7 @@ import { api } from '../lib/api.js';
 import '../styles/social.css';
 
 const FEED_LIMIT = 10;
-const SKELETON_POSTS = 3;
 const TOAST_MS = 3000;
-
-/** Khung chờ dạng skeleton khớp bố cục PostCard để danh sách thật hiện ra không bị giật. */
-function FeedSkeleton() {
-  return (
-    <div role="status">
-      <span className="visually-hidden">Đang tải bảng tin…</span>
-      <div aria-hidden="true">
-        {Array.from({ length: SKELETON_POSTS }, (_, i) => (
-          <Card key={i} body className="soc-post-card mb-3">
-            <div className="d-flex align-items-center gap-2 gap-sm-3 mb-3">
-              <span className="ui-skeleton ui-skeleton-circle flex-shrink-0" style={{ width: 42, height: 42 }} />
-              <div className="flex-grow-1">
-                <span className="ui-skeleton mb-2" style={{ height: 14, width: i === 1 ? '38%' : '46%' }} />
-                <span className="ui-skeleton" style={{ height: 11, width: '24%' }} />
-              </div>
-            </div>
-            <span className="ui-skeleton mb-2" style={{ height: 14, width: '92%' }} />
-            <span className="ui-skeleton mb-2" style={{ height: 14, width: i === 0 ? '78%' : '86%' }} />
-            {i !== 2 && <span className="ui-skeleton mb-3" style={{ height: 14, width: '54%' }} />}
-            {i === 1 && <span className="ui-skeleton mb-3" style={{ height: 200, width: '100%' }} />}
-            <div className="soc-post-actions d-flex gap-2">
-              <span className="ui-skeleton" style={{ height: 31, width: 88 }} />
-              <span className="ui-skeleton" style={{ height: 31, width: 116 }} />
-            </div>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export default function Home() {
   const location = useLocation();

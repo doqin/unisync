@@ -145,11 +145,14 @@ async function listFollowRelations(sb, viewerId, targetId, direction, page, limi
   return { items, page, has_more: hasMore };
 }
 
+const MAX_MUTUAL_FOLLOWS = 500;
+const PROFILE_IN_CHUNK = 100;
+
 /** Liệt kê người dùng có quan hệ Mutual với viewerId (dùng cho gợi ý @mention khi bình luận). */
 async function listMutuals(sb, viewerId, q, limit) {
   const [followingRes, followersRes] = await Promise.all([
-    sb.from('follows').select('followee_id').eq('follower_id', viewerId),
-    sb.from('follows').select('follower_id').eq('followee_id', viewerId),
+    sb.from('follows').select('followee_id').eq('follower_id', viewerId).limit(MAX_MUTUAL_FOLLOWS),
+    sb.from('follows').select('follower_id').eq('followee_id', viewerId).limit(MAX_MUTUAL_FOLLOWS),
   ]);
   if (followingRes.error) throw followingRes.error;
   if (followersRes.error) throw followersRes.error;
@@ -159,15 +162,22 @@ async function listMutuals(sb, viewerId, q, limit) {
     .filter((uid) => uid !== viewerId && followerSet.has(uid));
   if (!mutualIds.length) return { items: [] };
 
-  const { data: profiles, error } = await sb
-    .from('profiles')
-    .select(PUBLIC_USER_FIELDS)
-    .in('id', mutualIds)
-    .order('full_name', { ascending: true });
-  if (error) throw error;
+  const chunks = [];
+  for (let i = 0; i < mutualIds.length; i += PROFILE_IN_CHUNK) {
+    chunks.push(mutualIds.slice(i, i + PROFILE_IN_CHUNK));
+  }
+  const chunkResults = await Promise.all(
+    chunks.map((ids) => sb.from('profiles').select(PUBLIC_USER_FIELDS).in('id', ids)),
+  );
+  for (const res of chunkResults) {
+    if (res.error) throw res.error;
+  }
+  const profiles = chunkResults
+    .flatMap((res) => res.data ?? [])
+    .sort((a, b) => String(a.full_name ?? '').localeCompare(String(b.full_name ?? ''), 'vi'));
 
   const keyword = normalizeVi(q);
-  const filtered = (profiles ?? [])
+  const filtered = profiles
     .filter((p) => !keyword || normalizeVi(p.full_name).includes(keyword))
     .slice(0, limit);
   if (!filtered.length) return { items: [] };

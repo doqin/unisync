@@ -133,23 +133,33 @@ async function loadPostComment(sb, postId, commentId) {
   return data;
 }
 
+const MAX_REACTION_ROWS = 500;
+
+/** Gom tổng số và số lượng từng loại cảm xúc kèm cảm xúc của `viewerId`. */
+function aggregateReactions(rows, viewerId, defaultReaction = null) {
+  const reaction_counts = {};
+  let my_reaction = null;
+  for (const row of rows) {
+    const type = row.reaction ?? defaultReaction;
+    if (type) reaction_counts[type] = (reaction_counts[type] ?? 0) + 1;
+    if (row.user_id === viewerId) my_reaction = type;
+  }
+  return { total: rows.length, my_reaction, reaction_counts };
+}
+
 /** Tổng hợp số lượng từng loại cảm xúc của 1 bình luận dưới góc nhìn viewerId. */
 async function summarizeCommentReactions(sb, commentId, viewerId) {
   const { data, error } = await sb
     .from('comment_reactions')
     .select('user_id, reaction')
-    .eq('comment_id', commentId);
+    .eq('comment_id', commentId)
+    .limit(MAX_REACTION_ROWS);
   if (error) throw error;
-  const reaction_counts = {};
-  let my_reaction = null;
-  for (const row of data ?? []) {
-    reaction_counts[row.reaction] = (reaction_counts[row.reaction] ?? 0) + 1;
-    if (row.user_id === viewerId) my_reaction = row.reaction;
-  }
+  const { total, my_reaction, reaction_counts } = aggregateReactions(data ?? [], viewerId);
   return {
     comment_id: commentId,
     my_reaction,
-    reaction_count: (data ?? []).length,
+    reaction_count: total,
     reaction_counts,
   };
 }
@@ -169,7 +179,8 @@ async function fetchPostReactionRows(sb, postId) {
   const { data, error } = await sb
     .from('likes')
     .select('user_id, reaction, created_at')
-    .eq('post_id', postId);
+    .eq('post_id', postId)
+    .limit(MAX_REACTION_ROWS);
   if (error) throw error;
   return (data ?? []).map((row) => ({ ...row, reaction: row.reaction || 'love' }));
 }
@@ -177,17 +188,12 @@ async function fetchPostReactionRows(sb, postId) {
 /** Tổng hợp thống kê cảm xúc cho một bài đăng dưới góc nhìn viewerId. */
 async function summarizePostReactions(sb, postId, viewerId) {
   const rows = await fetchPostReactionRows(sb, postId);
-  const reaction_counts = {};
-  let my_reaction = null;
-  for (const row of rows) {
-    reaction_counts[row.reaction] = (reaction_counts[row.reaction] ?? 0) + 1;
-    if (row.user_id === viewerId) my_reaction = row.reaction;
-  }
+  const { total, my_reaction, reaction_counts } = aggregateReactions(rows, viewerId, 'love');
   return {
     post_id: postId,
     liked_by_me: Boolean(my_reaction),
     my_reaction,
-    like_count: rows.length,
+    like_count: total,
     reaction_counts,
   };
 }
@@ -617,14 +623,9 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       await assertPostAccess(sb, post, req.user.id, req.profile);
 
       const rows = await fetchPostReactionRows(sb, post.id);
-      const reaction_counts = {};
-      let my_reaction = null;
-      for (const row of rows) {
-        reaction_counts[row.reaction] = (reaction_counts[row.reaction] ?? 0) + 1;
-        if (row.user_id === req.user.id) my_reaction = row.reaction;
-      }
+      const { total, my_reaction, reaction_counts } = aggregateReactions(rows, req.user.id, 'love');
       const items = await buildReactionUsersList(sb, rows, req.user.id);
-      res.json({ post_id: post.id, total: rows.length, my_reaction, reaction_counts, items });
+      res.json({ post_id: post.id, total, my_reaction, reaction_counts, items });
     } catch (e) {
       next(e);
     }
@@ -752,18 +753,14 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       const { data: rows, error } = await sb
         .from('comment_reactions')
         .select('user_id, reaction, created_at')
-        .eq('comment_id', comment.id);
+        .eq('comment_id', comment.id)
+        .limit(MAX_REACTION_ROWS);
       if (error) throw error;
 
       const list = rows ?? [];
-      const reaction_counts = {};
-      let my_reaction = null;
-      for (const row of list) {
-        reaction_counts[row.reaction] = (reaction_counts[row.reaction] ?? 0) + 1;
-        if (row.user_id === req.user.id) my_reaction = row.reaction;
-      }
+      const { total, my_reaction, reaction_counts } = aggregateReactions(list, req.user.id);
       const items = await buildReactionUsersList(sb, list, req.user.id);
-      res.json({ comment_id: comment.id, total: list.length, my_reaction, reaction_counts, items });
+      res.json({ comment_id: comment.id, total, my_reaction, reaction_counts, items });
     } catch (e) {
       next(e);
     }

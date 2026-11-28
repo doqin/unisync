@@ -800,6 +800,10 @@ test('Cảm xúc bình luận (PUT/DELETE reaction): thả, đổi loại, bỏ 
     (await req('PUT', `/posts/${groupPost.id}/comments/${groupCmt.id}/reaction`, { user: STRANGER, body: { reaction: 'like' } })).status,
     403,
   );
+  assert.equal(
+    (await req('GET', `/posts/${groupPost.id}/comments/${groupCmt.id}/reactions`, { user: STRANGER })).status,
+    403,
+  );
 });
 
 // ───────────────────── FR-SOC-02: Bảng tin cursor ─────────────────────
@@ -930,6 +934,25 @@ test('Follow & Mutual: một chiều, hai chiều thành Mutual, bỏ theo dõi 
   assert.equal(unfollow.body.is_followed_by, true);
   assert.equal(unfollow.body.is_mutual, false);
   assert.equal(unfollow.body.followers_count, 0);
+});
+
+test('GET /api/follows/mutuals: chỉ trả Mutual 2 chiều, loại 1 chiều và tìm không dấu tiếng Việt', async () => {
+  // Alice <-> Bob (Mutual) và Alice <-> Admin (Mutual)
+  await req('POST', `/follows/${BOB}`, { user: ALICE });
+  await req('POST', `/follows/${ALICE}`, { user: BOB });
+  await req('POST', `/follows/${ADMIN}`, { user: ALICE });
+  await req('POST', `/follows/${ALICE}`, { user: ADMIN });
+  // Quan hệ 1 chiều: Alice -> Stranger (chỉ following) và Charlie -> Alice (chỉ followed_by)
+  await req('POST', `/follows/${STRANGER}`, { user: ALICE });
+  await req('POST', `/follows/${ALICE}`, { user: CHARLIE });
+
+  const all = await req('GET', '/follows/mutuals', { user: ALICE });
+  assert.equal(all.status, 200);
+  assert.deepEqual(all.body.items.map((u) => u.id).sort(), [ADMIN, BOB].sort());
+
+  const byUnaccent = await req('GET', '/follows/mutuals?q=quan tri', { user: ALICE });
+  assert.equal(byUnaccent.status, 200);
+  assert.deepEqual(byUnaccent.body.items.map((u) => u.id), [ADMIN]);
 });
 
 test('GET /api/posts?author_id=...: ẩn bài nhóm kín với người ngoài nhưng hiện với thành viên đã duyệt và Admin', async () => {

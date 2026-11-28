@@ -698,6 +698,14 @@
     position: sticky;
     top: 5rem;
   }
+  /* Trang chi tiết: một cột, giữ độ rộng đọc như bảng tin */
+  .soc-dashboard-grid--single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .soc-dashboard-grid--single .soc-dashboard-main {
+    max-width: 680px;
+    margin-inline: auto;
+  }
 }
 
 .soc-feed-header {

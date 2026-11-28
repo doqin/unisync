@@ -908,3 +908,54 @@
   background: var(--us-primary-subtle);
   color: var(--us-primary-active);
 }
+
+/* Danh sách người theo dõi / đang theo dõi (FR-SOC-10) */
+.soc-back-icon-btn {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--us-border);
+  border-radius: 50%;
+  background: var(--us-surface);
+  color: var(--us-text);
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.soc-back-icon-btn svg {
+  transition: transform 0.18s ease;
+}
+
+.soc-back-icon-btn:hover,
+.soc-back-icon-btn:focus-visible {
+  background: var(--us-primary-subtle);
+  border-color: rgba(79, 70, 229, 0.35);
+  color: var(--us-primary-active);
+}
+
+.soc-back-icon-btn:hover svg {
+  transform: translateX(-2px);
+}
+
+.soc-back-icon-btn:active {
+  transform: scale(0.95);
+}
+
+.soc-follow-tabs .ui-tab {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+}
+
+.soc-follow-row-btn {
+  min-width: 7rem;
+}
+
+@media (max-width: 575.98px) {
+  .soc-follow-row-btn {
+    min-width: 6.25rem;
+  }
+}

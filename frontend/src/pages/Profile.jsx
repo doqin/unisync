@@ -59,6 +59,39 @@ function EduMark() {
   );
 }
 
+/** Khung chờ cùng bố cục với thẻ hồ sơ để nội dung thật hiện ra không bị nhảy. */
+function ProfileSkeleton() {
+  return (
+    <div role="status">
+      <span className="visually-hidden">Đang tải hồ sơ…</span>
+      <Card className="profile-card mb-4" aria-hidden="true">
+        <div className="profile-band" />
+        <div className="profile-body">
+          <div className="profile-top">
+            <span className="ui-skeleton ui-skeleton-circle profile-avatar flex-shrink-0" />
+            <div className="profile-actions">
+              <span className="ui-skeleton" style={{ width: 120, height: 44 }} />
+            </div>
+          </div>
+          <span className="ui-skeleton mt-3 mb-2" style={{ height: 26, width: '48%', maxWidth: 240 }} />
+          <div className="d-flex flex-wrap gap-2 mb-2">
+            <span className="ui-skeleton" style={{ height: 26, width: 88, borderRadius: 999 }} />
+            <span className="ui-skeleton" style={{ height: 26, width: 72, borderRadius: 999 }} />
+            <span className="ui-skeleton" style={{ height: 26, width: 64, borderRadius: 999 }} />
+          </div>
+          <span className="ui-skeleton mb-2" style={{ height: 16, width: 170 }} />
+          <div className="d-flex flex-wrap gap-3 mb-3">
+            <span className="ui-skeleton" style={{ height: 18, width: 112 }} />
+            <span className="ui-skeleton" style={{ height: 18, width: 112 }} />
+          </div>
+          <span className="ui-skeleton mb-2" style={{ height: 15, width: '82%' }} />
+          <span className="ui-skeleton" style={{ height: 15, width: '56%' }} />
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 export default function Profile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
@@ -113,61 +146,69 @@ export default function Profile() {
     );
   }
 
+  const loading = !profile && !error;
+
   return (
     <Container className="py-4" style={{ maxWidth: 720 }}>
-      <AsyncState loading={!profile && !error} error={error} onRetry={load} errorTitle="Không tải được hồ sơ">
-        {profile && (
-          <>
-            <Card as="section" className="profile-card mb-4" aria-labelledby="profile-name">
-              <div className="profile-band" aria-hidden="true" />
-              <div className="profile-body">
-                <div className="profile-top">
-                  <Avatar src={profile.avatar_url} name={profile.full_name} size={96} className="profile-avatar" />
-                  <div className="profile-actions">
-                    {profile.is_self ? (
-                      <Button as={Link} to="/settings" variant="outline-primary" className="profile-edit">
-                        Chỉnh sửa hồ sơ
-                      </Button>
-                    ) : (
-                      <>
-                        {profile.is_mutual && <MutualBadge className="profile-mutual-badge" />}
-                        <FollowButton
-                          userId={profile.id}
-                          fullName={profile.full_name}
-                          isFollowing={profile.is_following}
-                          isFollowedBy={profile.is_followed_by}
-                          className="profile-edit profile-follow-btn"
-                          onChanged={handleFollowChanged}
-                          onToast={showToast}
-                        />
-                      </>
-                    )}
+      {loading ? <ProfileSkeleton /> : (
+        <AsyncState loading={false} error={error} onRetry={load} errorTitle="Không tải được hồ sơ">
+          {profile && (
+            <>
+              <Card as="section" className="profile-card mb-4" aria-labelledby="profile-name">
+                <div className="profile-band" aria-hidden="true" />
+                <div className="profile-body">
+                  <div className="profile-top">
+                    <Avatar src={profile.avatar_url} name={profile.full_name} size={96} className="profile-avatar" />
+                    <div className="profile-actions">
+                      {profile.is_self ? (
+                        <Button as={Link} to="/settings" variant="outline-primary" className="profile-edit">
+                          Chỉnh sửa hồ sơ
+                        </Button>
+                      ) : (
+                        <>
+                          {profile.is_mutual && <MutualBadge className="profile-mutual-badge" />}
+                          <FollowButton
+                            userId={profile.id}
+                            fullName={profile.full_name}
+                            isFollowing={profile.is_following}
+                            isFollowedBy={profile.is_followed_by}
+                            className="profile-edit profile-follow-btn"
+                            onChanged={handleFollowChanged}
+                            onToast={showToast}
+                          />
+                        </>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <h1 id="profile-name" className="profile-name">{profile.full_name}</h1>
-                {chips(profile).length > 0 && (
-                  <ul className="profile-chips">
-                    {chips(profile).map((c) => <li key={c}>{c}</li>)}
-                  </ul>
-                )}
-                <EduMark />
-                <p className="profile-stats">
-                  <span><strong>{num(profile.followers_count)}</strong> người theo dõi</span>
-                  <span><strong>{num(profile.following_count)}</strong> đang theo dõi</span>
-                </p>
-                {profile.bio
-                  ? <Bio text={profile.bio} />
-                  : profile.is_self && (
-                    <p className="profile-bio-empty">
-                      Bạn chưa viết giới thiệu. <Link to="/settings">Viết giới thiệu</Link>
-                    </p>
+                  <h1 id="profile-name" className="profile-name">{profile.full_name}</h1>
+                  {chips(profile).length > 0 && (
+                    <ul className="profile-chips">
+                      {chips(profile).map((c) => <li key={c}>{c}</li>)}
+                    </ul>
                   )}
-              </div>
-            </Card>
-            <ProfilePosts userId={profile.id} isSelf={profile.is_self} />
-          </>
-        )}
-      </AsyncState>
+                  <EduMark />
+                  <p className="profile-stats">
+                    <Link to={`/u/${profile.id}/followers`} state={{ ownerProfile: profile }} className="profile-stat-link">
+                      <strong>{num(profile.followers_count)}</strong> người theo dõi
+                    </Link>
+                    <Link to={`/u/${profile.id}/following`} state={{ ownerProfile: profile }} className="profile-stat-link">
+                      <strong>{num(profile.following_count)}</strong> đang theo dõi
+                    </Link>
+                  </p>
+                  {profile.bio
+                    ? <Bio text={profile.bio} />
+                    : profile.is_self && (
+                      <p className="profile-bio-empty">
+                        Bạn chưa viết giới thiệu. <Link to="/settings">Viết giới thiệu</Link>
+                      </p>
+                    )}
+                </div>
+              </Card>
+              <ProfilePosts userId={profile.id} isSelf={profile.is_self} />
+            </>
+          )}
+        </AsyncState>
+      )}
 
       <div className="ui-toast-layer" role="status" aria-live="polite">
         {toast && (

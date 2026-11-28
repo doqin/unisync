@@ -10,8 +10,10 @@
   width: 5rem !important; height: 5rem !important; font-size: 2rem !important;
   border: 4px solid var(--bs-card-bg, var(--us-surface));
 }
-.profile-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: flex-end; align-self: flex-end; margin-bottom: -0.5rem; }
+.profile-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; justify-content: flex-end; align-self: flex-end; margin-bottom: -0.5rem; }
 .profile-edit { min-height: 2.75rem; display: inline-flex; align-items: center; }
+.profile-follow-btn { min-width: 7.25rem; justify-content: center; }
+.profile-mutual-badge { font-size: 0.8125rem; padding: 0.4em 0.65em; }
 
 .profile-name {
   margin: 0.75rem 0 0.5rem; font-size: 1.5rem; font-weight: 700; line-height: 1.2;

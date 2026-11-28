@@ -18,6 +18,8 @@ import {
 } from '../lib/posts.js';
 import { validate } from '../middleware/validate.js';
 
+const FEED_FOLLOWING_CAP = 500;
+
 const feedQuerySchema = z.object({
   cursor: z.string().max(120).optional(),
   limit: z.coerce.number().int().min(1).max(MAX_FEED_LIMIT).default(DEFAULT_FEED_LIMIT),
@@ -39,7 +41,8 @@ export function createFeedRouter({ db = supabaseAdmin } = {}) {
       const { data: following, error: fErr } = await sb
         .from('follows')
         .select('followee_id')
-        .eq('follower_id', req.user.id);
+        .eq('follower_id', req.user.id)
+        .limit(FEED_FOLLOWING_CAP);
       if (fErr) throw fErr;
 
       const authorIds = [...new Set([req.user.id, ...(following ?? []).map((f) => f.followee_id)])];
@@ -60,6 +63,8 @@ export function createFeedRouter({ db = supabaseAdmin } = {}) {
       const list = rows ?? [];
       const hasMore = list.length > limit;
       const slice = list.slice(0, limit);
+      if (!slice.length) return res.json({ items: [], next_cursor: null, has_more: false });
+
       const items = await hydratePosts(sb, slice, req.user.id);
 
       res.json({

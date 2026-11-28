@@ -623,6 +623,31 @@
   min-width: 7rem;
 }
 
+.soc-feed-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  min-height: 2.25rem;
+  border-color: var(--us-border);
+  color: var(--us-text-muted);
+  background: var(--us-surface);
+}
+
+.soc-feed-refresh-btn:hover,
+.soc-feed-refresh-btn:focus-visible {
+  background: var(--us-primary-subtle);
+  border-color: rgba(79, 70, 229, 0.35);
+  color: var(--us-primary-active);
+}
+
+@keyframes soc-spin {
+  to { transform: rotate(360deg); }
+}
+
+.soc-spin {
+  animation: soc-spin 0.8s linear infinite;
+}
+
 @media (max-width: 575.98px) {
   .soc-follow-row-btn {
     min-width: 6.25rem;

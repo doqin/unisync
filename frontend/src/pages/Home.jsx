@@ -21,13 +21,22 @@ export default function Home() {
   const [nextCursor, setNextCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null); // { id, text, variant: 'edit' | 'delete' }
-  const toastTimerRef = useRef(null);
 
-  useEffect(() => () => {
-    clearTimeout(toastTimerRef.current);
+  const toastTimerRef = useRef(null);
+  const mountedRef = useRef(true);
+  const requestIdRef = useRef(0);
+  const errorSourceRef = useRef('initial');
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      clearTimeout(toastTimerRef.current);
+    };
   }, []);
 
   const showToast = useCallback((text, variant = 'edit') => {
@@ -48,31 +57,42 @@ export default function Home() {
     setToast(null);
   };
 
-  const loadInitial = useCallback(async () => {
-    setLoading(true);
+  const fetchFirstPage = useCallback(async ({ silent = false } = {}) => {
+    const reqId = ++requestIdRef.current;
+    if (silent) setRefreshing(true);
+    else setLoading(true);
     setError(null);
+
     try {
       const res = await api(`/feed?limit=${FEED_LIMIT}`);
+      if (!mountedRef.current || reqId !== requestIdRef.current) return;
       setItems(Array.isArray(res?.items) ? res.items : []);
       setNextCursor(res?.next_cursor ?? null);
       setHasMore(Boolean(res?.has_more));
     } catch (ex) {
+      if (!mountedRef.current || reqId !== requestIdRef.current) return;
+      errorSourceRef.current = silent ? 'refresh' : 'initial';
       setError(ex);
     } finally {
-      setLoading(false);
+      if (mountedRef.current && reqId === requestIdRef.current) {
+        if (silent) setRefreshing(false);
+        else setLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
-    loadInitial();
-  }, [loadInitial]);
+    fetchFirstPage({ silent: false });
+  }, [fetchFirstPage]);
 
   async function loadMore() {
-    if (loading || loadingMore || !hasMore || !nextCursor) return;
+    if (loading || refreshing || loadingMore || !hasMore || !nextCursor) return;
+    const reqId = requestIdRef.current;
     setLoadingMore(true);
     setError(null);
     try {
       const res = await api(`/feed?limit=${FEED_LIMIT}&cursor=${encodeURIComponent(nextCursor)}`);
+      if (!mountedRef.current || reqId !== requestIdRef.current) return;
       const extra = Array.isArray(res?.items) ? res.items : [];
       setItems((cur) => {
         const seen = new Set(cur.map((x) => x.id));
@@ -81,9 +101,13 @@ export default function Home() {
       setNextCursor(res?.next_cursor ?? null);
       setHasMore(Boolean(res?.has_more));
     } catch (ex) {
+      if (!mountedRef.current || reqId !== requestIdRef.current) return;
+      errorSourceRef.current = 'more';
       setError(ex);
     } finally {
-      setLoadingMore(false);
+      if (mountedRef.current && reqId === requestIdRef.current) {
+        setLoadingMore(false);
+      }
     }
   }
 
@@ -101,11 +125,43 @@ export default function Home() {
     showToast('Đã xóa bài đăng thành công', 'delete');
   };
 
-  const handleRetry = () => (items.length > 0 ? loadMore() : loadInitial());
+  const handleRetry = () => {
+    if (errorSourceRef.current === 'more') loadMore();
+    else fetchFirstPage({ silent: items.length > 0 });
+  };
 
   return (
     <Container className="py-4 soc-feed-col">
-      <h1 className="h4 mb-3">Bảng tin</h1>
+      <div className="d-flex align-items-center justify-content-between gap-2 mb-3">
+        <h1 className="h4 mb-0">Bảng tin</h1>
+        <Button
+          type="button"
+          variant="outline-secondary"
+          size="sm"
+          className="soc-feed-refresh-btn"
+          disabled={loading || refreshing || loadingMore}
+          aria-busy={refreshing}
+          onClick={() => fetchFirstPage({ silent: true })}
+        >
+          <svg
+            width="15"
+            height="15"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.1"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            focusable="false"
+            className={refreshing ? 'soc-spin' : undefined}
+          >
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <polyline points="21 3 21 9 15 9" />
+          </svg>
+          <span>{refreshing ? 'Đang làm mới…' : 'Làm mới'}</span>
+        </Button>
+      </div>
 
       <PostComposer onCreated={handleCreated} />
 
@@ -130,7 +186,14 @@ export default function Home() {
               onDeleted={handleDeleted}
             />
           ))}
-          <LoadMore hasMore={hasMore} loading={loadingMore} onLoadMore={loadMore} />
+          {!error && (
+            <LoadMore
+              hasMore={hasMore}
+              loading={loadingMore}
+              onLoadMore={loadMore}
+              endLabel={items.length > 0 ? 'Bạn đã xem hết bài đăng mới nhất.' : ''}
+            />
+          )}
         </AsyncState>
       )}
 

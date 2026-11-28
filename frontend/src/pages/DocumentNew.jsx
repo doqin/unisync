@@ -6,7 +6,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form, ProgressBar, Spinner } from 'react-bootstrap';
 import { api } from '../lib/api.js';
 import { ACCEPT, checkFile, formatSize } from '../lib/files.js';
-import BackLink from '../components/BackLink.jsx';
+import BackLink, { useGoBack } from '../components/BackLink.jsx';
 import FileBadge from '../components/FileBadge.jsx';
 import FilterDropdown from '../components/FilterDropdown.jsx';
 import '../styles/library.css';
@@ -15,6 +15,7 @@ const STEPS = { url: 'Đang chuẩn bị…', upload: 'Đang tải tệp lên…
 
 export default function DocumentNew() {
   const nav = useNavigate();
+  const goBack = useGoBack();
   const [params] = useSearchParams();
   const [groups, setGroups] = useState(null); // null = đang tải
   const [loadErr, setLoadErr] = useState('');
@@ -231,7 +232,7 @@ export default function DocumentNew() {
           {step === 'upload' ? (
             <Button variant="outline-danger" onClick={cancelUpload}>Hủy tải lên</Button>
           ) : (
-            <Button as={Link} to="/library" variant="outline-secondary" disabled={busy}>Hủy</Button>
+            <Button as={Link} to="/library" onClick={goBack} variant="outline-secondary" disabled={busy}>Hủy</Button>
           )}
         </div>
       </Form>

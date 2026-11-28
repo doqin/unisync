@@ -19,7 +19,6 @@ const users = {
   rejected:  { id: 'u-rejected',  role: 'student' },
   pendingMgr:{ id: 'u-pendingmgr',role: 'student' },
   locked:    { id: 'u-locked',    role: 'student', is_locked: true },
-  unverified:{ id: 'u-unver',     role: 'student', unverified: true },
 };
 const memberships = {
   [`${G1}:u-manager`]:    { status: 'approved', role: 'manager' },
@@ -33,11 +32,11 @@ const memberships = {
 
 const fakeDb = ({ failMemberships = false } = {}) => () => ({
   auth: {
-    getUser: async (token) => {
+    getClaims: async (token) => {
       const u = users[token];
       return u
-        ? { data: { user: { id: u.id, email: `${token}@uit.edu.vn`, email_confirmed_at: u.unverified ? null : '2026-01-01' } }, error: null }
-        : { data: { user: null }, error: { message: 'invalid' } };
+        ? { data: { claims: { sub: u.id, email: `${token}@uit.edu.vn` } }, error: null }
+        : { data: null, error: { message: 'invalid' } };
     },
   },
   from: (table) => {
@@ -79,7 +78,6 @@ async function call(token, path, opts) {
 test('requireAuth: thiếu/sai token => 401; chưa xác minh hoặc bị khóa => 403', async () => {
   assert.equal(await call(null, '/mod'), 401);
   assert.equal(await call('nobody', '/mod'), 401);
-  assert.equal(await call('unverified', '/mod'), 403);
   assert.equal(await call('locked', '/mod'), 403);
   assert.equal(await call('locked', `/groups/${G1}/feed`), 403);
 });

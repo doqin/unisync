@@ -3,7 +3,7 @@
 // người khác báo cáo được tài liệu vi phạm.
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { Alert, Button, Card, Container, Form, Modal } from 'react-bootstrap';
+import { Alert, Button, Card, Col, Container, Form, Modal, Row } from 'react-bootstrap';
 import { api } from '../lib/api.js';
 import { formatSize } from '../lib/files.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -29,6 +29,20 @@ const REPORT_PLACEHOLDERS = {
   other: 'Mô tả vi phạm để quản trị viên xem xét',
 };
 const EMPTY_REPORT = { reason: 'copyright', detail: '' };
+
+/** Icon nét mảnh cho các nút ở trang chi tiết. */
+const ICONS = {
+  download: 'M12 3v12M7 10l5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
+  eye: 'M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7zM15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0z',
+  link: 'M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5',
+  edit: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
+  trash: 'M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v5M14 11v5',
+};
+const ActionIcon = ({ name, size = 18 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d={ICONS[name]} />
+  </svg>
+);
 
 /** Lá cờ báo cáo; `filled` khi đã báo cáo. */
 const FlagIcon = ({ filled = false }) => (
@@ -226,18 +240,31 @@ export default function DocumentDetail() {
   const detailRequired = reportForm.reason === 'other';
 
   let content;
+  // Khung chờ dựng đúng bố cục thật (2 cột, cùng kích thước khối) để trang không giật khi dữ liệu về.
+  const bar = (height, width, className = 'mb-2') => (
+    <div className={`lib-skeleton ${className}`} style={{ height, width }} />
+  );
+  const twoColumns = loading || Boolean(doc);
+
   if (loading) {
     content = (
-      <Card body aria-busy="true" aria-label="Đang tải tài liệu">
-        <div className="lib-skeleton mb-3" style={{ height: 28, width: '70%' }} />
-        <div className="lib-skeleton mb-2" style={{ height: 14, width: '40%' }} />
-        <div className="lib-skeleton mb-4" style={{ height: 14, width: '55%' }} />
-        <div className="lib-skeleton mb-2" style={{ height: 16, width: '90%' }} />
-        <div className="lib-skeleton mb-4" style={{ height: 16, width: '60%' }} />
-        <div className="d-flex gap-2">
-          <div className="lib-skeleton" style={{ height: 38, width: 110 }} />
-          <div className="lib-skeleton" style={{ height: 38, width: 110 }} />
-        </div>
+      <Card className="lib-panel" aria-busy="true" aria-label="Đang tải tài liệu">
+        <Card.Body className="p-3 p-sm-4">
+          <div className="d-flex align-items-center gap-3 mb-3">
+            {bar(32, '55%', '')}
+            {bar(26, 52, '')}
+          </div>
+          {bar(16, '45%', 'mb-3')}
+          {bar(14, '70%', 'mb-4')}
+          {bar(16, '95%')}
+          {bar(16, '60%', '')}
+          <hr className="my-4" />
+          {bar(22, '65%', 'mb-3')}
+          <div className="lib-my-rating">
+            {bar(12, 130)}
+            {bar(26, 150, '')}
+          </div>
+        </Card.Body>
       </Card>
     );
   } else if (!doc) {
@@ -246,7 +273,8 @@ export default function DocumentDetail() {
     );
   } else {
     content = (
-      <Card body>
+      <Card className="lib-panel">
+        <Card.Body className="p-3 p-sm-4">
         {err && <Alert variant="danger">{err}</Alert>}
         {notice && (
           <div className="lib-toast-layer" aria-live="polite">
@@ -283,105 +311,154 @@ export default function DocumentDetail() {
           </Form>
         ) : (
           <>
-            <div className="d-flex justify-content-between align-items-start gap-2 flex-wrap">
-              <h1 className="h4 text-break mb-1">{doc.title}</h1>
-              <FileBadge type={doc.file_type} label={`Tệp ${doc.file_type}`} />
+            <div className="d-flex align-items-center gap-3 flex-wrap mb-2">
+              <h1 className="lib-detail-title text-break mb-0">{doc.title}</h1>
+              <span className={`lib-type-pill lib-file-${doc.file_type}`} aria-label={`Tệp ${doc.file_type}`}>
+                {doc.file_type.toUpperCase()}
+              </span>
             </div>
-            <div className="small text-muted mb-1">
-              {doc.uploader_name ? <>Tải lên bởi {doc.uploader_name} · </> : null}
+            <div className="text-muted mb-2">
+              {doc.uploader_name ? <>Tải lên bởi <span className="fw-semibold text-body">{doc.uploader_name}</span> · </> : null}
               {new Date(doc.created_at).toLocaleDateString('vi-VN')}
             </div>
-            <div className="small text-muted mb-3">
+            <div className="d-flex align-items-center flex-wrap gap-2 small text-muted mb-3">
               {subject && (
                 <>
-                  <Link to={`/library?group=${doc.group_id}`} className="lib-subject-link">{subject}</Link>
-                  <span> · </span>
+                  <Link to={`/library?group=${doc.group_id}`} className="lib-subject-pill">{subject}</Link>
+                  <span aria-hidden="true">•</span>
                 </>
               )}
-              {formatSize(doc.file_size)} · {doc.download_count ?? 0} lượt tải
+              <span>{formatSize(doc.file_size)}</span>
+              <span aria-hidden="true">•</span>
+              <span>{doc.download_count ?? 0} lượt tải</span>
             </div>
-            {doc.description ? <p className="text-break" style={{ whiteSpace: 'pre-wrap' }}>{doc.description}</p>
-              : <p className="text-muted fst-italic">Không có mô tả.</p>}
-            <div className="lib-rating-box mb-3">
-              <div className="d-flex align-items-center gap-2 flex-wrap">
-                <StarRating value={doc.rating_avg ?? 0} />
-                <span className="small text-muted">
-                  {doc.rating_count ? `${doc.rating_avg} · ${doc.rating_count} lượt đánh giá` : 'Chưa có đánh giá'}
-                </span>
-              </div>
-              <div className="small text-muted mt-2 mb-1">Đánh giá của bạn</div>
+            {doc.description ? <p className="text-break mb-0" style={{ whiteSpace: 'pre-wrap' }}>{doc.description}</p>
+              : <p className="text-muted fst-italic mb-0">Không có mô tả.</p>}
+            <hr className="my-4" />
+            <div className="d-flex align-items-center gap-2 flex-wrap mb-3">
+              <span className="fw-bold">Đánh giá trung bình:</span>
+              {doc.rating_count ? (
+                <>
+                  <span className="fs-5 fw-bold">{doc.rating_avg.toLocaleString('vi-VN')}/5</span>
+                  <StarRating value={doc.rating_avg} />
+                  <span className="text-muted">({doc.rating_count} lượt đánh giá)</span>
+                </>
+              ) : <span className="text-muted">Chưa có đánh giá</span>}
+            </div>
+            <div className="lib-my-rating">
+              <div className="lib-my-rating-label">Đánh giá của bạn</div>
               <StarRating value={doc.my_rating ?? 0} onChange={rate} label="Đánh giá của bạn" />
             </div>
-            <div className="d-flex gap-2 flex-wrap mt-3">
-              {PREVIEWABLE.includes(doc.file_type) ? (
-                <Button variant="outline-secondary" onClick={showPreview} disabled={busy !== ''}>
-                  {busy === 'preview' ? 'Đang tải…' : 'Xem trước'}
-                </Button>
-              ) : (
-                // Nút mờ kèm chú thích: người dùng biết vì sao không xem trước được (tooltip bọc ngoài vì nút bị vô hiệu không nhận chuột).
-                <span className="d-inline-block" title="Định dạng này không hỗ trợ xem trước, hãy tải xuống để xem">
-                  <Button variant="outline-secondary" disabled style={{ pointerEvents: 'none' }}>Xem trước</Button>
-                </span>
-              )}
-              <Button onClick={download} disabled={busy !== ''}>
-                {busy === 'download' ? 'Đang chuẩn bị…' : 'Tải xuống'}
-              </Button>
-              {isOwner && (
-                <>
-                  <Button variant="outline-primary" onClick={() => { setEditing(true); setNotice(''); }} disabled={busy !== ''}>Sửa</Button>
-                  <Button variant="outline-danger" onClick={() => setConfirmDelete(true)} disabled={busy !== ''}>
-                    {busy === 'delete' ? 'Đang xóa…' : 'Xóa'}
-                  </Button>
-                </>
-              )}
-              <Button variant="outline-secondary" className="lib-icon-btn ms-auto" onClick={copyLink}
-                disabled={busy !== ''} aria-label="Sao chép liên kết" title="Sao chép liên kết">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M10 13a5 5 0 0 0 7.07 0l3-3a5 5 0 0 0-7.07-7.07l-1.5 1.5" />
-                  <path d="M14 11a5 5 0 0 0-7.07 0l-3 3a5 5 0 0 0 7.07 7.07l1.5-1.5" />
-                </svg>
-              </Button>
-              {!isOwner && (doc.my_report_pending ? (
-                // Nút mờ kèm chú thích (bọc ngoài vì nút bị vô hiệu không nhận chuột).
-                <span className="d-inline-block" title="Bạn đã báo cáo tài liệu này, quản trị viên đang xem xét">
-                  <Button variant="outline-danger" className="lib-icon-btn lib-report-btn" disabled style={{ pointerEvents: 'none' }}
-                    aria-label="Đã báo cáo vi phạm, đang chờ xem xét">
-                    <FlagIcon filled />
-                  </Button>
-                </span>
-              ) : (
-                <Button variant="outline-danger" className="lib-icon-btn lib-report-btn" onClick={openReport}
-                  disabled={busy !== ''} aria-label="Báo cáo vi phạm" title="Báo cáo vi phạm">
-                  <FlagIcon />
-                </Button>
-              ))}
-            </div>
-            {!PREVIEWABLE.includes(doc.file_type) && (
-              <div className="small text-muted mt-2">
-                Tệp {doc.file_type.toUpperCase()} không xem trước được trên trình duyệt, hãy tải xuống để xem.
-              </div>
-            )}
           </>
         )}
+        </Card.Body>
       </Card>
     );
   }
 
   return (
-    <Container className="py-4 library-page" style={{ maxWidth: 720 }}>
+    <Container className="py-4 library-page" style={{ maxWidth: twoColumns ? 1080 : 720 }}>
       <BackLink />
-      {content}
-
-      {doc && related.length > 0 && (
-        <section className="mt-4" aria-label="Tài liệu cùng môn">
-          <h2 className="h6 mb-2">Tài liệu cùng môn</h2>
-          <div className="d-grid gap-2">
-            {related.map((d) => (
-              <DocCard key={d.id} doc={d} subject={subject} view="list" />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Từ 992px: nội dung bên trái, thao tác và tài liệu cùng môn bên phải; màn hình nhỏ xếp một cột. */}
+      <Row className="g-3 align-items-start">
+        <Col xs={12} lg={twoColumns ? 8 : 12}>{content}</Col>
+        {loading && (
+          <Col xs={12} lg={4} aria-hidden="true">
+            <Card className="lib-panel mb-3">
+              <Card.Body className="d-grid gap-2">
+                {bar(48, '100%', '')}
+                {bar(44, '100%', '')}
+                <div className="lib-action-row mt-1">
+                  {bar(36, '100%', '')}
+                  {bar(36, '100%', '')}
+                </div>
+              </Card.Body>
+            </Card>
+            <Card className="lib-panel p-3">
+              {bar(16, 150, 'mb-3')}
+              {bar(70, '100%')}
+              {bar(70, '100%', '')}
+            </Card>
+          </Col>
+        )}
+        {doc && !loading && (
+          <Col xs={12} lg={4}>
+            {!editing && (
+              <Card className="lib-panel mb-3">
+                <Card.Body className="d-grid gap-2">
+                  <Button className="lib-action lib-action-main" onClick={download} disabled={busy !== ''}>
+                    <ActionIcon name="download" />
+                    {busy === 'download' ? 'Đang chuẩn bị…' : 'Tải xuống'}
+                  </Button>
+                  {PREVIEWABLE.includes(doc.file_type) ? (
+                    <Button variant="outline-secondary" className="lib-action lib-action-soft" onClick={showPreview} disabled={busy !== ''}>
+                      <ActionIcon name="eye" />
+                      {busy === 'preview' ? 'Đang tải…' : 'Xem trước'}
+                    </Button>
+                  ) : (
+                    // Nút mờ kèm chú thích: người dùng biết vì sao không xem trước được (tooltip bọc ngoài vì nút bị vô hiệu không nhận chuột).
+                    <span className="d-grid" title="Định dạng này không hỗ trợ xem trước, hãy tải xuống để xem">
+                      <Button variant="outline-secondary" className="lib-action lib-action-soft" disabled style={{ pointerEvents: 'none' }}>
+                        <ActionIcon name="eye" />
+                        Xem trước
+                      </Button>
+                    </span>
+                  )}
+                  {!PREVIEWABLE.includes(doc.file_type) && (
+                    <div className="small text-muted text-center">
+                      Tệp {doc.file_type.toUpperCase()} không xem trước được trên trình duyệt, hãy tải xuống để xem.
+                    </div>
+                  )}
+                  <div className="lib-action-row mt-1">
+                    <Button variant="outline-secondary" className="lib-action lib-action-sm" onClick={copyLink} disabled={busy !== ''}>
+                      <ActionIcon name="link" />
+                      Chia sẻ
+                    </Button>
+                    {isOwner && (
+                      <>
+                        <Button variant="outline-secondary" className="lib-action lib-action-sm" onClick={() => { setEditing(true); setNotice(''); }} disabled={busy !== ''}>
+                          <ActionIcon name="edit" />
+                          Sửa
+                        </Button>
+                        <Button variant="outline-danger" className="lib-action lib-action-sm" onClick={() => setConfirmDelete(true)} disabled={busy !== ''}>
+                          <ActionIcon name="trash" />
+                          {busy === 'delete' ? 'Đang xóa…' : 'Xóa'}
+                        </Button>
+                      </>
+                    )}
+                    {!isOwner && (doc.my_report_pending ? (
+                      // Nút mờ kèm chú thích (bọc ngoài vì nút bị vô hiệu không nhận chuột).
+                      <span className="d-grid" title="Bạn đã báo cáo tài liệu này, quản trị viên đang xem xét">
+                        <Button variant="outline-danger" className="lib-action lib-action-sm" disabled style={{ pointerEvents: 'none' }}
+                          aria-label="Đã báo cáo vi phạm, đang chờ xem xét">
+                          <FlagIcon filled />
+                          Đã báo cáo
+                        </Button>
+                      </span>
+                    ) : (
+                      <Button variant="outline-danger" className="lib-action lib-action-sm" onClick={openReport}
+                        disabled={busy !== ''} title="Báo cáo vi phạm">
+                        <FlagIcon />
+                        Báo cáo
+                      </Button>
+                    ))}
+                  </div>
+                </Card.Body>
+              </Card>
+            )}
+            {related.length > 0 && (
+              <section className="card lib-panel p-3" aria-label="Tài liệu cùng môn">
+                <h2 className="h6 fw-bold mb-3">Tài liệu cùng môn</h2>
+                <div className="d-grid gap-2">
+                  {related.map((d) => (
+                    <DocCard key={d.id} doc={d} subject={subject} view="list" compact />
+                  ))}
+                </div>
+              </section>
+            )}
+          </Col>
+        )}
+      </Row>
 
       <Modal show={previewOpen} onHide={() => setPreviewOpen(false)} size="xl" fullscreen="md-down" centered scrollable>
         <Modal.Header closeButton>
@@ -407,15 +484,15 @@ export default function DocumentDetail() {
             <div className="d-flex align-items-center gap-3 lib-min-w-0">
               <span className="lib-report-head-icon" aria-hidden="true"><FlagIcon /></span>
               <div className="lib-min-w-0">
-                <Modal.Title as="h2" id="report-title" className="h5 mb-0">Báo cáo tài liệu</Modal.Title>
+                <Modal.Title as="h2" id="report-title" className="lib-report-title mb-0">Báo cáo tài liệu</Modal.Title>
                 <div className="small text-muted text-truncate" title={doc?.title}>{doc?.title}</div>
               </div>
             </div>
           </Modal.Header>
-          <Modal.Body className="pt-3">
+          <Modal.Body>
             {reportErr && <Alert variant="danger" className="lib-shake py-2">{reportErr}</Alert>}
             <fieldset className="mb-3">
-              <legend className="form-label fs-6 fw-semibold mb-2">Tài liệu này có vấn đề gì?</legend>
+              <legend className="lib-report-label">Tài liệu này có vấn đề gì?</legend>
               {REPORT_REASONS.map(([value, label]) => (
                 <Form.Check key={value} type="radio" name="report-reason" id={`report-${value}`} label={label}
                   className="mb-2" checked={reportForm.reason === value}
@@ -423,7 +500,7 @@ export default function DocumentDetail() {
               ))}
             </fieldset>
             <Form.Group controlId="report-detail">
-              <Form.Label className="fw-semibold">
+              <Form.Label className="lib-report-label">
                 Mô tả thêm{' '}
                 {detailRequired
                   ? <span className="text-danger" aria-hidden="true">*</span>
@@ -433,24 +510,23 @@ export default function DocumentDetail() {
                 value={reportForm.detail}
                 placeholder={REPORT_PLACEHOLDERS[reportForm.reason]}
                 onChange={(e) => setReportForm({ ...reportForm, detail: e.target.value })} />
-              <div className="d-flex justify-content-between gap-2 mt-2 small text-muted">
-                <span className="d-inline-flex align-items-center gap-1">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
-                  </svg>
-                  Chỉ quản trị viên thấy báo cáo này
-                </span>
-                <span aria-hidden="true">{reportForm.detail.length}/1000</span>
-              </div>
             </Form.Group>
           </Modal.Body>
-          <Modal.Footer className="border-0 pt-0">
-            <Button variant="outline-secondary" onClick={() => setReportOpen(false)}>
-              Hủy
-            </Button>
-            <Button type="submit" variant="danger" disabled={detailRequired && !reportForm.detail.trim()}>
-              Gửi báo cáo
-            </Button>
+          <Modal.Footer className="lib-report-foot">
+            <span className="lib-report-private">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" />
+              </svg>
+              Chỉ quản trị viên thấy báo cáo này
+            </span>
+            <div className="d-flex gap-2 ms-auto">
+              <Button variant="outline-secondary" size="sm" className="lib-action lib-action-soft lib-report-action" onClick={() => setReportOpen(false)}>
+                Hủy
+              </Button>
+              <Button type="submit" variant="danger" size="sm" className="lib-action lib-report-action" disabled={detailRequired && !reportForm.detail.trim()}>
+                Gửi báo cáo
+              </Button>
+            </div>
           </Modal.Footer>
         </Form>
       </Modal>

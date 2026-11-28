@@ -9,7 +9,7 @@
 //   - DELETE /api/posts/:id                   Xóa bài đăng (tác giả hoặc Admin) và dọn ảnh trên Storage
 //   - POST   /api/posts/:id/like              Thích bài đăng (idempotent) → { post_id, liked_by_me: true, like_count }
 //   - DELETE /api/posts/:id/like              Bỏ thích bài đăng → { post_id, liked_by_me: false, like_count }
-//   - GET    /api/posts/:id/comments                    Danh sách bình luận (?page=1&limit=20)
+//   - GET    /api/posts/:id/comments                    Danh sách bình luận (?page=1&limit=20&sort=oldest|newest)
 //   - POST   /api/posts/:id/comments                    Thêm bình luận / phản hồi (1–2000 ký tự, parent_id?)
 //   - PATCH  /api/posts/:id/comments/:cid               Sửa bình luận (chỉ tác giả bình luận)
 //   - DELETE /api/posts/:id/comments/:cid               Xóa bình luận (tác giả bình luận hoặc Admin)
@@ -91,6 +91,7 @@ const listPostsQuerySchema = z.object({
 const commentsQuerySchema = z.object({
   page: z.coerce.number().int().min(1).max(1000).default(1),
   limit: z.coerce.number().int().min(1).max(50).default(20),
+  sort: z.enum(['oldest', 'newest']).default('oldest'),
 });
 
 const commentContentField = z
@@ -497,6 +498,7 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
 
       const page = Number(req.query.page ?? 1);
       const limit = Number(req.query.limit ?? 20);
+      const ascending = req.query.sort !== 'newest';
       const from = (page - 1) * limit;
 
       const { data: rootRows, error } = await sb
@@ -504,8 +506,8 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
         .select(COMMENT_SELECT)
         .eq('post_id', post.id)
         .is('parent_id', null)
-        .order('created_at', { ascending: true })
-        .order('id', { ascending: true })
+        .order('created_at', { ascending })
+        .order('id', { ascending })
         .range(from, from + limit);
       if (error) throw error;
 

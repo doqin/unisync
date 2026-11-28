@@ -107,9 +107,11 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
   const isAdmin = profile?.role === 'admin';
   const myName = profile?.full_name || user?.user_metadata?.full_name || 'Bạn';
 
+  const [sort, setSort] = useState('oldest');
+
   const list = usePagedList(
-    (page) => api(`/posts/${postId}/comments?page=${page}&limit=${COMMENTS_LIMIT}`),
-    [postId],
+    (page) => api(`/posts/${postId}/comments?page=${page}&limit=${COMMENTS_LIMIT}&sort=${sort}`),
+    [postId, sort],
   );
 
   // Form bình luận gốc ở đầu mục
@@ -148,6 +150,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
   const inputId = useId();
   const editTextareaId = useId();
   const headingId = useId();
+  const sortSelectId = useId();
   const menuBaseId = useId();
 
   useEffect(() => {
@@ -156,8 +159,9 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
     }
   }, [replyTo]);
 
-  // Đóng thanh chọn cảm xúc khi đổi bài đăng
+  // Đóng thanh chọn cảm xúc và đặt lại thứ tự lọc khi đổi bài đăng
   useEffect(() => {
+    setSort('oldest');
     setExpandedRoots({});
     setReplyTo(null);
     setOpenPickerId(null);
@@ -165,6 +169,13 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
   }, [postId]);
 
   const commentTree = useMemo(() => buildTwoLevelTree(list.items), [list.items]);
+
+  function handleSortChange(nextSort) {
+    setSort(nextSort);
+    setExpandedRoots({});
+    setReplyTo(null);
+    setOpenPickerId(null);
+  }
 
   async function submitRootComment(e) {
     e?.preventDefault();
@@ -181,7 +192,10 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
         method: 'POST',
         body: { content: trimmed },
       });
-      list.setItems((cur) => (cur.some((x) => x.id === created.id) ? cur : [...cur, created]));
+      list.setItems((cur) => {
+        if (cur.some((x) => x.id === created.id)) return cur;
+        return sort === 'newest' ? [created, ...cur] : [...cur, created];
+      });
       setDraft('');
       onCountChange?.(1);
       onToast?.('Đã gửi bình luận', 'edit');
@@ -482,9 +496,22 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
   return (
     <section aria-labelledby={headingId}>
       <Card body className="soc-post-card soc-comment-card">
-        <h2 id={headingId} className="h5 mb-3">
-          Bình luận ({commentCount})
-        </h2>
+        <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+          <h2 id={headingId} className="h5 mb-0">
+            Bình luận ({commentCount})
+          </h2>
+          <Form.Select
+            id={sortSelectId}
+            size="sm"
+            value={sort}
+            onChange={(e) => handleSortChange(e.target.value)}
+            aria-label="Sắp xếp bình luận"
+            className="w-auto"
+          >
+            <option value="oldest">Cũ nhất</option>
+            <option value="newest">Mới nhất</option>
+          </Form.Select>
+        </div>
 
         <Form onSubmit={submitRootComment} noValidate className="mb-3">
           <div className="d-flex align-items-start gap-2 gap-sm-3">

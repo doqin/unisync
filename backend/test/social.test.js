@@ -660,6 +660,20 @@ test('Phân trang bình luận theo bình luận gốc kèm đầy đủ phản 
   assert.equal(page2.status, 200);
   assert.equal(page2.body.has_more, false);
   assert.deepEqual(page2.body.items.map((x) => x.id), [root2.id]);
+
+  // Lọc theo mới nhất: root2 lên trang 1, root1 kèm phản hồi ở trang 2
+  const newest1 = await req('GET', `/posts/${post.id}/comments?page=1&limit=1&sort=newest`);
+  assert.equal(newest1.status, 200);
+  assert.equal(newest1.body.has_more, true);
+  assert.deepEqual(newest1.body.items.map((x) => x.id), [root2.id]);
+
+  const newest2 = await req('GET', `/posts/${post.id}/comments?page=2&limit=1&sort=newest`);
+  assert.equal(newest2.status, 200);
+  assert.equal(newest2.body.has_more, false);
+  assert.deepEqual(newest2.body.items.map((x) => x.id), [root1.id, replyToRoot1.id]);
+
+  const badSort = await req('GET', `/posts/${post.id}/comments?sort=invalid`);
+  assert.equal(badSort.status, 400);
 });
 
 test('Cảm xúc bình luận (PUT/DELETE reaction): thả, đổi loại, bỏ cảm xúc, thống kê và chặn người ngoài nhóm', async () => {

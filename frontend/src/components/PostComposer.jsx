@@ -153,7 +153,9 @@ export default function PostComposer({
               onChange={(e) => { setContent(e.target.value); if (err) setErr(''); }}
               placeholder={placeholder}
               maxLength={MAX_CONTENT}
-              disabled={busy}
+              className="soc-composer-input"
+              readOnly={busy}
+              aria-busy={busy}
             />
             <div className="d-flex justify-content-between align-items-center mt-1">
               <span className="small text-body-secondary">
@@ -189,7 +191,7 @@ export default function PostComposer({
           </div>
         )}
 
-        <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
+        <div className="soc-composer-actions d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
           <div>
             <input
               ref={fileInputRef}
@@ -203,7 +205,7 @@ export default function PostComposer({
             />
             <Button
               type="button"
-              variant="outline-primary"
+              variant="light"
               size="sm"
               className="soc-composer-media-btn"
               disabled={busy || images.length >= MAX_POST_IMAGES}
@@ -215,7 +217,7 @@ export default function PostComposer({
                 <circle cx="8.5" cy="8.5" r="1.5" />
                 <polyline points="21 15 16 10 5 21" />
               </svg>
-              <span>Thêm ảnh ({images.length}/{MAX_POST_IMAGES})</span>
+              <span>{images.length > 0 ? `Ảnh (${images.length}/${MAX_POST_IMAGES})` : 'Thêm ảnh'}</span>
             </Button>
           </div>
           <Button type="submit" variant="primary" className="px-3 fw-semibold" disabled={busy || !content.trim()}>

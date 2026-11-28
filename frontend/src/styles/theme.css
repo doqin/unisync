@@ -12,7 +12,7 @@
   --us-border: #e3e6ec;
   --us-text: #1f2430;
   --us-text-muted: #565e66;
-  --us-focus: #b45309;
+  --us-focus: var(--us-primary); /* viền focus bàn phím: cùng màu chính; outline-offset tạo khe để vẫn thấy trên nút tím */
 
   --bs-primary: var(--us-primary);
   --bs-primary-rgb: 79, 70, 229;
@@ -83,7 +83,10 @@ body { background: var(--us-bg); color: var(--us-text); }
 }
 .app-header.is-scrolled .app-brand-logo { width: 2rem; height: 2rem; }
 .app-header.is-scrolled .app-brand { font-size: 1.25rem; }
-.app-navbar .btn { transition: padding 0.3s ease, font-size 0.3s ease; }
+.app-navbar .btn {
+  transition: padding 0.3s ease, font-size 0.3s ease, transform 0.15s ease, box-shadow 0.2s ease,
+    background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
 .app-header.is-scrolled .app-navbar .btn {
   --bs-btn-padding-x: 0.875rem; --bs-btn-padding-y: 0.3125rem; --bs-btn-font-size: 0.9375rem;
 }
@@ -300,10 +303,61 @@ body { background: var(--us-bg); color: var(--us-text); }
 
 /* ---------- Trợ năng ---------- */
 :focus-visible { outline: 3px solid var(--us-focus); outline-offset: 2px; }
-.btn:focus-visible, .nav-link:focus-visible, .form-control:focus-visible, .form-select:focus-visible,
+.btn:focus-visible, .nav-link:focus-visible,
 .dropdown-item:focus-visible, .navbar-toggler:focus-visible {
   outline: 3px solid var(--us-focus); outline-offset: 2px; box-shadow: none;
 }
+
+/* ---------- Ô nhập liệu (toàn site) ----------
+   Viền bo nhẹ; khi focus viền + quầng màu chính (thay viền cam), đủ tương phản cho trợ năng. */
+.form-control, .form-select {
+  border-radius: 0.5rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.form-control:focus, .form-select:focus,
+.form-control:focus-visible, .form-select:focus-visible {
+  border-color: var(--us-primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
+  outline: none;
+}
+
+/* Ô tìm kiếm có icon: khung ngoài vẽ viền, ô nhập bên trong không viền.
+   <InputGroup className="search-group">
+     <InputGroup.Text as="span" className="search-group-icon"><Icon name="search" /></InputGroup.Text>
+     <Form.Control type="search" />
+   </InputGroup> */
+.search-group {
+  border: 1px solid var(--bs-border-color);
+  border-radius: 0.5rem;
+  background: var(--bs-body-bg);
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.search-group:focus-within {
+  border-color: var(--us-primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.25);
+}
+.search-group-icon { background: transparent; border: 0; color: #6b7280; padding-right: 0; }
+.search-group:focus-within .search-group-icon { color: var(--us-primary); }
+.search-group > .form-control,
+.search-group > .form-control:focus,
+.search-group > .form-control:focus-visible {
+  border: 0; border-radius: 0; box-shadow: none; outline: none; background: transparent;
+}
+/* Nút ✕ xoá từ khóa (thay nút xoá riêng của Chrome để mọi trình duyệt giống nhau).
+   <button type="button" className="search-group-clear" aria-label="Xoá từ khóa"><Icon name="close" size={16} /></button> */
+.search-group > input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; }
+.search-group-clear {
+  display: grid; place-items: center; flex: 0 0 auto;
+  width: 28px; height: 28px; margin: auto 6px auto 0; padding: 0;
+  border: 0; border-radius: 50%; background: transparent; color: #6b7280;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.search-group-clear:hover { background: #eef0f3; color: var(--us-text); }
+.search-group-clear:focus-visible { outline-offset: 0; }
+
+/* Kết quả cũ mờ đi trong lúc tải kết quả mới (giữ bố cục, không nháy khung chờ). */
+.ui-stale { opacity: 0.55; pointer-events: none; transition: opacity 0.2s ease; }
 
 .skip-link {
   position: absolute; left: 0.5rem; top: -100px; z-index: 2000;
@@ -313,6 +367,125 @@ body { background: var(--us-bg); color: var(--us-text); }
 .skip-link:focus { top: 0.5rem; color: #fff; }
 
 img { max-width: 100%; height: auto; }
+
+/* ---------- Nút bấm (toàn site) ----------
+   Rê chuột: bóng tím nhẹ; nhấn: lún nhẹ (không nhấc lên); vô hiệu: mờ. Bỏ qua nút dạng link. */
+.btn {
+  transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease, color 0.2s ease;
+}
+.btn:not(.btn-link):hover:not(:disabled) { box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); }
+.btn:not(.btn-link):active:not(:disabled) { transform: scale(0.97); box-shadow: none; }
+.btn:disabled, .btn.disabled { opacity: 0.6; }
+
+/* Ô nhập khi rê chuột: viền đậm lên một chút trước khi focus. */
+.form-control:hover:not(:focus):not(:disabled),
+.form-select:hover:not(:focus):not(:disabled) { border-color: #b6c2d2; }
+
+/* Giữ chỗ thanh cuộn dọc: nội dung không dịch ngang khi trang đổi giữa dài và ngắn. */
+html { scrollbar-gutter: stable; }
+
+/* ---------- Class dùng chung (gắn khi cần) ----------
+   Hiệu ứng chuyển động tự tắt khi người dùng bật "giảm chuyển động" (quy tắc prefers-reduced-motion ở trên). */
+
+/* Thẻ nhấc lên khi rê chuột / focus bàn phím.
+   <Card className="ui-lift">…</Card>  hoặc  <Link className="ui-lift-link"><Card className="ui-lift">…</Card></Link> */
+.ui-lift {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.ui-lift:hover, .ui-lift-link:hover .ui-lift, .ui-lift-link:focus-visible .ui-lift {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+  border-color: rgba(79, 70, 229, 0.35);
+}
+.ui-lift-link { display: block; color: inherit; text-decoration: none; border-radius: 14px; }
+.ui-lift-link:hover { color: inherit; }
+
+/* Khung chờ shimmer khi đang tải. Đặt kích thước bằng style/class, ẩn khỏi trình đọc màn hình.
+   <div className="ui-skeleton" style={{ height: 16, width: '60%' }} aria-hidden="true" /> */
+@keyframes ui-shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+.ui-skeleton {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #eef0f3 25%, #f8f9fb 37%, #eef0f3 63%);
+  background-size: 400px 100%;
+  animation: ui-shimmer 1.2s ease-in-out infinite;
+}
+.ui-skeleton-circle { border-radius: 50%; }
+
+/* Tab dạng viên.
+   <div className="ui-tabs" role="tablist">
+     <button className="ui-tab active" role="tab" aria-selected="true">Tất cả</button>
+     <button className="ui-tab" role="tab" aria-selected="false">Của tôi</button>
+   </div> */
+.ui-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.ui-tab {
+  border: 1px solid var(--bs-border-color);
+  background: var(--bs-body-bg);
+  border-radius: 999px;
+  padding: 4px 16px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--bs-secondary-color);
+  text-decoration: none;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+.ui-tab:hover { border-color: #b6c2d2; color: var(--us-text); }
+.ui-tab.active, .ui-tab[aria-selected="true"] {
+  background: var(--bs-primary-bg-subtle);
+  border-color: rgba(79, 70, 229, 0.3);
+  color: var(--us-primary);
+}
+
+/* Thông báo toast cố định ở đáy giữa màn hình, trượt lên khi hiện.
+   <div className="ui-toast-layer" role="status" aria-live="polite">
+     {msg && <div className="ui-toast">{msg}</div>}
+   </div>
+   Biến thể: ui-toast-error. Tự ẩn bằng setTimeout ở component. */
+.ui-toast-layer {
+  position: fixed;
+  left: 0; right: 0; bottom: 24px;
+  display: flex;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+  z-index: 1080;
+}
+@media (max-width: 991.98px) { .ui-toast-layer { bottom: 84px; } } /* chừa chỗ thanh điều hướng dưới trên di động */
+.ui-toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.12);
+  pointer-events: auto;
+  animation: ui-toast-in 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.ui-toast-error { border-color: #fecaca; background: #fef2f2; color: #991b1b; box-shadow: 0 2px 6px rgba(220, 38, 38, 0.12); }
+@keyframes ui-toast-in {
+  from { opacity: 0; translate: 0 16px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+/* Hiện dần từ dưới lên cho nội dung mới (mục danh sách, thẻ…).
+   Lệch thời gian theo thứ tự: style={{ animationDelay: `${i * 40}ms` }} */
+@keyframes ui-fade-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.ui-fade-up { animation: ui-fade-up 0.35s ease both; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

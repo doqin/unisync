@@ -17,6 +17,10 @@ const PATHS = {
   bell: <><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></>,
   arrowUp: <><path d="M12 19V5" /><path d="m5 12 7-7 7 7" /></>,
   user: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
+  // Thành công / lỗi (toast, thông báo) và nút đóng / xoá.
+  check: <><circle cx="12" cy="12" r="10" /><path d="m8 12 3 3 5-6" /></>,
+  alert: <><circle cx="12" cy="12" r="10" /><path d="M12 7v6" /><path d="M12 17h.01" /></>,
+  close: <><path d="M18 6 6 18" /><path d="m6 6 12 12" /></>,
 };
 
 /** @param {{ name: keyof typeof PATHS, size?: number, className?: string }} props */

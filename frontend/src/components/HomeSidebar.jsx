@@ -9,10 +9,10 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../lib/api.js';
 
 export const CAMPUS_SHORTCUTS = [
-  { to: '/study', label: 'Góc học tập', icon: 'study', accent: 'coral' },
-  { to: '/library', label: 'Thư viện', icon: 'library', accent: 'sky' },
-  { to: '/groups', label: 'Nhóm học phần', icon: 'groups', accent: 'emerald' },
-  { to: '/teamups', label: 'Team-up', icon: 'teamup', accent: 'indigo' },
+  { to: '/study', label: 'Góc học tập', icon: 'study' },
+  { to: '/library', label: 'Thư viện', icon: 'library' },
+  { to: '/groups', label: 'Nhóm học phần', icon: 'groups' },
+  { to: '/teamups', label: 'Team-up', icon: 'teamup' },
 ];
 
 function shortReason(u) {
@@ -106,7 +106,7 @@ export default function HomeSidebar({ onToast }) {
         <h2 className="h6 fw-bold mb-2">Khám phá nhanh</h2>
         <div className="soc-quick-grid">
           {CAMPUS_SHORTCUTS.map((item) => (
-            <Link key={item.to} to={item.to} className={`soc-quick-tile is-${item.accent}`}>
+            <Link key={item.to} to={item.to} className="soc-quick-tile">
               <span className="soc-quick-icon" aria-hidden="true">
                 <Icon name={item.icon} size={18} />
               </span>

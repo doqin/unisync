@@ -149,8 +149,7 @@ export default function Home() {
         <div className="soc-dashboard-main">
           <header className="soc-feed-header d-flex align-items-end justify-content-between gap-2 mb-3">
             <div style={{ minWidth: 0 }}>
-              <p className="soc-feed-greeting d-inline-flex align-items-center gap-2 mb-0">
-                <span className="soc-live-dot" aria-hidden="true" />
+              <p className="soc-feed-greeting mb-0">
                 <span>{getGreeting()}, {displayName}</span>
               </p>
               <h1 id="home-feed-title" className="h4 fw-bold mb-0">Bảng tin</h1>
@@ -186,7 +185,7 @@ export default function Home() {
 
           <div className="soc-mobile-shortcuts d-lg-none mb-3" aria-label="Lối tắt nhanh">
             {CAMPUS_SHORTCUTS.map((item) => (
-              <Link key={item.to} to={item.to} className={`soc-mobile-pill is-${item.accent}`}>
+              <Link key={item.to} to={item.to} className="soc-mobile-pill">
                 <Icon name={item.icon} size={15} />
                 <span>{item.label}</span>
               </Link>

@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form } from 'react-bootstrap';
+import BackButton from '../components/BackButton.jsx';
 import ErrorAlert from '../components/ErrorAlert.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 import PasswordInputs from '../components/PasswordInputs.jsx';
@@ -142,6 +143,7 @@ export default function ResetPassword() {
 
   return (
     <Container className="py-5" style={{ maxWidth: 440 }}>
+      <BackButton fallback="/login" className="mb-2" />
       <Card body>
         <h1 className="h4 mb-3">{title}</h1>
         {body}

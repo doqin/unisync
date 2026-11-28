@@ -65,6 +65,8 @@ export default function Layout() {
   const { pathname } = useLocation();
   const desktop = useMedia(DESKTOP);
   const wideScreen = useMedia(WIDE);
+  const [scrolled, setScrolled] = useState(false);
+  const [showTop, setShowTop] = useState(false);
   const mainRef = useRef(null);
   const firstRender = useRef(true);
 
@@ -75,6 +77,25 @@ export default function Layout() {
     mainRef.current?.focus({ preventScroll: true });
   }, [pathname]);
 
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    const onScrollTop = () => setShowTop(window.scrollY > 400);
+    onScrollTop();
+    window.addEventListener('scroll', onScrollTop, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('scroll', onScrollTop);
+    };
+  }, []);
+
+  const scrollToTop = () => {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    mainRef.current?.focus({ preventScroll: true });
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/', { replace: true });
@@ -84,8 +105,10 @@ export default function Layout() {
     <div className={user ? 'app-shell has-bottom-nav' : 'app-shell'}>
       <a href="#main-content" className="skip-link">Bỏ qua đến nội dung chính</a>
 
-      <header>
-        <Navbar sticky="top" className="app-navbar border-bottom">
+      {/* sticky đặt ở <header> (không phải Navbar): phần tử sticky chỉ dính trong phạm vi cha của nó,
+          mà <header> chỉ cao bằng Navbar nên Navbar sticky bên trong sẽ cuộn mất. */}
+      <header className={`sticky-top app-header${scrolled ? ' is-scrolled' : ''}${pathname === '/' ? ' is-landing' : ''}`}>
+        <Navbar className="app-navbar border-bottom">
           <Container>
             <Navbar.Brand as={Link} to={user ? '/home' : '/'} className="app-brand">
               <img src="/logo.svg" alt="" width="32" height="32" className="app-brand-logo" />
@@ -130,6 +153,18 @@ export default function Layout() {
       <main id="main-content" ref={mainRef} tabIndex={-1} className="app-main">
         <Outlet />
       </main>
+
+      <button
+        type="button"
+        className={`back-to-top${showTop ? ' is-visible' : ''}`}
+        onClick={scrollToTop}
+        aria-label="Về đầu trang"
+        title="Về đầu trang"
+        tabIndex={showTop ? 0 : -1}
+        aria-hidden={!showTop}
+      >
+        <Icon name="arrowUp" size={22} />
+      </button>
 
       <footer className="app-footer border-top">
         <Container className="py-4">

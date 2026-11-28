@@ -83,6 +83,25 @@ async function loadDocument(sb, id) {
   return data;
 }
 
+/** Điểm trung bình (làm tròn 1 chữ số) và số lượt đánh giá. */
+function summarizeRatings(ratings) {
+  const count = ratings.length;
+  const sum = ratings.reduce((a, x) => a + x.stars, 0);
+  return { rating_avg: count ? Math.round((sum / count) * 10) / 10 : null, rating_count: count };
+}
+
+/** Gắn điểm đánh giá cho một trang danh sách (FR-DOC-08). Lỗi thì trả danh sách không kèm điểm. */
+async function withRatings(sb, docs) {
+  if (!docs.length) return docs;
+  const { data, error } = await sb.from('document_ratings').select('document_id, stars')
+    .in('document_id', docs.map((d) => d.id));
+  if (error) {
+    console.error('Đọc document_ratings thất bại:', error.message);
+    return docs;
+  }
+  return docs.map((d) => ({ ...d, ...summarizeRatings(data.filter((x) => x.document_id === d.id)) }));
+}
+
 /** Tên tệp khi người dùng tải về: tiêu đề + phần mở rộng thật. */
 const downloadName = (doc) => `${doc.title.replace(/[\/:*?"<>|]/g, '_').slice(0, 150)}.${doc.file_type}`;
 
@@ -231,13 +250,14 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       const { group_id, file_type, q } = req.query; // đã kiểm tra bởi browseSchema
       const page = Number(req.query.page ?? 1);
       const limit = 20;
-      const { data, error } = await db().rpc('search_documents', {
+      const sb = db();
+      const { data, error } = await sb.rpc('search_documents', {
         p_q: q ?? null, p_group: group_id ?? null, p_file_type: file_type ?? null,
         p_sort: req.query.sort === 'rating' ? 'rating' : 'newest',
         p_limit: limit, p_offset: (page - 1) * limit,
       });
       if (error) throw error;
-      res.json({ items: data, page, has_more: data.length === limit });
+      res.json({ items: await withRatings(sb, data), page, has_more: data.length === limit });
     } catch (e) {
       next(e);
     }
@@ -248,11 +268,12 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
     try {
       const limit = 20;
       const page = Number(req.query.page ?? 1);
-      const { data, error } = await db().from('documents').select('*')
+      const sb = db();
+      const { data, error } = await sb.from('documents').select('*')
         .eq('uploader_id', req.user.id).order('created_at', { ascending: false })
         .range((page - 1) * limit, page * limit - 1);
       if (error) throw error;
-      res.json({ items: data, page, has_more: data.length === limit });
+      res.json({ items: await withRatings(sb, data), page, has_more: data.length === limit });
     } catch (e) {
       next(e);
     }
@@ -276,13 +297,10 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       // Báo cáo vi phạm là tính năng phụ (FR-DOC-10): lỗi hoặc CSDL chưa có bảng `reports` thì ghi nhật ký,
       // không được chặn trang chi tiết.
       if (repErr) console.error('Đọc reports thất bại:', repErr.message);
-      const count = ratings.length;
-      const sum = ratings.reduce((a, x) => a + x.stars, 0);
       res.json({
         ...doc,
         uploader_name: uploader?.full_name ?? null,
-        rating_avg: count ? Math.round((sum / count) * 10) / 10 : null,
-        rating_count: count,
+        ...summarizeRatings(ratings),
         my_rating: ratings.find((x) => x.user_id === req.user.id)?.stars ?? null,
         my_report_pending: Boolean(myReport),
       });

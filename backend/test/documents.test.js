@@ -512,6 +512,18 @@ test('mine: chỉ trả tài liệu do chính mình tải lên', async () => {
   assert.equal(body.has_more, false);
 });
 
+test('mine: kèm điểm trung bình và số lượt đánh giá', async () => {
+  const rated = ownDoc();
+  sb.tables.document_ratings.push(
+    { document_id: rated.id, user_id: USER, stars: 5 },
+    { document_id: rated.id, user_id: OTHER, stars: 4 },
+  );
+  const body = await (await fetch(`${base}/mine`)).json();
+  const hit = body.items.find((d) => d.id === rated.id);
+  assert.equal(hit.rating_avg, 4.5);
+  assert.equal(hit.rating_count, 2);
+});
+
 test('mine: page không hợp lệ → 400', async () => {
   assert.equal((await fetch(`${base}/mine?page=0`)).status, 400);
 });

@@ -6,9 +6,13 @@ import { Button, Card, Container } from 'react-bootstrap';
 import AsyncState from '../components/AsyncState.jsx';
 import Avatar from '../components/Avatar.jsx';
 import EmptyState from '../components/EmptyState.jsx';
+import FollowButton, { MutualBadge } from '../components/FollowButton.jsx';
+import Icon from '../components/Icon.jsx';
 import ProfilePosts from '../components/ProfilePosts.jsx';
 import { api } from '../lib/api.js';
 import '../styles/profile.css';
+
+const TOAST_MS = 2500;
 
 const chips = (p) => [p.major, p.school, p.year ? `Năm ${p.year}` : null].filter(Boolean);
 const num = (n) => Number(n ?? 0).toLocaleString('vi-VN');
@@ -59,15 +63,45 @@ export default function Profile() {
   const { id } = useParams();
   const [profile, setProfile] = useState(null);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
+  const toastTimer = useRef(null);
+
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
+
+  const showToast = useCallback((t) => {
+    clearTimeout(toastTimer.current);
+    setToast({ ...t, id: Date.now() });
+    toastTimer.current = setTimeout(() => setToast(null), TOAST_MS);
+  }, []);
 
   const load = useCallback(() => {
     let alive = true;
     setProfile(null);
     setError(null);
-    api(`/profiles/${id}`).then((p) => alive && setProfile(p)).catch((e) => alive && setError(e));
+    Promise.all([api(`/profiles/${id}`), api(`/follows/${id}/status`)])
+      .then(([p, st]) => alive && setProfile({
+        ...p,
+        is_following: Boolean(st?.is_following),
+        is_followed_by: Boolean(st?.is_followed_by),
+        is_mutual: !p.is_self && Boolean(st?.is_mutual),
+        followers_count: st?.followers_count ?? p.followers_count,
+        following_count: st?.following_count ?? p.following_count,
+      }))
+      .catch((e) => alive && setError(e));
     return () => { alive = false; };
   }, [id]);
   useEffect(load, [load]);
+
+  const handleFollowChanged = (st) => {
+    setProfile((cur) => (cur ? {
+      ...cur,
+      is_following: Boolean(st.is_following),
+      is_followed_by: Boolean(st.is_followed_by),
+      is_mutual: !cur.is_self && Boolean(st.is_mutual),
+      followers_count: st.followers_count ?? cur.followers_count,
+      following_count: st.following_count ?? cur.following_count,
+    } : cur));
+  };
 
   if (error && [400, 404].includes(error.status)) {
     return (
@@ -90,10 +124,23 @@ export default function Profile() {
                 <div className="profile-top">
                   <Avatar src={profile.avatar_url} name={profile.full_name} size={96} className="profile-avatar" />
                   <div className="profile-actions">
-                    {profile.is_self && (
+                    {profile.is_self ? (
                       <Button as={Link} to="/settings" variant="outline-primary" className="profile-edit">
                         Chỉnh sửa hồ sơ
                       </Button>
+                    ) : (
+                      <>
+                        {profile.is_mutual && <MutualBadge className="profile-mutual-badge" />}
+                        <FollowButton
+                          userId={profile.id}
+                          fullName={profile.full_name}
+                          isFollowing={profile.is_following}
+                          isFollowedBy={profile.is_followed_by}
+                          className="profile-edit profile-follow-btn"
+                          onChanged={handleFollowChanged}
+                          onToast={showToast}
+                        />
+                      </>
                     )}
                   </div>
                 </div>
@@ -121,6 +168,15 @@ export default function Profile() {
           </>
         )}
       </AsyncState>
+
+      <div className="ui-toast-layer" role="status" aria-live="polite">
+        {toast && (
+          <div key={toast.id} className={`ui-toast${toast.error ? ' ui-toast-error' : ''}`}>
+            <Icon name={toast.error ? 'alert' : 'check'} size={18} />
+            {toast.text}
+          </div>
+        )}
+      </div>
     </Container>
   );
 }

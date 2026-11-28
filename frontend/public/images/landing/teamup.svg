@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 680" font-family="Segoe UI, system-ui, -apple-system, Roboto, Arial, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10b981"/><stop offset="1" stop-color="#0ea5e9"/>
+    </linearGradient>
+    <pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="2" fill="#fff" fill-opacity=".12"/>
+    </pattern>
+  </defs>
+  <rect width="600" height="680" fill="url(#bg)"/>
+  <rect width="600" height="680" fill="url(#dots)"/>
+  <circle cx="560" cy="60" r="170" fill="#fff" fill-opacity=".08"/>
+  <circle cx="40" cy="640" r="200" fill="#fff" fill-opacity=".06"/>
+  <g transform="translate(0,-8)">
+    <rect x="40" y="40" width="168" height="48" rx="24" fill="#fff" fill-opacity=".18"/>
+    <rect x="50" y="48" width="32" height="32" rx="8" fill="#fff"/>
+    <text x="66" y="71" text-anchor="middle" font-size="20" font-weight="700" fill="#10b981">U</text>
+    <text x="94" y="72" font-size="22" font-weight="700" fill="#fff">UniSync</text>
+  </g>
+  <g transform="translate(0,-40)">
+  <circle cx="300" cy="310" r="120" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="3" stroke-dasharray="10 12"/>
+  <line x1="300" y1="190" x2="196" y2="370" stroke="#fff" stroke-opacity=".35" stroke-width="3"/>
+  <line x1="300" y1="190" x2="404" y2="370" stroke="#fff" stroke-opacity=".35" stroke-width="3"/>
+  <line x1="196" y1="370" x2="404" y2="370" stroke="#fff" stroke-opacity=".35" stroke-width="3"/>
+  <g fill="#fff">
+    <circle cx="300" cy="190" r="50"/><circle cx="196" cy="370" r="50"/>
+  </g>
+  <g fill="#10b981">
+    <circle cx="300" cy="176" r="15"/><path d="M274 214a26 22 0 0 1 52 0z"/>
+    <circle cx="196" cy="356" r="15"/><path d="M170 394a26 22 0 0 1 52 0z"/>
+  </g>
+  <circle cx="404" cy="370" r="50" fill="#fff" fill-opacity=".3" stroke="#fff" stroke-width="4" stroke-dasharray="8 8"/>
+  <path d="M404 348v44m-22-22h44" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <text x="300" y="525" text-anchor="middle" font-size="58" font-weight="800" fill="#fff">Team-up</text>
+  <text x="300" y="572" text-anchor="middle" font-size="25" fill="#fff" fill-opacity=".9">Tìm đồng đội cho đồ án môn học</text>
+  <text x="300" y="642" text-anchor="middle" font-size="18" letter-spacing="2" fill="#fff" fill-opacity=".7">DÀNH CHO SINH VIÊN .EDU.VN</text>
+</svg>

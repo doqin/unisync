@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form } from 'react-bootstrap';
+import BackButton from '../components/BackButton.jsx';
 import { api } from '../lib/api.js';
 import { isEduVnEmail } from '../lib/edu.js';
 
@@ -25,6 +26,7 @@ export default function Register() {
 
   return (
     <Container className="py-5" style={{ maxWidth: 440 }}>
+      <BackButton className="mb-2" />
       <Card body>
         <h1 className="h4 mb-3">Đăng ký UniSync</h1>
         {done ? (

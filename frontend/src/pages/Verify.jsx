@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form } from 'react-bootstrap';
+import BackButton from '../components/BackButton.jsx';
 import { supabase } from '../lib/supabase.js';
 import { isEduVnEmail } from '../lib/edu.js';
 
@@ -93,6 +94,7 @@ export default function Verify() {
 
   return (
     <Container className="py-5" style={{ maxWidth: 520 }}>
+      <BackButton fallback="/login" className="mb-2" />
       <Card body>
         <h1 className="h4 mb-3">{title}</h1>
         {body}

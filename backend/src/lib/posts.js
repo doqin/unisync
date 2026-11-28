@@ -146,17 +146,12 @@ export async function assertPostAccess(sb, post, userId, profile) {
   }
 }
 
-export const isMissingReactionCol = (error) => error?.code === '42703' || error?.code === 'PGRST204';
-
-/** Tải thống kê cảm xúc (6 loại, mặc định 'love' nếu DB chưa có cột reaction) cho một tập bài đăng. */
+/** Tải thống kê cảm xúc (6 loại, mặc định 'love' nếu dữ liệu cũ chưa có giá trị) cho một tập bài đăng. */
 async function loadPostReactionsSummary(sb, postIds, viewerId) {
-  let { data, error } = await sb
+  const { data, error } = await sb
     .from('likes')
     .select('post_id, user_id, reaction')
     .in('post_id', postIds);
-  if (isMissingReactionCol(error)) {
-    ({ data, error } = await sb.from('likes').select('post_id, user_id').in('post_id', postIds));
-  }
   if (error) throw error;
 
   const totals = new Map();

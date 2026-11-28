@@ -45,7 +45,6 @@ import {
   encodeCursor,
   hydrateComments,
   hydratePosts,
-  isMissingReactionCol,
   loadPost,
   signAvatars,
 } from '../lib/posts.js';
@@ -165,15 +164,12 @@ async function countPostLikes(sb, postId) {
   return count ?? 0;
 }
 
-/** Đọc các dòng cảm xúc của 1 bài đăng (hỗ trợ fallback nếu DB chưa có cột `reaction`). */
+/** Đọc các dòng cảm xúc của 1 bài đăng. */
 async function fetchPostReactionRows(sb, postId) {
-  let { data, error } = await sb
+  const { data, error } = await sb
     .from('likes')
     .select('user_id, reaction, created_at')
     .eq('post_id', postId);
-  if (isMissingReactionCol(error)) {
-    ({ data, error } = await sb.from('likes').select('user_id, created_at').eq('post_id', postId));
-  }
   if (error) throw error;
   return (data ?? []).map((row) => ({ ...row, reaction: row.reaction || 'love' }));
 }
@@ -579,16 +575,12 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       const post = await loadPost(sb, req.params.id);
       await assertPostAccess(sb, post, req.user.id, req.profile);
 
-      let { error } = await sb
+      const { error } = await sb
         .from('likes')
         .upsert(
           { post_id: post.id, user_id: req.user.id, reaction: req.body.reaction },
           { onConflict: 'post_id,user_id' },
         );
-      if (isMissingReactionCol(error)) {
-        ({ error } = await sb.from('likes').insert({ post_id: post.id, user_id: req.user.id }));
-        if (error?.code === '23505') error = null;
-      }
       if (error) throw error;
 
       res.json(await summarizePostReactions(sb, post.id, req.user.id));

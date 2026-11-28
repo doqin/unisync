@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Alert, Button, Card, Container, Form } from 'react-bootstrap';
+import BackButton from '../components/BackButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 export default function Login() {
@@ -32,6 +33,7 @@ export default function Login() {
 
   return (
     <Container className="py-5" style={{ maxWidth: 440 }}>
+      <BackButton className="mb-2" />
       <Card body>
         <h1 className="h4 mb-3">Đăng nhập</h1>
         <Form onSubmit={submit}>

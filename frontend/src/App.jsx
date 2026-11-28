@@ -40,8 +40,8 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/home" element={<Home />} />
           <Route path="/u/:id" element={<Profile />} />
-          <Route path="/u/:id/followers" element={<FollowList tab="followers" />} />
-          <Route path="/u/:id/following" element={<FollowList tab="following" />} />
+          <Route path="/u/:id/followers" element={<FollowList key="followers" tab="followers" />} />
+          <Route path="/u/:id/following" element={<FollowList key="following" tab="following" />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/posts/:id" element={<PostDetail />} />
           <Route path="/groups" element={<Groups />} />

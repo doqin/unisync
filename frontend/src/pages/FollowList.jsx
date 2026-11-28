@@ -1,10 +1,9 @@
 // Danh sách người theo dõi / đang theo dõi (FR-SOC-10) – phụ trách: Đức Huy (dhuyy-06).
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Button, Container, ListGroup } from 'react-bootstrap';
 import AsyncState from '../components/AsyncState.jsx';
 import Avatar from '../components/Avatar.jsx';
-import BackButton from '../components/BackButton.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import FollowButton, { MutualBadge } from '../components/FollowButton.jsx';
 import Icon from '../components/Icon.jsx';
@@ -16,19 +15,38 @@ import '../styles/social.css';
 const PAGE_SIZE = 20;
 const SKELETON_ROWS = 5;
 const TOAST_MS = 2500;
+const COMPACT_QUERY = '(max-width: 575.98px)';
 
 const num = (n) => Number(n ?? 0).toLocaleString('vi-VN');
 const subtitle = (u) => [u.major, u.school, u.year ? `Năm ${u.year}` : null].filter(Boolean).join(' · ');
 
+function useCompactViewport() {
+  const [compact, setCompact] = useState(() => (
+    typeof window !== 'undefined' && window.matchMedia?.(COMPACT_QUERY).matches
+  ));
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined;
+    const mq = window.matchMedia(COMPACT_QUERY);
+    const onChange = () => setCompact(mq.matches);
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return compact;
+}
+
 /** Khung chờ cùng bố cục với FollowUserRow để danh sách thật hiện ra không bị nhảy. */
-function FollowListSkeleton() {
+function FollowListSkeleton({ avatarSize = 48 }) {
   return (
     <div role="status">
       <span className="visually-hidden">Đang tải danh sách…</span>
       <ListGroup aria-hidden="true">
         {Array.from({ length: SKELETON_ROWS }, (_, i) => (
           <ListGroup.Item key={i} className="d-flex align-items-center gap-2 gap-sm-3 py-3">
-            <span className="ui-skeleton ui-skeleton-circle flex-shrink-0" style={{ width: 48, height: 48 }} />
+            <span
+              className="ui-skeleton ui-skeleton-circle flex-shrink-0"
+              style={{ width: avatarSize, height: avatarSize }}
+            />
             <div className="flex-grow-1">
               <span className="ui-skeleton mb-2" style={{ height: 14, width: `${55 - (i % 3) * 10}%` }} />
               <span className="ui-skeleton" style={{ height: 12, width: '35%' }} />
@@ -41,7 +59,7 @@ function FollowListSkeleton() {
   );
 }
 
-function FollowUserRow({ user, index, onChanged, onToast }) {
+function FollowUserRow({ user, index, avatarSize, onChanged, onToast }) {
   const info = subtitle(user);
   const delay = Math.min(index % PAGE_SIZE, 10) * 40;
   return (
@@ -51,7 +69,7 @@ function FollowUserRow({ user, index, onChanged, onToast }) {
         className="text-reset text-decoration-none d-flex align-items-center gap-2 gap-sm-3 flex-grow-1"
         style={{ minWidth: 0 }}
       >
-        <Avatar src={user.avatar_url} name={user.full_name} size={48} className="soc-follow-avatar" />
+        <Avatar src={user.avatar_url} name={user.full_name} size={avatarSize} />
         <div style={{ minWidth: 0 }}>
           <div className="d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
             <span className="fw-semibold text-truncate">{user.full_name}</span>
@@ -79,10 +97,14 @@ function FollowUserRow({ user, index, onChanged, onToast }) {
 export default function FollowList({ tab = 'followers' }) {
   const { id } = useParams();
   const location = useLocation();
+  const navigate = useNavigate();
   const stateOwner = location.state?.ownerProfile;
+  const isCompact = useCompactViewport();
+  const avatarSize = isCompact ? 42 : 48;
 
   const [owner, setOwner] = useState(() => (stateOwner?.id === id ? stateOwner : null));
   const [ownerError, setOwnerError] = useState(null);
+  const [ownerReloadKey, setOwnerReloadKey] = useState(0);
   const [toast, setToast] = useState(null);
   const toastTimer = useRef(null);
 
@@ -94,7 +116,7 @@ export default function FollowList({ tab = 'followers' }) {
     toastTimer.current = setTimeout(() => setToast(null), TOAST_MS);
   }, []);
 
-  const loadOwner = useCallback(() => {
+  useEffect(() => {
     let alive = true;
     setOwner((cur) => {
       if (cur?.id === id) return cur;
@@ -105,8 +127,7 @@ export default function FollowList({ tab = 'followers' }) {
       .then((p) => alive && setOwner(p))
       .catch((e) => alive && setOwnerError(e));
     return () => { alive = false; };
-  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(loadOwner, [loadOwner]);
+  }, [id, ownerReloadKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const list = usePagedList((page) => api(`/follows/${id}/${tab}?page=${page}`), [id, tab]);
 
@@ -123,6 +144,12 @@ export default function FollowList({ tab = 'followers' }) {
       </Container>
     );
   }
+
+  const goBackToProfile = () => {
+    const idx = window.history.state?.idx ?? 0;
+    if (idx > 0) navigate(-1);
+    else navigate(`/u/${id}`, { replace: true });
+  };
 
   const handleItemFollowChange = (u, s) => {
     const wasFollowing = Boolean(u.is_following);
@@ -147,7 +174,7 @@ export default function FollowList({ tab = 'followers' }) {
   };
 
   const retryAll = () => {
-    if (ownerError || !owner) loadOwner();
+    if (ownerError || !owner) setOwnerReloadKey((k) => k + 1);
     if (list.error) list.retry();
   };
 
@@ -163,27 +190,54 @@ export default function FollowList({ tab = 'followers' }) {
 
   return (
     <Container className="py-4" style={{ maxWidth: 720 }}>
-      <BackButton fallback={`/u/${id}`} className="mb-2">Về hồ sơ</BackButton>
+      <div className="d-flex align-items-center gap-2 gap-sm-3 mb-2">
+        <button
+          type="button"
+          onClick={goBackToProfile}
+          className="soc-back-icon-btn"
+          aria-label="Về hồ sơ"
+          title="Về hồ sơ"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M19 12H5M11 6l-6 6 6 6" />
+          </svg>
+        </button>
 
-      {owner ? (
-        <Link to={`/u/${id}`} className="text-reset text-decoration-none d-inline-flex align-items-center gap-3 mb-2">
-          <Avatar src={owner.avatar_url} name={owner.full_name} size={44} />
-          <div style={{ minWidth: 0 }}>
-            <h1 className="h4 mb-0 text-truncate">{owner.full_name}</h1>
-            <p className="small text-body-secondary mb-0">
-              {isFollowers ? 'Người theo dõi' : 'Đang theo dõi'}
-            </p>
+        {owner ? (
+          <Link
+            to={`/u/${id}`}
+            className="text-reset text-decoration-none d-inline-flex align-items-center gap-3 flex-grow-1"
+            style={{ minWidth: 0 }}
+          >
+            <Avatar src={owner.avatar_url} name={owner.full_name} size={44} decorative />
+            <div style={{ minWidth: 0 }}>
+              <h1 className="h4 mb-0 text-truncate">{owner.full_name}</h1>
+              <p className="small text-body-secondary mb-0">
+                {isFollowers ? 'Người theo dõi' : 'Đang theo dõi'}
+              </p>
+            </div>
+          </Link>
+        ) : (
+          <div className="d-flex align-items-center gap-3 flex-grow-1" style={{ minWidth: 0 }} aria-hidden="true">
+            <span className="ui-skeleton ui-skeleton-circle flex-shrink-0" style={{ width: 44, height: 44 }} />
+            <div className="flex-grow-1">
+              <span className="ui-skeleton mb-2" style={{ height: 18, width: 160 }} />
+              <span className="ui-skeleton" style={{ height: 12, width: 96 }} />
+            </div>
           </div>
-        </Link>
-      ) : (
-        <div className="d-flex align-items-center gap-3 mb-2" aria-hidden="true">
-          <span className="ui-skeleton ui-skeleton-circle flex-shrink-0" style={{ width: 44, height: 44 }} />
-          <div className="flex-grow-1">
-            <span className="ui-skeleton mb-2" style={{ height: 18, width: 160 }} />
-            <span className="ui-skeleton" style={{ height: 12, width: 96 }} />
-          </div>
-        </div>
-      )}
+        )}
+      </div>
 
       <nav className="ui-tabs soc-follow-tabs my-3" aria-label="Quan hệ theo dõi">
         <Link
@@ -207,7 +261,7 @@ export default function FollowList({ tab = 'followers' }) {
       </nav>
 
       {showSkeleton ? (
-        <FollowListSkeleton />
+        <FollowListSkeleton avatarSize={avatarSize} />
       ) : (
         <AsyncState
           loading={false}
@@ -225,6 +279,7 @@ export default function FollowList({ tab = 'followers' }) {
                 key={u.id}
                 user={u}
                 index={i}
+                avatarSize={avatarSize}
                 onChanged={handleItemFollowChange}
                 onToast={showToast}
               />

@@ -1,5 +1,5 @@
 // Chi tiết tài liệu (FR-DOC-05, FR-DOC-06, FR-DOC-10) – phụ trách: Đức Trọng (ImDT06).
-// Tải xuống bằng signed URL ngắn hạn; người tải lên được sửa thông tin và xóa tài liệu;
+// Tải xuống bằng signed URL ngắn hạn; người tải lên được sửa thông tin và xóa tài liệu (Admin cũng xóa được);
 // người khác báo cáo được tài liệu vi phạm.
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -55,7 +55,7 @@ const FlagIcon = ({ filled = false }) => (
 export default function DocumentDetail() {
   const { id } = useParams();
   const nav = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const [doc, setDoc] = useState(null);
   const [subject, setSubject] = useState('');
   const [loading, setLoading] = useState(true);
@@ -101,6 +101,8 @@ export default function DocumentDetail() {
   }, [id, reloadKey]);
 
   const isOwner = doc && user?.id === doc.uploader_id;
+  // Admin xóa được tài liệu vi phạm của người khác (FR-DOC-06); backend kiểm tra lại quyền.
+  const canDelete = isOwner || profile?.role === 'admin';
 
   async function download() {
     setBusy('download'); setErr('');
@@ -415,16 +417,16 @@ export default function DocumentDetail() {
                       Chia sẻ
                     </Button>
                     {isOwner && (
-                      <>
-                        <Button variant="outline-secondary" className="lib-action lib-action-sm" onClick={() => { setEditing(true); setNotice(''); }} disabled={busy !== ''}>
-                          <ActionIcon name="edit" />
-                          Sửa
-                        </Button>
-                        <Button variant="outline-danger" className="lib-action lib-action-sm" onClick={() => setConfirmDelete(true)} disabled={busy !== ''}>
-                          <ActionIcon name="trash" />
-                          {busy === 'delete' ? 'Đang xóa…' : 'Xóa'}
-                        </Button>
-                      </>
+                      <Button variant="outline-secondary" className="lib-action lib-action-sm" onClick={() => { setEditing(true); setNotice(''); }} disabled={busy !== ''}>
+                        <ActionIcon name="edit" />
+                        Sửa
+                      </Button>
+                    )}
+                    {canDelete && (
+                      <Button variant="outline-danger" className="lib-action lib-action-sm" onClick={() => setConfirmDelete(true)} disabled={busy !== ''}>
+                        <ActionIcon name="trash" />
+                        {busy === 'delete' ? 'Đang xóa…' : 'Xóa'}
+                      </Button>
                     )}
                     {!isOwner && (doc.my_report_pending ? (
                       // Nút mờ kèm chú thích (bọc ngoài vì nút bị vô hiệu không nhận chuột).
@@ -536,6 +538,7 @@ export default function DocumentDetail() {
           <Modal.Title as="h2" className="h5">Xóa tài liệu này?</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+          {!isOwner && <p className="mb-2">Bạn đang xóa tài liệu của người khác với quyền quản trị viên.</p>}
           Tài liệu và tệp đính kèm sẽ bị xóa vĩnh viễn, không thể hoàn tác.
         </Modal.Body>
         <Modal.Footer>

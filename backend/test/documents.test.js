@@ -137,11 +137,12 @@ function fakeSupabase() {
 }
 
 let sb, server, base;
+let role = 'student'; // vai trò của người đang gọi, đổi trong test quyền Admin
 
 before(async () => {
   const app = express();
   app.use(express.json());
-  app.use((req, _res, next) => { req.user = { id: USER }; next(); }); // thay cho requireAuth
+  app.use((req, _res, next) => { req.user = { id: USER }; req.profile = { role }; next(); }); // thay cho requireAuth
   app.use('/api/documents', createDocumentsRouter({
     db: () => sb,
     readHead: async (_sb, path) => sb.objects[path].head,
@@ -151,7 +152,7 @@ before(async () => {
   base = `http://127.0.0.1:${server.address().port}/api/documents`;
 });
 after(() => server.close());
-beforeEach(() => { sb = fakeSupabase(); });
+beforeEach(() => { sb = fakeSupabase(); role = 'student'; });
 
 const post = async (path, body) => {
   const res = await fetch(base + path, {
@@ -447,6 +448,18 @@ test('delete: người tải lên xóa được bản ghi và tệp; người kh
   const theirs = ownDoc({ uploader_id: OTHER });
   assert.equal((await fetch(`${base}/${theirs.id}`, { method: 'DELETE' })).status, 403);
   assert.ok(sb.tables.documents.some((d) => d.id === theirs.id));
+});
+
+test('delete: Admin xóa được tài liệu của người khác nhưng không sửa được', async () => {
+  role = 'admin';
+  const theirs = ownDoc({ uploader_id: OTHER });
+  const edit = await fetch(`${base}/${theirs.id}`, {
+    method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title: 'X' }),
+  });
+  assert.equal(edit.status, 403);
+  assert.equal((await fetch(`${base}/${theirs.id}`, { method: 'DELETE' })).status, 204);
+  assert.ok(!sb.tables.documents.some((d) => d.id === theirs.id));
+  assert.ok(sb.removed.includes(theirs.file_path));
 });
 
 // ───── Đếm lượt tải, xem trước, đánh giá, sắp xếp theo điểm (FR-DOC-07, 08, 09) ─────

@@ -63,7 +63,7 @@ const editSchema = z.object({
 
 const ratingSchema = z.object({ stars: z.number().int().min(1, 'Số sao từ 1 đến 5').max(5, 'Số sao từ 1 đến 5') });
 
-// Lý do báo cáo vi phạm (FR-DOC-10); khớp ràng buộc `reports.reason` ở migration 0007.
+// Lý do báo cáo vi phạm (FR-DOC-10); khớp ràng buộc `reports.reason` ở migration 0008.
 export const REPORT_REASONS = ['copyright', 'inappropriate', 'spam', 'other'];
 
 const reportSchema = z.object({

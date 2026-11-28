@@ -6,8 +6,16 @@
 
 .soc-post-card {
   border-color: var(--us-border);
+  border-radius: 0.875rem;
   background: var(--us-surface);
+  box-shadow: 0 2px 12px -4px rgba(31, 36, 48, 0.06);
   min-width: 0;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.soc-post-card:hover {
+  border-color: rgba(79, 70, 229, 0.24);
+  box-shadow: 0 8px 22px -12px rgba(79, 70, 229, 0.24);
 }
 
 .soc-post-content {
@@ -651,5 +659,199 @@
 @media (max-width: 575.98px) {
   .soc-follow-row-btn {
     min-width: 6.25rem;
+  }
+}
+
+/* Dashboard Trang chủ 2 cột & bảng màu tươi sáng (FR-SOC-02) */
+.soc-dashboard-wrap {
+  max-width: 1040px;
+}
+
+.soc-dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.soc-dashboard-main {
+  min-width: 0;
+  max-width: 680px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+@media (min-width: 992px) {
+  .soc-dashboard-grid {
+    grid-template-columns: minmax(0, 1fr) 310px;
+    gap: 1.5rem;
+  }
+  .soc-dashboard-main {
+    max-width: none;
+    margin-inline: 0;
+  }
+  .soc-dashboard-aside {
+    position: sticky;
+    top: 5rem;
+  }
+}
+
+.soc-hero-banner {
+  position: relative;
+  overflow: hidden;
+  padding: 1rem 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(79, 70, 229, 0.18);
+  background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 55%, #fdf2f8 100%);
+}
+
+.soc-hero-kicker {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--us-primary);
+}
+
+/* Khung soạn bài nhấn dải gradient phía trên */
+.soc-composer-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.soc-composer-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--us-gradient);
+}
+
+.soc-composer-media-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-color: rgba(79, 70, 229, 0.3);
+  background: var(--us-primary-subtle);
+  color: var(--us-primary-active);
+}
+
+.soc-composer-media-btn:hover,
+.soc-composer-media-btn:focus-visible {
+  background: var(--us-primary);
+  border-color: var(--us-primary);
+  color: #fff;
+}
+
+/* Cột phụ: thẻ hồ sơ mini, lối tắt 4 màu & gợi ý kết nối */
+.soc-side-band {
+  height: 3.5rem;
+  background: var(--us-gradient);
+}
+
+.soc-side-profile-top {
+  margin-top: -1.75rem;
+}
+
+.soc-side-avatar {
+  border: 3px solid var(--us-surface);
+}
+
+.soc-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.soc-quick-tile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--us-border);
+  background: var(--us-bg);
+  color: var(--us-text);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.soc-quick-tile:hover,
+.soc-quick-tile:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(79, 70, 229, 0.3);
+  background: var(--us-surface);
+  color: var(--us-text);
+}
+
+.soc-quick-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.soc-quick-icon {
+  display: inline-grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 1.85rem;
+  height: 1.85rem;
+  border-radius: 0.5rem;
+}
+
+.soc-quick-tile.is-indigo .soc-quick-icon,
+.soc-mobile-pill.is-indigo { background: #eef2ff; color: #4338ca; border-color: #c7d2fe; }
+.soc-quick-tile.is-emerald .soc-quick-icon,
+.soc-mobile-pill.is-emerald { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+.soc-quick-tile.is-amber .soc-quick-icon,
+.soc-mobile-pill.is-amber { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+.soc-quick-tile.is-rose .soc-quick-icon,
+.soc-mobile-pill.is-rose { background: #fff1f2; color: #be123c; border-color: #fecdd3; }
+
+.soc-mobile-shortcuts {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scrollbar-width: none;
+}
+
+.soc-mobile-shortcuts::-webkit-scrollbar {
+  display: none;
+}
+
+.soc-mobile-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.soc-suggest-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.soc-suggest-reason {
+  font-size: 0.74rem;
+  color: var(--us-text-muted);
+}
+
+.soc-suggest-btn {
+  min-width: 5.5rem;
+}
+
+@media (max-width: 575.98px) {
+  .soc-hero-banner {
+    padding: 0.875rem 1rem;
   }
 }

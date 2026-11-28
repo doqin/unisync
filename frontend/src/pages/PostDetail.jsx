@@ -2,10 +2,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Button, Card, Container } from 'react-bootstrap';
-import BackButton from '../components/BackButton.jsx';
 import CommentSection from '../components/CommentSection.jsx';
 import EmptyState from '../components/EmptyState.jsx';
 import ErrorAlert from '../components/ErrorAlert.jsx';
+import HomeSidebar from '../components/HomeSidebar.jsx';
 import Icon from '../components/Icon.jsx';
 import PostCard from '../components/PostCard.jsx';
 import { api } from '../lib/api.js';
@@ -62,9 +62,9 @@ export default function PostDetail() {
     clearTimeout(toastTimerRef.current);
   }, []);
 
-  const showToast = useCallback((text, variant = 'edit') => {
+  const showToast = useCallback((text, variant = 'edit', icon = 'check') => {
     clearTimeout(toastTimerRef.current);
-    setToast({ id: Date.now(), text, variant });
+    setToast({ id: Date.now(), text, variant, icon });
     toastTimerRef.current = setTimeout(() => setToast(null), TOAST_MS);
   }, []);
 
@@ -157,19 +157,57 @@ export default function PostDetail() {
     );
   }
 
-  return (
-    <Container className="py-4 soc-feed-col">
-      <div className="mb-2">
-        <BackButton fallback="/home">Quay lại bảng tin</BackButton>
-      </div>
-      <h1 className="visually-hidden">Chi tiết bài đăng</h1>
+  const goBack = () => {
+    const idx = window.history.state?.idx ?? 0;
+    if (idx > 0) navigate(-1);
+    else navigate('/home', { replace: true });
+  };
 
-      {body}
+  return (
+    <Container className="py-4 soc-dashboard-wrap">
+      <div className="soc-dashboard-grid">
+        <div className="soc-dashboard-main">
+          <header className="d-flex align-items-center gap-2 gap-sm-3 mb-3">
+            <button
+              type="button"
+              onClick={goBack}
+              className="soc-back-icon-btn"
+              aria-label="Quay lại bảng tin"
+              title="Quay lại"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M19 12H5M11 6l-6 6 6 6" />
+              </svg>
+            </button>
+            <div style={{ minWidth: 0 }}>
+              <h1 className="h5 fw-bold mb-0">Bài viết</h1>
+              <p className="small text-body-secondary mb-0">Thảo luận &amp; phản hồi</p>
+            </div>
+          </header>
+
+          {body}
+        </div>
+
+        <aside className="soc-dashboard-aside d-none d-lg-block" aria-label="Thông tin và gợi ý kết nối">
+          <HomeSidebar onToast={showToast} />
+        </aside>
+      </div>
 
       <div className="soc-toast-layer" role="status" aria-live="polite">
         {toast && (
           <div key={toast.id} className={`soc-toast soc-toast--${toast.variant}`}>
-            <Icon name="check" size={18} className="soc-toast-icon" />
+            <Icon name={toast.icon ?? 'check'} size={18} className="soc-toast-icon" />
             <span>{toast.text}</span>
             <button type="button" className="soc-toast-close" onClick={closeToast} aria-label="Đóng thông báo">
               <Icon name="close" size={14} />

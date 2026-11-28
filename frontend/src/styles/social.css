@@ -135,20 +135,21 @@
   align-items: center;
   gap: 0.4rem;
   min-height: 36px;
-  padding: 0.25rem 0.6rem;
-  border: 0;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid #eceff5;
   border-radius: 999px;
-  background: transparent;
-  color: var(--us-text-muted);
-  font-size: 0.92rem;
+  background: #f8f9fc;
+  color: #4b5563;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
 }
 
 .soc-action-btn:hover,
 .soc-action-btn:focus-visible {
-  background: var(--us-primary-subtle);
+  background: #eef2ff;
+  border-color: #c7d2fe;
   color: var(--us-primary);
 }
 
@@ -158,12 +159,15 @@
 }
 
 .soc-action-btn.is-liked {
+  background: #fff1f2;
+  border-color: #fecdd3;
   color: #e11d48;
 }
 
 .soc-action-btn.is-liked:hover,
 .soc-action-btn.is-liked:focus-visible {
-  background: rgba(225, 29, 72, 0.1);
+  background: #ffe4e6;
+  border-color: #fda4af;
   color: #be123c;
 }
 
@@ -869,4 +873,19 @@
 
 .soc-suggest-btn {
   min-width: 5.5rem;
+}
+
+.soc-post-avatar {
+  box-shadow: 0 0 0 2px #eef2ff;
+}
+
+.soc-author-link:hover,
+.soc-author-link:focus-visible {
+  color: var(--us-primary) !important;
+}
+
+.soc-time-link:hover,
+.soc-time-link:focus-visible {
+  color: var(--us-primary) !important;
+  text-decoration: underline !important;
 }

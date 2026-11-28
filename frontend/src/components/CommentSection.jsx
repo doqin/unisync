@@ -396,6 +396,9 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
     );
   }
 
+  const isSubmitKey = (e) =>
+    e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.nativeEvent?.isComposing;
+
   function renderRootThread(rootNode) {
     const childCount = rootNode.children.length;
     const isExpanded = Boolean(expandedRoots[rootNode.id]);
@@ -450,7 +453,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
                         value={replyDraft}
                         onChange={(e) => { setReplyDraft(e.target.value); if (replyErr) setReplyErr(''); }}
                         onKeyDown={(e) => {
-                          if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                          if (isSubmitKey(e)) {
                             e.preventDefault();
                             submitReplyComment();
                           } else if (e.key === 'Escape') {
@@ -504,7 +507,10 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
             id={sortSelectId}
             size="sm"
             value={sort}
-            onChange={(e) => handleSortChange(e.target.value)}
+            onChange={(e) => {
+              handleSortChange(e.target.value);
+              e.currentTarget.blur();
+            }}
             aria-label="Sắp xếp bình luận"
             className="w-auto"
           >
@@ -527,7 +533,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
                 value={draft}
                 onChange={(e) => { setDraft(e.target.value); if (submitErr) setSubmitErr(''); }}
                 onKeyDown={(e) => {
-                  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                  if (isSubmitKey(e)) {
                     e.preventDefault();
                     submitRootComment();
                   }
@@ -538,7 +544,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
               />
               <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
                 <span className="small text-body-secondary">
-                  {draft.length}/{MAX_COMMENT} · Ctrl+Enter để gửi nhanh
+                  {draft.length}/{MAX_COMMENT}
                 </span>
                 <Button type="submit" size="sm" disabled={submitting || !draft.trim()}>
                   {submitting ? <LoadingSpinner inline label="Đang gửi…" /> : 'Gửi bình luận'}

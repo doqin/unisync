@@ -12,14 +12,14 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { supabaseAdmin } from '../lib/supabase.js';
-import { badRequest, forbidden } from '../lib/errors.js';
+import { badRequest, forbidden, notFound } from '../lib/errors.js';
 import { HEAD_BYTES } from '../lib/files.js';
 import {
   IMAGES_BUCKET, buildAvatarPath, checkDeclaredAvatar, checkStoredAvatar, parseAvatarPath, signAvatar,
 } from '../lib/avatar.js';
+import { hydratePosts } from '../lib/posts.js';
 import { validate } from '../middleware/validate.js';
 import { uploadLimiter } from '../middleware/rateLimit.js';
-import { stub } from './_stub.js';
 
 // Ô văn bản không bắt buộc: client gửi '' hoặc null để xóa → lưu null.
 const optionalText = (label, max) => z.string().trim().max(max, `${label} tối đa ${max} ký tự`).nullish()
@@ -40,6 +40,21 @@ const avatarUrlSchema = z.object({
 });
 
 const avatarConfirmSchema = z.object({ path: z.string().max(255) });
+
+const idParam = z.object({ id: z.uuid('Hồ sơ không hợp lệ') });
+const postsQuery = z.object({ page: z.coerce.number().int().min(1).max(1000).default(1) });
+
+const POSTS_PER_PAGE = 10;
+
+// Hồ sơ công khai (FR-PRO-01): mọi sinh viên đã đăng nhập xem được (SRS 4). Không có email, role, is_locked.
+const PUBLIC_FIELDS = 'id, full_name, avatar_url, bio, major, school, year, created_at';
+
+/** Đếm dòng của một bảng theo một điều kiện bằng, không tải dữ liệu về. */
+async function countWhere(sb, table, column, value) {
+  const { count, error } = await sb.from(table).select('*', { count: 'exact', head: true }).eq(column, value);
+  if (error) throw error;
+  return count ?? 0;
+}
 
 /** Đọc vài byte đầu của ảnh trên Storage qua signed URL ngắn hạn (không tải cả ảnh vào bộ nhớ). */
 async function readHeadFromStorage(sb, path) {
@@ -132,8 +147,67 @@ export function createProfilesRouter({ db = supabaseAdmin, readHead = readHeadFr
     }
   });
 
-  // FR-PRO-01/03 (xem hồ sơ người khác, bài đăng của họ): issue #17.
-  r.use(stub('Hồ sơ', 'FR-PRO-01, FR-PRO-03', 'Khang'));
+  // FR-PRO-01: xem hồ sơ của bất kỳ người dùng nào kèm số người theo dõi / đang theo dõi.
+  r.get('/:id', validate({ params: idParam }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const { data: profile, error } = await sb.from('profiles').select(PUBLIC_FIELDS).eq('id', req.params.id).maybeSingle();
+      if (error) throw error;
+      if (!profile) throw notFound('Không tìm thấy người dùng');
+
+      const [followers, following] = await Promise.all([
+        countWhere(sb, 'follows', 'followee_id', profile.id),
+        countWhere(sb, 'follows', 'follower_id', profile.id),
+      ]);
+      const signed = await signAvatar(sb, profile);
+      res.json({ ...signed, followers_count: followers, following_count: following, is_self: profile.id === req.user.id });
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // FR-PRO-03: bài đăng của người đó, mới nhất trước, phân trang → { items, page, has_more }.
+  // Bài cá nhân thấy được với mọi người; bài nhóm chỉ khi người xem là thành viên đã duyệt của nhóm (SRS 4).
+  r.get('/:id/posts', validate({ params: idParam, query: postsQuery }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const { id } = req.params;
+      const page = Number(req.query.page ?? 1);
+
+      const { data: exists, error: exErr } = await sb.from('profiles').select('id').eq('id', id).maybeSingle();
+      if (exErr) throw exErr;
+      if (!exists) throw notFound('Không tìm thấy người dùng');
+
+      const { data: mine, error: mErr } = await sb.from('group_members').select('group_id')
+        .eq('user_id', req.user.id).eq('status', 'approved');
+      if (mErr) throw mErr;
+      const groupIds = (mine ?? []).map((m) => m.group_id);
+
+      let q = sb.from('posts').select('id, author_id, group_id, content, image_urls, created_at').eq('author_id', id);
+      q = groupIds.length ? q.or(`group_id.is.null,group_id.in.(${groupIds.join(',')})`) : q.is('group_id', null);
+      const from = (page - 1) * POSTS_PER_PAGE;
+      // Lấy dư một bài để biết còn trang sau; `id` phân định khi hai bài cùng thời điểm.
+      const { data: rows, error } = await q.order('created_at', { ascending: false }).order('id', { ascending: false })
+        .range(from, from + POSTS_PER_PAGE);
+      if (error) throw error;
+
+      const hasMore = (rows ?? []).length > POSTS_PER_PAGE;
+      const posts = (rows ?? []).slice(0, POSTS_PER_PAGE);
+      if (!posts.length) return res.json({ items: [], page, has_more: false });
+
+      // Cùng dạng với bảng tin (lib/posts.js) để dùng chung PostCard. Đường dẫn gốc của ảnh (`image_paths`) chỉ
+      // cần cho form sửa của tác giả nên chỉ trả cho bài của chính người xem.
+      const items = (await hydratePosts(sb, posts, req.user.id))
+        .map((p) => { if (p.author_id !== req.user.id) delete p.image_paths; return p; });
+      res.json({
+        items,
+        page,
+        has_more: hasMore,
+      });
+    } catch (e) {
+      next(e);
+    }
+  });
 
   return r;
 }

@@ -218,7 +218,7 @@ export default function PostComposer({
               <span>Thêm ảnh ({images.length}/{MAX_POST_IMAGES})</span>
             </Button>
           </div>
-          <Button type="submit" className="soc-navy-btn px-3" disabled={busy || !content.trim()}>
+          <Button type="submit" variant="primary" className="px-3 fw-semibold" disabled={busy || !content.trim()}>
             {busy ? <LoadingSpinner inline label={statusLabel || 'Đang đăng…'} /> : 'Đăng bài'}
           </Button>
         </div>

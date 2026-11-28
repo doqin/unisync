@@ -9,10 +9,10 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../lib/api.js';
 
 export const CAMPUS_SHORTCUTS = [
-  { to: '/study', label: 'Góc học tập', icon: 'study' },
-  { to: '/library', label: 'Thư viện', icon: 'library' },
-  { to: '/groups', label: 'Nhóm học phần', icon: 'groups' },
-  { to: '/teamups', label: 'Team-up', icon: 'teamup' },
+  { to: '/study', label: 'Góc học tập', icon: 'study', accent: 'coral' },
+  { to: '/library', label: 'Thư viện', icon: 'library', accent: 'sky' },
+  { to: '/groups', label: 'Nhóm học phần', icon: 'groups', accent: 'emerald' },
+  { to: '/teamups', label: 'Team-up', icon: 'teamup', accent: 'indigo' },
 ];
 
 function shortReason(u) {
@@ -81,6 +81,14 @@ export default function HomeSidebar({ onToast }) {
               Bổ sung ngành &amp; trường →
             </Link>
           )}
+          <div className="soc-side-edu mt-1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"
+              strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8.5 12.5 2.5 2.5 4.5-5" />
+            </svg>
+            <span>Sinh viên .edu.vn</span>
+          </div>
           <div className="d-flex gap-2 mt-3">
             {userId && (
               <Button as={Link} to={`/u/${userId}`} variant="outline-primary" size="sm" className="flex-grow-1">
@@ -98,7 +106,7 @@ export default function HomeSidebar({ onToast }) {
         <h2 className="h6 fw-bold mb-2">Khám phá nhanh</h2>
         <div className="soc-quick-grid">
           {CAMPUS_SHORTCUTS.map((item) => (
-            <Link key={item.to} to={item.to} className="soc-quick-tile">
+            <Link key={item.to} to={item.to} className={`soc-quick-tile is-${item.accent}`}>
               <span className="soc-quick-icon" aria-hidden="true">
                 <Icon name={item.icon} size={18} />
               </span>

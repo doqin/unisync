@@ -793,9 +793,8 @@
 
 .soc-quick-label {
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .soc-mobile-shortcuts {
@@ -865,4 +864,69 @@
 .soc-time-link:focus-visible {
   color: var(--us-primary) !important;
   text-decoration: underline !important;
+}
+
+/* Dải gợi ý kết nối (di động) */
+.soc-suggest-strip-list {
+  display: flex;
+  gap: 0.625rem;
+  overflow-x: auto;
+  padding-bottom: 0.25rem;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+
+.soc-suggest-strip-list::-webkit-scrollbar {
+  display: none;
+}
+
+.soc-suggest-card {
+  display: flex;
+  flex: 0 0 8.5rem;
+  width: 8.5rem;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--us-border);
+  border-radius: 0.875rem;
+  background: var(--us-surface);
+  scroll-snap-align: start;
+}
+
+.soc-suggest-card-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Vùng chạm ≥ 44 px trên màn hình cảm ứng / điện thoại */
+@media (pointer: coarse), (max-width: 575.98px) {
+  .soc-action-btn,
+  .soc-mobile-pill,
+  .soc-suggest-btn,
+  .soc-feed-refresh-btn,
+  .soc-more-btn,
+  .soc-icon-btn {
+    min-height: 44px;
+  }
+
+  .soc-more-btn,
+  .soc-icon-btn {
+    min-width: 44px;
+  }
+
+  .soc-toast-close {
+    position: relative;
+  }
+
+  .soc-preview-remove::after,
+  .soc-toast-close::after {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
 }

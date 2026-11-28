@@ -24,42 +24,89 @@ function shortReason(u) {
   return [u.major, u.school].filter(Boolean).join(' · ') || 'Sinh viên .edu.vn';
 }
 
-export default function HomeSidebar({ onToast }) {
-  const { user, profile } = useAuth();
-  const [suggestions, setSuggestions] = useState([]);
-  const [loadingSug, setLoadingSug] = useState(true);
-
-  const userId = profile?.id ?? user?.id;
-  const displayName = profile?.full_name || user?.user_metadata?.full_name || 'Sinh viên';
-  const metaText = [profile?.major, profile?.school, profile?.year ? `Năm ${profile.year}` : null]
-    .filter(Boolean)
-    .join(' · ');
+/** Gợi ý kết nối dùng chung cho cột phụ (desktop) và dải gợi ý (di động): chỉ gọi API một lần. */
+export function useSuggestions() {
+  const { user } = useAuth();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user?.id) return undefined;
     let alive = true;
-    setLoadingSug(true);
+    setLoading(true);
     api('/users?limit=4')
       .then((res) => {
-        if (alive) setSuggestions(Array.isArray(res?.items) ? res.items : []);
+        if (alive) setItems(Array.isArray(res?.items) ? res.items : []);
       })
       .catch(() => {
-        if (alive) setSuggestions([]);
+        if (alive) setItems([]);
       })
       .finally(() => {
-        if (alive) setLoadingSug(false);
+        if (alive) setLoading(false);
       });
     return () => { alive = false; };
   }, [user?.id]);
 
-  const handleFollowChanged = (targetId, status) => {
-    setSuggestions((cur) => cur.map((u) => (u.id === targetId ? {
+  const onFollowChanged = (targetId, status) => {
+    setItems((cur) => cur.map((u) => (u.id === targetId ? {
       ...u,
       is_following: Boolean(status.is_following),
       is_followed_by: Boolean(status.is_followed_by),
       is_mutual: Boolean(status.is_mutual),
     } : u)));
   };
+
+  return { items, loading, onFollowChanged };
+}
+
+function toastFromFollow(onToast) {
+  return (t) => onToast?.(t.text, t.error ? 'delete' : 'edit', t.error ? 'alert' : 'check');
+}
+
+/** Dải gợi ý kết nối cuộn ngang, chỉ dùng dưới 992 px (cột phụ bị ẩn). */
+export function SuggestionStrip({ suggestions, onToast }) {
+  const { items, onFollowChanged } = suggestions;
+  if (items.length === 0) return null;
+  return (
+    <section className="soc-suggest-strip d-lg-none mb-3" aria-label="Gợi ý kết nối">
+      <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
+        <h2 className="h6 fw-bold mb-0">Gợi ý kết nối</h2>
+        <Link to="/search" className="small fw-semibold text-decoration-none">Xem thêm</Link>
+      </div>
+      <ul className="soc-suggest-strip-list list-unstyled mb-0">
+        {items.map((u) => (
+          <li key={u.id} className="soc-suggest-card">
+            <Link to={`/u/${u.id}`} className="soc-suggest-card-link text-reset text-decoration-none">
+              <Avatar src={u.avatar_url} name={u.full_name} size={44} decorative />
+              <span className="small fw-semibold text-truncate w-100 text-center">{u.full_name}</span>
+              <span className="soc-suggest-reason text-truncate w-100 text-center">{shortReason(u)}</span>
+            </Link>
+            <FollowButton
+              size="sm"
+              className="w-100 soc-suggest-btn"
+              userId={u.id}
+              fullName={u.full_name}
+              isFollowing={u.is_following}
+              isFollowedBy={u.is_followed_by}
+              onChanged={(st) => onFollowChanged(u.id, st)}
+              onToast={toastFromFollow(onToast)}
+            />
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+export default function HomeSidebar({ suggestions, onToast }) {
+  const { user, profile } = useAuth();
+  const { items: suggestionItems, loading: loadingSug, onFollowChanged: handleFollowChanged } = suggestions;
+
+  const userId = profile?.id ?? user?.id;
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || 'Sinh viên';
+  const metaText = [profile?.major, profile?.school, profile?.year ? `Năm ${profile.year}` : null]
+    .filter(Boolean)
+    .join(' · ');
 
   return (
     <div className="d-flex flex-column gap-3">
@@ -116,7 +163,7 @@ export default function HomeSidebar({ onToast }) {
         </div>
       </Card>
 
-      {(loadingSug || suggestions.length > 0) && (
+      {(loadingSug || suggestionItems.length > 0) && (
         <Card body className="soc-post-card">
           <div className="d-flex align-items-center justify-content-between gap-2 mb-2">
             <h2 className="h6 fw-bold mb-0">Gợi ý kết nối</h2>
@@ -140,7 +187,7 @@ export default function HomeSidebar({ onToast }) {
             </div>
           ) : (
             <div className="d-flex flex-column gap-2">
-              {suggestions.map((u) => (
+              {suggestionItems.map((u) => (
                 <div key={u.id} className="soc-suggest-row">
                   <Link
                     to={`/u/${u.id}`}
@@ -161,7 +208,7 @@ export default function HomeSidebar({ onToast }) {
                     isFollowing={u.is_following}
                     isFollowedBy={u.is_followed_by}
                     onChanged={(s) => handleFollowChanged(u.id, s)}
-                    onToast={(t) => onToast?.(t.text, t.error ? 'delete' : 'edit', t.error ? 'alert' : 'check')}
+                    onToast={toastFromFollow(onToast)}
                   />
                 </div>
               ))}

@@ -43,10 +43,11 @@ export default function Library() {
 
   // Tìm ngay khi người dùng ngừng gõ khoảng 300ms; Enter vẫn gửi ngay.
   useEffect(() => {
+    const v = draftQ.trim();
+    // Không đổi thì không gọi setParams: gọi với URL cũ vẫn thêm một mục lịch sử, làm nút quay lại bị kẹt.
+    if (v === q) return undefined;
     const t = setTimeout(() => {
-      const v = draftQ.trim();
       setParams((prev) => {
-        if ((prev.get('q') ?? '') === v) return prev; // không đổi thì giữ nguyên
         const next = new URLSearchParams(prev);
         if (v) next.set('q', v); else next.delete('q');
         return next;

@@ -577,3 +577,67 @@
     max-width: calc(100vw - 1.5rem);
   }
 }
+
+/* Gắn thẻ @mention trong bình luận & danh sách gợi ý Mutual */
+.soc-mention-link {
+  color: var(--us-primary);
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 0.25rem;
+}
+
+.soc-mention-link:hover,
+.soc-mention-link:focus-visible {
+  color: var(--us-primary-hover);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.soc-mention-wrap {
+  position: relative;
+}
+
+.soc-mention-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 0.25rem);
+  z-index: 1050;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 0.35rem;
+  border: 1px solid var(--us-border);
+  border-radius: 0.625rem;
+  background: var(--us-surface);
+  box-shadow: 0 10px 28px rgba(31, 36, 48, 0.14);
+}
+
+.soc-mention-header {
+  padding: 0.25rem 0.5rem 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--us-text-muted);
+}
+
+.soc-mention-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: 0;
+  border-radius: 0.45rem;
+  background: transparent;
+  color: var(--us-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.soc-mention-item:hover,
+.soc-mention-item.is-active {
+  background: var(--us-primary-subtle);
+  color: var(--us-primary-active);
+}

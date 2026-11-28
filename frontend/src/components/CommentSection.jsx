@@ -7,9 +7,11 @@ import CommentItem from './CommentItem.jsx';
 import ErrorAlert from './ErrorAlert.jsx';
 import LoadMore from './LoadMore.jsx';
 import LoadingSpinner from './LoadingSpinner.jsx';
+import MentionTextarea from './MentionTextarea.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import usePagedList from '../hooks/usePagedList.js';
 import { api } from '../lib/api.js';
+import { decodeMentions, encodeMentions, focusCaretAt } from '../lib/mentions.js';
 import '../styles/social.css';
 
 const COMMENTS_LIMIT = 50;
@@ -114,6 +116,10 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
     [postId, sort],
   );
 
+  // Danh sách người dùng Mutual và người được gắn thẻ để gợi ý & gắn link hồ sơ cho @mention
+  const [mutuals, setMutuals] = useState([]);
+  const [extraMentions, setExtraMentions] = useState([]);
+
   // Form bình luận gốc ở đầu mục
   const [draft, setDraft] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -141,6 +147,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
   const [editContent, setEditContent] = useState('');
   const [editBusy, setEditBusy] = useState(false);
   const [editErr, setEditErr] = useState('');
+  const editTextareaRef = useRef(null);
 
   // State xóa bình luận
   const [targetDelete, setTargetDelete] = useState(null);
@@ -154,10 +161,30 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
   const menuBaseId = useId();
 
   useEffect(() => {
+    if (!user?.id) {
+      setMutuals([]);
+      return undefined;
+    }
+    let alive = true;
+    api('/follows/mutuals?limit=100')
+      .then((res) => {
+        if (alive && Array.isArray(res?.items)) setMutuals(res.items);
+      })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, [user?.id]);
+
+  useEffect(() => {
     if (replyTo && replyTextareaRef.current) {
-      replyTextareaRef.current.focus({ preventScroll: false });
+      focusCaretAt(replyTextareaRef.current);
     }
   }, [replyTo]);
+
+  useEffect(() => {
+    if (showEditModal && editTextareaRef.current) {
+      focusCaretAt(editTextareaRef.current);
+    }
+  }, [showEditModal]);
 
   // Đóng thanh chọn cảm xúc và đặt lại thứ tự lọc khi đổi bài đăng
   useEffect(() => {
@@ -167,6 +194,22 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
     setOpenPickerId(null);
     setReactErr('');
   }, [postId]);
+
+  const registerMention = (u) => {
+    if (!u?.id || !u?.full_name) return;
+    setExtraMentions((cur) => (cur.some((x) => x.id === u.id && x.full_name === u.full_name)
+      ? cur
+      : [...cur, { id: u.id, full_name: u.full_name }]));
+  };
+
+  const knownUsers = useMemo(() => {
+    const users = [...mutuals, ...extraMentions];
+    for (const c of list.items) {
+      const cid = c.author?.id ?? c.author_id;
+      if (cid && c.author?.full_name) users.push({ id: cid, full_name: c.author.full_name });
+    }
+    return users;
+  }, [mutuals, extraMentions, list.items]);
 
   const commentTree = useMemo(() => buildTwoLevelTree(list.items), [list.items]);
 
@@ -190,7 +233,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
     try {
       const created = await api(`/posts/${postId}/comments`, {
         method: 'POST',
-        body: { content: trimmed },
+        body: { content: encodeMentions(trimmed, knownUsers) },
       });
       list.setItems((cur) => {
         if (cur.some((x) => x.id === created.id)) return cur;
@@ -212,11 +255,14 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
 
   function openInlineReply(comment, authorName) {
     const rootId = comment.rootId ?? comment.id;
+    const targetAuthorId = comment.author?.id ?? comment.author_id;
+    registerMention({ id: targetAuthorId, full_name: authorName });
+
     // Tự động mở rộng nhánh phản hồi của bình luận gốc để hiện khung nhập ngay bên dưới
     setExpandedRoots((cur) => ({ ...cur, [rootId]: true }));
 
     if (replyTo?.rootId === rootId && replyTo?.targetId === comment.id) {
-      replyTextareaRef.current?.focus();
+      focusCaretAt(replyTextareaRef.current);
       return;
     }
     setReplyTo({ rootId, targetId: comment.id, authorName });
@@ -246,7 +292,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
       // Luôn gắn parent_id về bình luận gốc (cấp 0) để cấu trúc cây giữ đúng 2 cấp như Facebook
       const created = await api(`/posts/${postId}/comments`, {
         method: 'POST',
-        body: { content: trimmed, parent_id: replyTo.rootId },
+        body: { content: encodeMentions(trimmed, knownUsers), parent_id: replyTo.rootId },
       });
       list.setItems((cur) => (cur.some((x) => x.id === created.id) ? cur : [...cur, created]));
       setExpandedRoots((cur) => ({ ...cur, [replyTo.rootId]: true }));
@@ -291,8 +337,10 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
   }
 
   function startEditComment(comment) {
+    const { text, mentions } = decodeMentions(comment.content);
+    for (const m of mentions) registerMention(m);
     setEditingComment(comment);
-    setEditContent(comment.content);
+    setEditContent(text);
     setEditErr('');
     setShowEditConfirm(false);
     setShowEditModal(true);
@@ -339,7 +387,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
     try {
       const updated = await api(`/posts/${postId}/comments/${editingComment.id}`, {
         method: 'PATCH',
-        body: { content: trimmed },
+        body: { content: encodeMentions(trimmed, knownUsers) },
       });
       list.setItems((cur) => cur.map((x) => (x.id === updated.id ? updated : x)));
       setShowEditConfirm(false);
@@ -380,6 +428,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
       <CommentItem
         comment={comment}
         isReply={isReply}
+        knownUsers={knownUsers}
         currentUserId={user?.id}
         isAdmin={isAdmin}
         menuId={`${menuBaseId}-${comment.id}`}
@@ -444,13 +493,14 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
                       <Form.Label htmlFor={`${inputId}-reply`} className="visually-hidden">
                         Trả lời {replyTo.authorName}
                       </Form.Label>
-                      <Form.Control
-                        ref={replyTextareaRef}
+                      <MentionTextarea
+                        textareaRef={replyTextareaRef}
                         id={`${inputId}-reply`}
-                        as="textarea"
                         rows={2}
                         className="soc-textarea-fixed"
                         value={replyDraft}
+                        mutuals={mutuals}
+                        onMentionPicked={registerMention}
                         onChange={(e) => { setReplyDraft(e.target.value); if (replyErr) setReplyErr(''); }}
                         onKeyDown={(e) => {
                           if (isSubmitKey(e)) {
@@ -524,13 +574,14 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
             <Avatar src={profile?.avatar_url} name={myName} size={36} decorative />
             <div className="flex-grow-1" style={{ minWidth: 0 }}>
               <Form.Label htmlFor={inputId} className="visually-hidden">Viết bình luận</Form.Label>
-              <Form.Control
-                ref={inputRef}
+              <MentionTextarea
+                textareaRef={inputRef}
                 id={inputId}
-                as="textarea"
                 rows={2}
                 className="soc-textarea-fixed"
                 value={draft}
+                mutuals={mutuals}
+                onMentionPicked={registerMention}
                 onChange={(e) => { setDraft(e.target.value); if (submitErr) setSubmitErr(''); }}
                 onKeyDown={(e) => {
                   if (isSubmitKey(e)) {
@@ -539,7 +590,7 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
                   }
                 }}
                 maxLength={MAX_COMMENT}
-                placeholder="Viết bình luận của bạn…"
+                placeholder="Viết bình luận của bạn… (gõ @ để gắn thẻ Mutual)"
                 disabled={submitting}
               />
               <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2">
@@ -589,12 +640,14 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
         <Form onSubmit={requestSaveEditComment} noValidate>
           <Modal.Body>
             <Form.Label htmlFor={editTextareaId} className="visually-hidden">Chỉnh sửa nội dung bình luận</Form.Label>
-            <Form.Control
+            <MentionTextarea
+              textareaRef={editTextareaRef}
               id={editTextareaId}
-              as="textarea"
               rows={3}
               className="soc-textarea-fixed"
               value={editContent}
+              mutuals={mutuals}
+              onMentionPicked={registerMention}
               onChange={(e) => { setEditContent(e.target.value); if (editErr) setEditErr(''); }}
               maxLength={MAX_COMMENT}
               disabled={editBusy}

@@ -851,6 +851,20 @@ test('Follow & Mutual: một chiều, hai chiều thành Mutual, bỏ theo dõi 
   assert.equal(following.status, 200);
   assert.deepEqual(following.body.items.map((u) => u.id), [BOB]);
 
+  // Danh sách Mutual dùng cho gợi ý @mention khi bình luận (chỉ trả người theo dõi 2 chiều)
+  const mutuals = await req('GET', '/follows/mutuals', { user: ALICE });
+  assert.equal(mutuals.status, 200);
+  assert.equal(mutuals.body.items.length, 1);
+  assert.equal(mutuals.body.items[0].id, BOB);
+  assert.equal(mutuals.body.items[0].is_mutual, true);
+  assert.match(mutuals.body.items[0].avatar_url, /^https:\/\/sb\.test\/object\/avatars\//);
+
+  const mutualSearch = await req('GET', '/follows/mutuals?q=van', { user: ALICE });
+  assert.equal(mutualSearch.status, 200);
+  assert.deepEqual(mutualSearch.body.items.map((u) => u.id), [BOB]);
+  const mutualEmpty = await req('GET', '/follows/mutuals?q=khongco', { user: ALICE });
+  assert.deepEqual(mutualEmpty.body.items, []);
+
   // Alice bỏ theo dõi Bob → không còn Mutual
   const unfollow = await req('DELETE', `/follows/${BOB}`, { user: ALICE });
   assert.equal(unfollow.status, 200);

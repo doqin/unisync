@@ -172,10 +172,15 @@ export async function hydratePosts(sb, posts, viewerId) {
 
   return posts.map((p) => {
     const rawPaths = p.image_urls ?? [];
+    const paired = rawPaths
+      .map((path) => ({ path, url: signedImages.get(path) }))
+      .filter((x) => Boolean(x.url));
+    const isAuthor = p.author_id === viewerId;
     return {
       ...p,
-      image_paths: rawPaths,
-      image_urls: rawPaths.map((u) => signedImages.get(u)).filter(Boolean),
+      // Chỉ trả đường dẫn gốc (chứa user_id) cho chính tác giả để phục vụ sửa bài, tránh lộ cho người xem khác.
+      ...(isAuthor ? { image_paths: paired.map((x) => x.path) } : {}),
+      image_urls: paired.map((x) => x.url),
       author: authorMap.get(p.author_id) ?? null,
       group: p.group_id ? { id: p.group_id, name: groupName.get(p.group_id) ?? null } : null,
       like_count: likeCounts.get(p.id) ?? 0,

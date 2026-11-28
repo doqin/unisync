@@ -63,6 +63,15 @@ const editSchema = z.object({
 
 const ratingSchema = z.object({ stars: z.number().int().min(1, 'Số sao từ 1 đến 5').max(5, 'Số sao từ 1 đến 5') });
 
+// Lý do báo cáo vi phạm (FR-DOC-10); khớp ràng buộc `reports.reason` ở migration 0008.
+export const REPORT_REASONS = ['copyright', 'inappropriate', 'spam', 'other'];
+
+const reportSchema = z.object({
+  reason: z.enum(REPORT_REASONS, { message: 'Lý do báo cáo không hợp lệ' }),
+  detail: z.string().trim().max(1000, 'Mô tả tối đa 1000 ký tự').optional()
+    .transform((v) => v || null),
+}).refine((b) => b.reason !== 'other' || b.detail, { message: 'Hãy mô tả vi phạm', path: ['detail'] });
+
 const DOWNLOAD_TTL = 60; // giây
 const PREVIEW_TYPES = ['pdf', 'png', 'jpg', 'webp']; // loại tệp xem trước được (FR-DOC-09 mở rộng cho ảnh)
 
@@ -72,6 +81,25 @@ async function loadDocument(sb, id) {
   if (error) throw error;
   if (!data) throw notFound('Không tìm thấy tài liệu');
   return data;
+}
+
+/** Điểm trung bình (làm tròn 1 chữ số) và số lượt đánh giá. */
+function summarizeRatings(ratings) {
+  const count = ratings.length;
+  const sum = ratings.reduce((a, x) => a + x.stars, 0);
+  return { rating_avg: count ? Math.round((sum / count) * 10) / 10 : null, rating_count: count };
+}
+
+/** Gắn điểm đánh giá cho một trang danh sách (FR-DOC-08). Lỗi thì trả danh sách không kèm điểm. */
+async function withRatings(sb, docs) {
+  if (!docs.length) return docs;
+  const { data, error } = await sb.from('document_ratings').select('document_id, stars')
+    .in('document_id', docs.map((d) => d.id));
+  if (error) {
+    console.error('Đọc document_ratings thất bại:', error.message);
+    return docs;
+  }
+  return docs.map((d) => ({ ...d, ...summarizeRatings(data.filter((x) => x.document_id === d.id)) }));
 }
 
 /** Tên tệp khi người dùng tải về: tiêu đề + phần mở rộng thật. */
@@ -222,13 +250,14 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       const { group_id, file_type, q } = req.query; // đã kiểm tra bởi browseSchema
       const page = Number(req.query.page ?? 1);
       const limit = 20;
-      const { data, error } = await db().rpc('search_documents', {
+      const sb = db();
+      const { data, error } = await sb.rpc('search_documents', {
         p_q: q ?? null, p_group: group_id ?? null, p_file_type: file_type ?? null,
         p_sort: req.query.sort === 'rating' ? 'rating' : 'newest',
         p_limit: limit, p_offset: (page - 1) * limit,
       });
       if (error) throw error;
-      res.json({ items: data, page, has_more: data.length === limit });
+      res.json({ items: await withRatings(sb, data), page, has_more: data.length === limit });
     } catch (e) {
       next(e);
     }
@@ -239,11 +268,12 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
     try {
       const limit = 20;
       const page = Number(req.query.page ?? 1);
-      const { data, error } = await db().from('documents').select('*')
+      const sb = db();
+      const { data, error } = await sb.from('documents').select('*')
         .eq('uploader_id', req.user.id).order('created_at', { ascending: false })
         .range((page - 1) * limit, page * limit - 1);
       if (error) throw error;
-      res.json({ items: data, page, has_more: data.length === limit });
+      res.json({ items: await withRatings(sb, data), page, has_more: data.length === limit });
     } catch (e) {
       next(e);
     }
@@ -261,14 +291,18 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       const { data: ratings, error } = await sb.from('document_ratings').select('user_id, stars')
         .eq('document_id', doc.id);
       if (error) throw error;
-      const count = ratings.length;
-      const sum = ratings.reduce((a, x) => a + x.stars, 0);
+      const { data: myReport, error: repErr } = await sb.from('reports').select('id')
+        .eq('target_type', 'document').eq('target_id', doc.id)
+        .eq('reporter_id', req.user.id).eq('status', 'pending').maybeSingle();
+      // Báo cáo vi phạm là tính năng phụ (FR-DOC-10): lỗi hoặc CSDL chưa có bảng `reports` thì ghi nhật ký,
+      // không được chặn trang chi tiết.
+      if (repErr) console.error('Đọc reports thất bại:', repErr.message);
       res.json({
         ...doc,
         uploader_name: uploader?.full_name ?? null,
-        rating_avg: count ? Math.round((sum / count) * 10) / 10 : null,
-        rating_count: count,
+        ...summarizeRatings(ratings),
         my_rating: ratings.find((x) => x.user_id === req.user.id)?.stars ?? null,
+        my_report_pending: Boolean(myReport),
       });
     } catch (e) {
       next(e);
@@ -347,6 +381,33 @@ export function createDocumentsRouter({ db = supabaseAdmin, readHead = readHeadF
       );
       if (error) throw error;
       res.json({ my_rating: req.body.stars });
+    } catch (e) {
+      next(e);
+    }
+  });
+
+  // Báo cáo tài liệu vi phạm (FR-DOC-10). Ghi vào bảng `reports` dùng chung; Admin xử lý ở hàng đợi (FR-ADM-04).
+  r.post('/:id/report', validate({ params: idParam, body: reportSchema }), async (req, res, next) => {
+    try {
+      const sb = db();
+      const doc = await loadDocument(sb, req.params.id);
+      if (doc.uploader_id === req.user.id) throw badRequest('Không thể báo cáo tài liệu của chính bạn');
+
+      const DUP = 'Bạn đã báo cáo tài liệu này, quản trị viên đang xem xét';
+      const { data: pending, error: pErr } = await sb.from('reports').select('id')
+        .eq('target_type', 'document').eq('target_id', doc.id)
+        .eq('reporter_id', req.user.id).eq('status', 'pending').maybeSingle();
+      if (pErr) throw pErr;
+      if (pending) throw new HttpError(409, DUP);
+
+      const { data, error } = await sb.from('reports').insert({
+        target_type: 'document', target_id: doc.id, reporter_id: req.user.id,
+        reason: req.body.reason, detail: req.body.detail, status: 'pending',
+      }).select('id, reason, status, created_at').single();
+      // Hai yêu cầu đồng thời: chỉ mục duy nhất `reports_one_pending` chặn bản thứ hai.
+      if (error?.code === '23505') throw new HttpError(409, DUP);
+      if (error) throw error;
+      res.status(201).json(data);
     } catch (e) {
       next(e);
     }

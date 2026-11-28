@@ -1,0 +1,261 @@
+/* Giao diện riêng của module Mạng xã hội cốt lõi (Đức Huy). Không sửa theme.css chung. */
+
+.soc-feed-col {
+  max-width: 680px;
+}
+
+.soc-post-card {
+  border-color: var(--us-border);
+  background: var(--us-surface);
+  min-width: 0;
+}
+
+.soc-post-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--us-text);
+  line-height: 1.55;
+}
+
+.soc-textarea-fixed {
+  resize: none;
+}
+
+/* Lưới xem trước ảnh khi soạn / sửa bài */
+.soc-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+  gap: 0.5rem;
+}
+
+.soc-preview-item {
+  position: relative;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid var(--us-border);
+  aspect-ratio: 1 / 1;
+  background: var(--us-bg);
+}
+
+.soc-preview-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.soc-preview-remove {
+  position: absolute;
+  top: 0.25rem;
+  right: 0.25rem;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0 0.4rem;
+  line-height: 1;
+  border-radius: 999px;
+  font-weight: 700;
+}
+
+/* Lưới ảnh 1–4 tấm trên bài đăng */
+.soc-img-grid {
+  display: grid;
+  gap: 0.375rem;
+  margin-bottom: 0.75rem;
+}
+
+.soc-img-grid--1 {
+  grid-template-columns: 1fr;
+  max-width: 440px;
+}
+
+.soc-img-grid--2,
+.soc-img-grid--3,
+.soc-img-grid--4 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.soc-img-btn {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--us-border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--us-bg);
+  cursor: zoom-in;
+}
+
+.soc-img-btn:focus-visible {
+  outline: 2px solid var(--us-focus);
+  outline-offset: 2px;
+}
+
+.soc-img-btn img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.soc-img-grid--1 .soc-img-btn img {
+  max-height: 420px;
+  object-fit: contain;
+}
+
+.soc-img-grid--2 .soc-img-btn,
+.soc-img-grid--4 .soc-img-btn {
+  aspect-ratio: 4 / 3;
+}
+
+.soc-img-grid--3 .soc-img-btn:first-child {
+  grid-column: 1 / -1;
+  aspect-ratio: 16 / 9;
+}
+
+.soc-img-grid--3 .soc-img-btn:not(:first-child) {
+  aspect-ratio: 4 / 3;
+}
+
+.soc-post-actions {
+  border-top: 1px solid var(--us-border);
+  padding-top: 0.625rem;
+}
+
+.soc-more-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0.25rem 0.5rem;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.soc-more-btn:hover,
+.soc-more-btn:focus-visible {
+  background-color: var(--us-primary-subtle);
+  border-color: var(--us-primary);
+  color: var(--us-primary);
+}
+
+.soc-more-btn::after {
+  display: none !important;
+}
+
+.soc-more-menu {
+  padding: 0.35rem;
+  border-color: var(--us-border);
+  box-shadow: 0 8px 24px rgba(31, 36, 48, 0.12);
+}
+
+.soc-menu-item {
+  border-radius: 0.375rem;
+  padding: 0.45rem 0.75rem;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+
+.soc-menu-item:hover,
+.soc-menu-item:focus-visible {
+  background-color: var(--us-primary-subtle);
+  color: var(--us-primary);
+}
+
+.soc-menu-item-danger {
+  color: #b02a37;
+}
+
+.soc-menu-item-danger:hover,
+.soc-menu-item-danger:focus-visible {
+  background-color: rgba(220, 53, 69, 0.12);
+  color: #842029;
+}
+
+.soc-lightbox-img {
+  max-height: 75vh;
+  width: 100%;
+  object-fit: contain;
+}
+
+/* Thông báo nhanh góc phải trên sau khi sửa / xóa bài đăng */
+.soc-toast-layer {
+  position: fixed;
+  top: 5rem;
+  right: 1.25rem;
+  z-index: 1080;
+  pointer-events: none;
+  max-width: calc(100vw - 2.5rem);
+}
+
+@keyframes soc-toast-in {
+  from { opacity: 0; transform: translateX(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+.soc-toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.625rem;
+  border: 1px solid var(--us-border);
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(31, 36, 48, 0.12);
+  pointer-events: auto;
+  animation: soc-toast-in 0.25s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.soc-toast--edit {
+  background: var(--us-primary-subtle);
+  border-color: rgba(79, 70, 229, 0.32);
+  color: var(--us-primary-active);
+}
+
+.soc-toast--edit .soc-toast-icon {
+  color: var(--us-primary);
+}
+
+.soc-toast--delete {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #842029;
+}
+
+.soc-toast--delete .soc-toast-icon {
+  color: #b02a37;
+}
+
+.soc-toast-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin-left: 0.25rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  opacity: 0.72;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.soc-toast-close:hover,
+.soc-toast-close:focus-visible {
+  opacity: 1;
+  background: rgba(31, 36, 48, 0.08);
+}
+
+@media (max-width: 575.98px) {
+  .soc-img-grid--1 {
+    max-width: 100%;
+  }
+  .soc-toast-layer {
+    top: 4.5rem;
+    right: 0.75rem;
+    max-width: calc(100vw - 1.5rem);
+  }
+}

@@ -43,10 +43,11 @@ export default function Library() {
 
   // Tìm ngay khi người dùng ngừng gõ khoảng 300ms; Enter vẫn gửi ngay.
   useEffect(() => {
+    const v = draftQ.trim();
+    // Không đổi thì không gọi setParams: gọi với URL cũ vẫn thêm một mục lịch sử, làm nút quay lại bị kẹt.
+    if (v === q) return undefined;
     const t = setTimeout(() => {
-      const v = draftQ.trim();
       setParams((prev) => {
-        if ((prev.get('q') ?? '') === v) return prev; // không đổi thì giữ nguyên
         const next = new URLSearchParams(prev);
         if (v) next.set('q', v); else next.delete('q');
         return next;
@@ -233,10 +234,11 @@ export default function Library() {
   }
 
   return (
-    <Container className="py-4 library-page">
+    <Container className="py-4 library-page lib-browse">
       <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 ps-3">
         <div>
-          <h1 className="h4 mb-0">Thư viện tài liệu</h1>
+          <h1 className="lib-page-title mb-1">Thư viện tài liệu</h1>
+          <p className="small text-muted mb-0">Kho chia sẻ slide, giáo trình, đề thi và tài liệu tham khảo dành cho sinh viên</p>
         </div>
         <Button as={Link} to={group ? `/library/new?group=${group}` : '/library/new'} className="rounded-pill px-3 d-inline-flex align-items-center gap-2">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">

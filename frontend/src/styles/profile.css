@@ -43,14 +43,6 @@
 .profile-more:hover { color: var(--us-primary-active); }
 .profile-bio-empty { margin: 0; color: var(--us-text-muted); }
 
-/* Nhãn nhóm của bài đăng */
-.post-group-badge {
-  display: inline-flex; align-items: center; gap: 0.25rem; max-width: 100%; padding: 0.125rem 0.625rem;
-  border-radius: 999px; background: var(--us-primary-subtle); color: var(--us-primary-active);
-  font-size: 0.8125rem; line-height: 1.5; text-decoration: none; overflow-wrap: anywhere;
-}
-a.post-group-badge:hover { background: #e0e7ff; color: var(--us-primary-active); }
-
 @media (min-width: 576px) {
   .profile-band { height: 5rem; }
   .profile-body { padding: 0 1.75rem 1.5rem; }

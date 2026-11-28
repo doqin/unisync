@@ -229,8 +229,15 @@ test('bài đăng: ảnh đổi sang signed URL, ảnh không ký được thì 
   tables.posts.push(post(1, { image_urls: [good, 'missing/b.webp'] }));
   const { body } = await get(`/${AUTHOR}/posts`);
   assert.deepEqual(body.items[0].image_urls, [`https://sb.test/object/${good}`]);
-  assert.equal('image_paths' in body.items[0], false);
-  assert.equal('author' in body.items[0], false);
+  assert.equal('image_paths' in body.items[0], false); // bài của người khác: không lộ đường dẫn gốc
+  assert.equal(body.items[0].author?.id, AUTHOR);
+});
+
+test('bài đăng: bài của chính người xem có image_paths để sửa ảnh', async () => {
+  const mine = `posts/${VIEWER}/${randomUUID()}.webp`;
+  tables.posts.push(post(1, { author_id: VIEWER, image_urls: [mine] }));
+  const { body } = await get(`/${VIEWER}/posts`);
+  assert.deepEqual(body.items[0].image_paths, [mine]);
 });
 
 test('bài đăng: chưa có bài → danh sách rỗng; người không tồn tại → 404; tham số sai → 400', async () => {

@@ -195,8 +195,10 @@ export function createProfilesRouter({ db = supabaseAdmin, readHead = readHeadFr
       const posts = (rows ?? []).slice(0, POSTS_PER_PAGE);
       if (!posts.length) return res.json({ items: [], page, has_more: false });
 
-      // Dạng bài đăng dùng chung với bảng tin (lib/posts.js); hồ sơ không cần `author` và đường dẫn gốc của ảnh.
-      const items = (await hydratePosts(sb, posts, req.user.id)).map(({ author, image_paths, ...p }) => p);
+      // Cùng dạng với bảng tin (lib/posts.js) để dùng chung PostCard. Đường dẫn gốc của ảnh (`image_paths`) chỉ
+      // cần cho form sửa của tác giả nên chỉ trả cho bài của chính người xem.
+      const items = (await hydratePosts(sb, posts, req.user.id))
+        .map((p) => { if (p.author_id !== req.user.id) delete p.image_paths; return p; });
       res.json({
         items,
         page,

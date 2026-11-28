@@ -2,13 +2,16 @@
 import { Link } from 'react-router-dom';
 import { Dropdown } from 'react-bootstrap';
 import Avatar from './Avatar.jsx';
-import ReactionPicker, { topReactionEmojis } from './ReactionPicker.jsx';
+import ReactionPicker from './ReactionPicker.jsx';
+import { CommentReactionsPopover } from './ReactionsPopover.jsx';
+import { parseCommentSegments } from '../lib/mentions.js';
 import { formatFullDateTime, formatRelativeTime } from '../lib/time.js';
 
 /**
  * @param {object} props
  * @param {object} props.comment
  * @param {boolean} [props.isReply]
+ * @param {Array<{ id: string, full_name: string }>} [props.knownUsers]
  * @param {string | undefined} props.currentUserId
  * @param {boolean} [props.isAdmin]
  * @param {string} props.menuId
@@ -25,6 +28,7 @@ import { formatFullDateTime, formatRelativeTime } from '../lib/time.js';
 export default function CommentItem({
   comment,
   isReply = false,
+  knownUsers = [],
   currentUserId,
   isAdmin = false,
   menuId,
@@ -42,7 +46,6 @@ export default function CommentItem({
   const authorName = comment.author?.full_name || 'Sinh viên';
   const isCommentAuthor = currentUserId === comment.author_id;
   const canDelete = isCommentAuthor || isAdmin;
-  const emojis = topReactionEmojis(comment.reaction_counts);
   const totalReactions = comment.reaction_count ?? 0;
 
   return (
@@ -101,7 +104,17 @@ export default function CommentItem({
             )}
           </div>
 
-          <p className="soc-comment-content mt-1 mb-0">{comment.content}</p>
+          <p className="soc-comment-content mt-1 mb-0">
+            {parseCommentSegments(comment.content, knownUsers).map((seg, idx) => (
+              seg.type === 'mention' ? (
+                <Link key={`${seg.userId}-${idx}`} to={`/u/${seg.userId}`} className="soc-mention-link">
+                  @{seg.name}
+                </Link>
+              ) : (
+                seg.text
+              )
+            ))}
+          </p>
         </div>
 
         <div className="soc-comment-footer d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
@@ -142,10 +155,13 @@ export default function CommentItem({
           </div>
 
           {totalReactions > 0 && (
-            <span className="soc-react-summary" aria-label={`${totalReactions} cảm xúc`}>
-              <span aria-hidden="true">{emojis.join('')}</span>
-              <span>{totalReactions}</span>
-            </span>
+            <CommentReactionsPopover
+              postId={comment.post_id}
+              commentId={comment.id}
+              totalCount={totalReactions}
+              reactionCounts={comment.reaction_counts}
+              myReaction={comment.my_reaction}
+            />
           )}
         </div>
       </div>

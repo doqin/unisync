@@ -3,6 +3,7 @@
 // Hợp đồng API:
 //   - POST   /api/follows/:userId            Theo dõi người dùng (idempotent) → trạng thái quan hệ & số đếm
 //   - DELETE /api/follows/:userId            Bỏ theo dõi người dùng → trạng thái quan hệ & số đếm
+//   - GET    /api/follows/mutuals            Danh sách người dùng theo dõi lẫn nhau với người gọi (?q=&limit=50)
 //   - GET    /api/follows/:userId/status     Trạng thái quan hệ với userId (`is_following`, `is_followed_by`, `is_mutual`)
 //   - GET    /api/follows/:userId/followers  Danh sách người theo dõi userId (?page=1&limit=20)
 //   - GET    /api/follows/:userId/following  Danh sách người mà userId đang theo dõi (?page=1&limit=20)
@@ -20,7 +21,20 @@ const listQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(50).default(20),
 });
 
+const mutualsQuerySchema = z.object({
+  q: z.string().trim().max(100, 'Từ khóa tối đa 100 ký tự').optional().default(''),
+  limit: z.coerce.number().int().min(1).max(100).default(50),
+});
+
 const PUBLIC_USER_FIELDS = 'id, full_name, avatar_url, bio, major, school, year';
+
+const normalizeVi = (s) => String(s ?? '')
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/đ/g, 'd')
+  .replace(/Đ/g, 'D')
+  .toLowerCase()
+  .trim();
 
 /** Kiểm tra người dùng tồn tại trong bảng profiles; ném 404 nếu không có. */
 async function assertUserExists(sb, userId) {
@@ -131,12 +145,72 @@ async function listFollowRelations(sb, viewerId, targetId, direction, page, limi
   return { items, page, has_more: hasMore };
 }
 
+const MAX_MUTUAL_FOLLOWS = 500;
+const PROFILE_IN_CHUNK = 100;
+
+/** Liệt kê người dùng có quan hệ Mutual với viewerId (dùng cho gợi ý @mention khi bình luận). */
+async function listMutuals(sb, viewerId, q, limit) {
+  const [followingRes, followersRes] = await Promise.all([
+    sb.from('follows').select('followee_id').eq('follower_id', viewerId).limit(MAX_MUTUAL_FOLLOWS),
+    sb.from('follows').select('follower_id').eq('followee_id', viewerId).limit(MAX_MUTUAL_FOLLOWS),
+  ]);
+  if (followingRes.error) throw followingRes.error;
+  if (followersRes.error) throw followersRes.error;
+
+  const followerSet = new Set((followersRes.data ?? []).map((r) => r.follower_id));
+  const mutualIds = [...new Set((followingRes.data ?? []).map((r) => r.followee_id))]
+    .filter((uid) => uid !== viewerId && followerSet.has(uid));
+  if (!mutualIds.length) return { items: [] };
+
+  const chunks = [];
+  for (let i = 0; i < mutualIds.length; i += PROFILE_IN_CHUNK) {
+    chunks.push(mutualIds.slice(i, i + PROFILE_IN_CHUNK));
+  }
+  const chunkResults = await Promise.all(
+    chunks.map((ids) => sb.from('profiles').select(PUBLIC_USER_FIELDS).in('id', ids)),
+  );
+  for (const res of chunkResults) {
+    if (res.error) throw res.error;
+  }
+  const profiles = chunkResults
+    .flatMap((res) => res.data ?? [])
+    .sort((a, b) => String(a.full_name ?? '').localeCompare(String(b.full_name ?? ''), 'vi'));
+
+  const keyword = normalizeVi(q);
+  const filtered = profiles
+    .filter((p) => !keyword || normalizeVi(p.full_name).includes(keyword))
+    .slice(0, limit);
+  if (!filtered.length) return { items: [] };
+
+  const signed = await signAvatars(sb, filtered);
+  return {
+    items: signed.map((p) => ({
+      ...p,
+      is_self: false,
+      is_following: true,
+      is_followed_by: true,
+      is_mutual: true,
+    })),
+  };
+}
+
 /**
  * @param {object} [deps] thay thế khi test (Supabase giả).
  * @param {() => any} [deps.db] trả về client Supabase service_role.
  */
 export function createFollowsRouter({ db = supabaseAdmin } = {}) {
   const r = Router();
+
+  // FR-SOC-05: Danh sách người dùng theo dõi lẫn nhau với người gọi (gợi ý @mention).
+  r.get('/mutuals', validate({ query: mutualsQuerySchema }), async (req, res, next) => {
+    try {
+      const q = String(req.query.q ?? '');
+      const limit = Number(req.query.limit ?? 50);
+      res.json(await listMutuals(db(), req.user.id, q, limit));
+    } catch (e) {
+      next(e);
+    }
+  });
 
   // FR-SOC-05: Trạng thái theo dõi và nhãn Mutual giữa người gọi và userId.
   r.get('/:userId/status', validate({ params: userIdParam }), async (req, res, next) => {

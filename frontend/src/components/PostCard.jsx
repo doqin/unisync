@@ -6,6 +6,8 @@ import { Badge, Button, Card, Dropdown, Form, Modal } from 'react-bootstrap';
 import Avatar from './Avatar.jsx';
 import ErrorAlert from './ErrorAlert.jsx';
 import LoadingSpinner from './LoadingSpinner.jsx';
+import ReactionPicker from './ReactionPicker.jsx';
+import { PostReactionsPopover } from './ReactionsPopover.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../lib/api.js';
 import {
@@ -205,14 +207,29 @@ export default function PostCard({ post, onUpdated, onDeleted, onCommentClick })
     }
   }
 
-  async function toggleLike() {
+  async function handleReaction(reactionType) {
     if (likeBusy) return;
     setActionErr('');
     setLikeBusy(true);
     try {
-      const method = post.liked_by_me ? 'DELETE' : 'POST';
-      const res = await api(`/posts/${post.id}/like`, { method });
-      onUpdated?.({ ...post, liked_by_me: res.liked_by_me, like_count: res.like_count }, 'like');
+      const current = post.my_reaction ?? (post.liked_by_me ? 'love' : null);
+      const removing = reactionType === null || current === reactionType;
+      const res = removing
+        ? await api(`/posts/${post.id}/reaction`, { method: 'DELETE' })
+        : await api(`/posts/${post.id}/reaction`, {
+            method: 'PUT',
+            body: { reaction: reactionType },
+          });
+      onUpdated?.(
+        {
+          ...post,
+          liked_by_me: res.liked_by_me,
+          my_reaction: res.my_reaction,
+          like_count: res.like_count,
+          reaction_counts: res.reaction_counts,
+        },
+        'like',
+      );
     } catch (ex) {
       setActionErr(ex);
     } finally {
@@ -324,32 +341,12 @@ export default function PostCard({ post, onUpdated, onDeleted, onCommentClick })
 
         <div className="soc-post-actions d-flex align-items-center justify-content-between flex-wrap gap-2">
           <div className="d-flex align-items-center gap-2">
-            <button
-              type="button"
-              className={`soc-action-btn${post.liked_by_me ? ' is-liked' : ''}`}
-              aria-pressed={Boolean(post.liked_by_me)}
-              aria-label={post.liked_by_me ? `Bỏ thích bài đăng (${post.like_count ?? 0} lượt thích)` : `Thích bài đăng (${post.like_count ?? 0} lượt thích)`}
-              title={post.liked_by_me ? 'Bỏ thích' : 'Thích'}
-              disabled={likeBusy}
-              onClick={toggleLike}
-            >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill={post.liked_by_me ? 'currentColor' : 'none'}
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                focusable="false"
-                className="soc-action-heart"
-              >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-              </svg>
-              <span>{post.like_count ?? 0}</span>
-            </button>
+            <ReactionPicker
+              variant="post"
+              myReaction={post.my_reaction ?? (post.liked_by_me ? 'love' : null)}
+              busy={likeBusy}
+              onSelect={handleReaction}
+            />
 
             {onCommentClick ? (
               <button
@@ -400,6 +397,15 @@ export default function PostCard({ post, onUpdated, onDeleted, onCommentClick })
               </Link>
             )}
           </div>
+
+          {(post.like_count ?? 0) > 0 && (
+            <PostReactionsPopover
+              postId={post.id}
+              totalCount={post.like_count ?? 0}
+              reactionCounts={post.reaction_counts}
+              myReaction={post.my_reaction ?? (post.liked_by_me ? 'love' : null)}
+            />
+          )}
         </div>
       </Card>
 

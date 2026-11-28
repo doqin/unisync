@@ -522,6 +522,56 @@ test('POST/DELETE /api/posts/:id/like: thích (idempotent), bỏ thích, đếm 
   assert.equal((await req('POST', `/posts/${groupPost.id}/like`, { user: STRANGER })).status, 403);
 });
 
+test('PUT/DELETE/GET /api/posts/:id/reaction(s): cảm xúc bài đăng, ưu tiên Mutual lên đầu và chặn nhóm kín', async () => {
+  await req('POST', `/follows/${BOB}`, { user: ALICE });
+  await req('POST', `/follows/${ALICE}`, { user: BOB }); // Alice <-> Bob là Mutual; Charlie không Mutual
+  const post = (await req('POST', '/posts', { user: ALICE, body: { content: 'Bài cảm xúc' } })).body;
+
+  const r1 = await req('PUT', `/posts/${post.id}/reaction`, { user: BOB, body: { reaction: 'haha' } });
+  assert.equal(r1.status, 200);
+  assert.deepEqual(r1.body, {
+    post_id: post.id,
+    liked_by_me: true,
+    my_reaction: 'haha',
+    like_count: 1,
+    reaction_counts: { haha: 1 },
+  });
+
+  // Gọi sau Bob nhưng Charlie không phải Mutual nên danh sách vẫn ghim Bob lên đầu
+  await req('PUT', `/posts/${post.id}/reaction`, { user: CHARLIE, body: { reaction: 'love' } });
+  // Bob đổi sang wow
+  await req('PUT', `/posts/${post.id}/reaction`, { user: BOB, body: { reaction: 'wow' } });
+
+  const listRes = await req('GET', `/posts/${post.id}/reactions`, { user: ALICE });
+  assert.equal(listRes.status, 200);
+  assert.equal(listRes.body.total, 2);
+  assert.deepEqual(listRes.body.reaction_counts, { wow: 1, love: 1 });
+  assert.deepEqual(listRes.body.items.map((u) => u.id), [BOB, CHARLIE]);
+  assert.equal(listRes.body.items[0].is_mutual, true);
+  assert.equal(listRes.body.items[0].reaction, 'wow');
+  assert.equal(listRes.body.items[1].is_mutual, false);
+  assert.match(listRes.body.items[0].avatar_url, /^https:\/\/sb\.test\/object\/avatars\//);
+
+  const detail = await req('GET', `/posts/${post.id}`, { user: BOB });
+  assert.equal(detail.body.my_reaction, 'wow');
+  assert.deepEqual(detail.body.reaction_counts, { wow: 1, love: 1 });
+
+  const del = await req('DELETE', `/posts/${post.id}/reaction`, { user: BOB });
+  assert.equal(del.status, 200);
+  assert.deepEqual(del.body, {
+    post_id: post.id,
+    liked_by_me: false,
+    my_reaction: null,
+    like_count: 1,
+    reaction_counts: { love: 1 },
+  });
+
+  const groupPost = (await req('POST', '/posts', {
+    user: ALICE, body: { content: 'Nhóm kín react', group_id: GROUP_SE347 },
+  })).body;
+  assert.equal((await req('GET', `/posts/${groupPost.id}/reactions`, { user: STRANGER })).status, 403);
+});
+
 test('Bình luận: thêm, liệt kê phân trang kèm avatar đã ký, xóa chính chủ / Admin, chặn người ngoài nhóm', async () => {
   const post = (await req('POST', '/posts', { user: ALICE, body: { content: 'Bài bình luận' } })).body;
 
@@ -717,6 +767,14 @@ test('Cảm xúc bình luận (PUT/DELETE reaction): thả, đổi loại, bỏ 
   const listAlice = await req('GET', `/posts/${post.id}/comments`, { user: ALICE });
   assert.equal(listAlice.body.items[0].my_reaction, null);
 
+  // Danh sách người đã thả cảm xúc cho bình luận
+  const cmtReactList = await req('GET', `/posts/${post.id}/comments/${cmt.id}/reactions`, { user: ALICE });
+  assert.equal(cmtReactList.status, 200);
+  assert.equal(cmtReactList.body.total, 2);
+  assert.equal(cmtReactList.body.items.length, 2);
+  assert.ok(cmtReactList.body.items.some((u) => u.id === BOB && u.reaction === 'haha'));
+  assert.ok(cmtReactList.body.items.some((u) => u.id === CHARLIE && u.reaction === 'love'));
+
   // Bob bỏ cảm xúc
   const delReact = await req('DELETE', `/posts/${post.id}/comments/${cmt.id}/reaction`, { user: BOB });
   assert.equal(delReact.status, 200);
@@ -740,6 +798,10 @@ test('Cảm xúc bình luận (PUT/DELETE reaction): thả, đổi loại, bỏ 
   })).body;
   assert.equal(
     (await req('PUT', `/posts/${groupPost.id}/comments/${groupCmt.id}/reaction`, { user: STRANGER, body: { reaction: 'like' } })).status,
+    403,
+  );
+  assert.equal(
+    (await req('GET', `/posts/${groupPost.id}/comments/${groupCmt.id}/reactions`, { user: STRANGER })).status,
     403,
   );
 });
@@ -851,6 +913,20 @@ test('Follow & Mutual: một chiều, hai chiều thành Mutual, bỏ theo dõi 
   assert.equal(following.status, 200);
   assert.deepEqual(following.body.items.map((u) => u.id), [BOB]);
 
+  // Danh sách Mutual dùng cho gợi ý @mention khi bình luận (chỉ trả người theo dõi 2 chiều)
+  const mutuals = await req('GET', '/follows/mutuals', { user: ALICE });
+  assert.equal(mutuals.status, 200);
+  assert.equal(mutuals.body.items.length, 1);
+  assert.equal(mutuals.body.items[0].id, BOB);
+  assert.equal(mutuals.body.items[0].is_mutual, true);
+  assert.match(mutuals.body.items[0].avatar_url, /^https:\/\/sb\.test\/object\/avatars\//);
+
+  const mutualSearch = await req('GET', '/follows/mutuals?q=van', { user: ALICE });
+  assert.equal(mutualSearch.status, 200);
+  assert.deepEqual(mutualSearch.body.items.map((u) => u.id), [BOB]);
+  const mutualEmpty = await req('GET', '/follows/mutuals?q=khongco', { user: ALICE });
+  assert.deepEqual(mutualEmpty.body.items, []);
+
   // Alice bỏ theo dõi Bob → không còn Mutual
   const unfollow = await req('DELETE', `/follows/${BOB}`, { user: ALICE });
   assert.equal(unfollow.status, 200);
@@ -858,6 +934,25 @@ test('Follow & Mutual: một chiều, hai chiều thành Mutual, bỏ theo dõi 
   assert.equal(unfollow.body.is_followed_by, true);
   assert.equal(unfollow.body.is_mutual, false);
   assert.equal(unfollow.body.followers_count, 0);
+});
+
+test('GET /api/follows/mutuals: chỉ trả Mutual 2 chiều, loại 1 chiều và tìm không dấu tiếng Việt', async () => {
+  // Alice <-> Bob (Mutual) và Alice <-> Admin (Mutual)
+  await req('POST', `/follows/${BOB}`, { user: ALICE });
+  await req('POST', `/follows/${ALICE}`, { user: BOB });
+  await req('POST', `/follows/${ADMIN}`, { user: ALICE });
+  await req('POST', `/follows/${ALICE}`, { user: ADMIN });
+  // Quan hệ 1 chiều: Alice -> Stranger (chỉ following) và Charlie -> Alice (chỉ followed_by)
+  await req('POST', `/follows/${STRANGER}`, { user: ALICE });
+  await req('POST', `/follows/${ALICE}`, { user: CHARLIE });
+
+  const all = await req('GET', '/follows/mutuals', { user: ALICE });
+  assert.equal(all.status, 200);
+  assert.deepEqual(all.body.items.map((u) => u.id).sort(), [ADMIN, BOB].sort());
+
+  const byUnaccent = await req('GET', '/follows/mutuals?q=quan tri', { user: ALICE });
+  assert.equal(byUnaccent.status, 200);
+  assert.deepEqual(byUnaccent.body.items.map((u) => u.id), [ADMIN]);
 });
 
 test('GET /api/posts?author_id=...: ẩn bài nhóm kín với người ngoài nhưng hiện với thành viên đã duyệt và Admin', async () => {

@@ -146,9 +146,31 @@ export async function assertPostAccess(sb, post, userId, profile) {
   }
 }
 
+/** Tải thống kê cảm xúc (6 loại, mặc định 'love' nếu dữ liệu cũ chưa có giá trị) cho một tập bài đăng. */
+async function loadPostReactionsSummary(sb, postIds, viewerId) {
+  const { data, error } = await sb
+    .from('likes')
+    .select('post_id, user_id, reaction')
+    .in('post_id', postIds);
+  if (error) throw error;
+
+  const totals = new Map();
+  const counts = new Map();
+  const mine = new Map();
+  for (const row of data ?? []) {
+    totals.set(row.post_id, (totals.get(row.post_id) ?? 0) + 1);
+    const type = row.reaction || 'love';
+    const byType = counts.get(row.post_id) ?? {};
+    byType[type] = (byType[type] ?? 0) + 1;
+    counts.set(row.post_id, byType);
+    if (viewerId && row.user_id === viewerId) mine.set(row.post_id, type);
+  }
+  return { totals, counts, mine };
+}
+
 /**
  * Gắn đầy đủ thông tin hiển thị cho danh sách bài đăng: tác giả (avatar đã ký), ảnh bài đăng (đã ký),
- * tên nhóm, số lượt thích, số bình luận, trạng thái `liked_by_me`.
+ * tên nhóm, số lượt thích/cảm xúc, số bình luận, trạng thái `liked_by_me` và `my_reaction`.
  */
 export async function hydratePosts(sb, posts, viewerId) {
   if (!posts.length) return [];
@@ -156,18 +178,15 @@ export async function hydratePosts(sb, posts, viewerId) {
   const authorIds = posts.map((p) => p.author_id);
   const groupIds = [...new Set(posts.map((p) => p.group_id).filter(Boolean))];
 
-  const [likeCounts, commentCounts, myLikesRes, authorMap, groupRes, signedImages] = await Promise.all([
-    countByPost(sb, 'likes', postIds),
+  const [reactions, commentCounts, authorMap, groupRes, signedImages] = await Promise.all([
+    loadPostReactionsSummary(sb, postIds, viewerId),
     countByPost(sb, 'comments', postIds),
-    sb.from('likes').select('post_id').eq('user_id', viewerId).in('post_id', postIds),
     loadSignedAuthors(sb, authorIds),
     groupIds.length ? sb.from('groups').select('id, name').in('id', groupIds) : { data: [], error: null },
     signPostImages(sb, posts),
   ]);
-  if (myLikesRes.error) throw myLikesRes.error;
   if (groupRes.error) throw groupRes.error;
 
-  const likedSet = new Set((myLikesRes.data ?? []).map((l) => l.post_id));
   const groupName = new Map((groupRes.data ?? []).map((g) => [g.id, g.name]));
 
   return posts.map((p) => {
@@ -176,6 +195,7 @@ export async function hydratePosts(sb, posts, viewerId) {
       .map((path) => ({ path, url: signedImages.get(path) }))
       .filter((x) => Boolean(x.url));
     const isAuthor = p.author_id === viewerId;
+    const myReaction = reactions.mine.get(p.id) ?? null;
     return {
       ...p,
       // Chỉ trả đường dẫn gốc (chứa user_id) cho chính tác giả để phục vụ sửa bài, tránh lộ cho người xem khác.
@@ -183,9 +203,11 @@ export async function hydratePosts(sb, posts, viewerId) {
       image_urls: paired.map((x) => x.url),
       author: authorMap.get(p.author_id) ?? null,
       group: p.group_id ? { id: p.group_id, name: groupName.get(p.group_id) ?? null } : null,
-      like_count: likeCounts.get(p.id) ?? 0,
+      like_count: reactions.totals.get(p.id) ?? 0,
+      reaction_counts: reactions.counts.get(p.id) ?? {},
       comment_count: commentCounts.get(p.id) ?? 0,
-      liked_by_me: likedSet.has(p.id),
+      liked_by_me: Boolean(myReaction),
+      my_reaction: myReaction,
     };
   });
 }

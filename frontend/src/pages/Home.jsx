@@ -1,6 +1,6 @@
 // Trang chủ – bảng tin (FR-SOC-01, FR-SOC-02) – phụ trách: Đức Huy (dhuyy-06).
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button, Card, Container } from 'react-bootstrap';
 import AsyncState from '../components/AsyncState.jsx';
 import Icon from '../components/Icon.jsx';
@@ -45,6 +45,8 @@ function FeedSkeleton() {
 }
 
 export default function Home() {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
   const [hasMore, setHasMore] = useState(false);
@@ -63,6 +65,13 @@ export default function Home() {
     setToast({ id: Date.now(), text, variant });
     toastTimerRef.current = setTimeout(() => setToast(null), TOAST_MS);
   }, []);
+
+  useEffect(() => {
+    const incoming = location.state?.toast;
+    if (!incoming?.text) return;
+    showToast(incoming.text, incoming.variant ?? 'edit');
+    navigate(location.pathname, { replace: true, state: null });
+  }, [location.pathname, location.state, navigate, showToast]);
 
   const closeToast = () => {
     clearTimeout(toastTimerRef.current);

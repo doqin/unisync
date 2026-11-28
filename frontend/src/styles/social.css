@@ -121,6 +121,52 @@
   padding-top: 0.625rem;
 }
 
+/* Nút icon Thích (tim) & Bình luận kiểu Instagram */
+.soc-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  padding: 0.25rem 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--us-text-muted);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.soc-action-btn:hover,
+.soc-action-btn:focus-visible {
+  background: var(--us-primary-subtle);
+  color: var(--us-primary);
+}
+
+.soc-action-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.soc-action-btn.is-liked {
+  color: #e11d48;
+}
+
+.soc-action-btn.is-liked:hover,
+.soc-action-btn.is-liked:focus-visible {
+  background: rgba(225, 29, 72, 0.1);
+  color: #be123c;
+}
+
+.soc-action-btn:active .soc-action-heart {
+  transform: scale(1.2);
+}
+
+.soc-action-heart {
+  transition: transform 0.15s ease;
+}
+
 .soc-more-btn {
   display: inline-flex;
   align-items: center;
@@ -175,6 +221,278 @@
   max-height: 75vh;
   width: 100%;
   object-fit: contain;
+}
+
+/* Khối bình luận dạng cây (folder tree giống Facebook) trên trang chi tiết bài đăng */
+.soc-comment-card {
+  margin-top: 0.75rem;
+}
+
+.soc-comment-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.soc-tree-root {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--us-border);
+}
+
+.soc-tree-node {
+  position: relative;
+}
+
+.soc-more-btn--sm {
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0.15rem 0.35rem;
+}
+
+.soc-comment-bubble {
+  background: var(--us-bg);
+  border: 1px solid var(--us-border);
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.soc-comment-bubble--reply {
+  padding: 0.45rem 0.65rem;
+  font-size: 0.92rem;
+}
+
+.soc-comment-content {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--us-text);
+  line-height: 1.5;
+}
+
+.soc-comment-footer {
+  padding-left: 0.25rem;
+}
+
+.soc-cmt-action-btn {
+  border: 0;
+  background: transparent;
+  padding: 0.125rem 0.35rem;
+  border-radius: 0.375rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--us-text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.soc-cmt-action-btn:hover,
+.soc-cmt-action-btn:focus-visible {
+  background: var(--us-primary-subtle);
+  color: var(--us-primary);
+}
+
+.soc-cmt-action-btn.is-like { color: #2563eb; }
+.soc-cmt-action-btn.is-love { color: #e11d48; }
+.soc-cmt-action-btn.is-haha,
+.soc-cmt-action-btn.is-wow,
+.soc-cmt-action-btn.is-sad { color: #b45309; }
+.soc-cmt-action-btn.is-angry { color: #dc2626; }
+
+/* Bộ chọn cảm xúc nổi (icon cảm xúc nhỏ, hover hiện menu icon phía trên) */
+.soc-react-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.soc-react-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--us-text-muted);
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.soc-react-icon-btn:hover,
+.soc-react-icon-btn:focus-visible,
+.soc-react-wrap.is-open .soc-react-icon-btn {
+  transform: scale(1.12);
+  background: var(--us-primary-subtle);
+  border-color: rgba(79, 70, 229, 0.25);
+  color: var(--us-primary);
+}
+
+.soc-react-icon-btn.is-reacted {
+  background: var(--us-primary-subtle);
+  border-color: var(--us-border);
+}
+
+.soc-react-active-emoji {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+/* Cầu nối vô hình giữa nút icon và menu cảm xúc để rê chuột lên không bị tắt hover */
+.soc-react-tray-bridge {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  padding-bottom: 6px;
+  z-index: 30;
+}
+
+.soc-react-tray {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.2rem 0.35rem;
+  border-radius: 999px;
+  background: var(--us-surface);
+  border: 1px solid var(--us-border);
+  box-shadow: 0 8px 20px rgba(31, 36, 48, 0.16);
+}
+
+.soc-react-choice {
+  border: 0;
+  background: transparent;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 999px;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.12s ease;
+}
+
+.soc-react-choice:hover,
+.soc-react-choice:focus-visible {
+  transform: scale(1.28);
+  background: var(--us-primary-subtle);
+}
+
+.soc-react-choice.is-selected {
+  background: var(--us-primary-subtle);
+}
+
+.soc-react-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  background: var(--us-bg);
+  border: 1px solid var(--us-border);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--us-text-muted);
+}
+
+.soc-replies-toggle {
+  border: 0;
+  background: transparent;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--us-primary);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.soc-replies-toggle:hover,
+.soc-replies-toggle:focus-visible {
+  background: var(--us-primary-subtle);
+}
+
+.soc-tree-children {
+  position: relative;
+  margin-left: 1.125rem;
+  padding-left: 1.25rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.soc-tree-children--capped {
+  margin-left: 0;
+}
+
+/* Nhánh cây chữ L nối từng phản hồi vào đường trục dọc của bình luận cha */
+.soc-tree-children > .soc-tree-node::before {
+  content: '';
+  position: absolute;
+  left: -1.25rem;
+  top: -0.5rem;
+  bottom: -0.5rem;
+  width: 2px;
+  background: var(--us-border);
+}
+
+.soc-tree-children > .soc-tree-node:last-child::before {
+  display: none;
+}
+
+.soc-tree-children > .soc-tree-node::after {
+  content: '';
+  position: absolute;
+  left: -1.25rem;
+  top: -0.5rem;
+  width: 1.05rem;
+  height: 1.55rem;
+  border-left: 2px solid var(--us-border);
+  border-bottom: 2px solid var(--us-border);
+  border-bottom-left-radius: 0.65rem;
+  pointer-events: none;
+}
+
+.soc-inline-reply {
+  background: var(--us-bg);
+  border: 1px dashed var(--us-border);
+  border-radius: 0.75rem;
+  padding: 0.625rem 0.75rem;
+}
+
+.soc-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0.25rem;
+  border: 1px solid transparent;
+  border-radius: 0.375rem;
+  background: transparent;
+  color: var(--us-text-muted);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.soc-icon-btn:hover,
+.soc-icon-btn:focus-visible {
+  background: var(--us-primary-subtle);
+  color: var(--us-primary);
+}
+
+@media (max-width: 575.98px) {
+  .soc-tree-children {
+    margin-left: 0.75rem;
+    padding-left: 0.9rem;
+  }
+  .soc-tree-children > .soc-tree-node::before {
+    left: -0.9rem;
+  }
+  .soc-tree-children > .soc-tree-node::after {
+    left: -0.9rem;
+    width: 0.75rem;
+  }
 }
 
 /* Thông báo nhanh góc phải trên sau khi sửa / xóa bài đăng */

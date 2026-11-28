@@ -9,7 +9,7 @@ import { AVATAR_VIEW_TTL, IMAGES_BUCKET, parseAvatarPath } from './avatar.js';
 import { signPostImages } from './postImages.js';
 
 export const POST_SELECT = 'id, author_id, group_id, content, image_urls, created_at';
-export const COMMENT_SELECT = 'id, post_id, author_id, content, created_at';
+export const COMMENT_SELECT = 'id, post_id, author_id, parent_id, content, created_at';
 export const AUTHOR_SELECT = 'id, full_name, avatar_url';
 
 export const DEFAULT_FEED_LIMIT = 10;
@@ -190,9 +190,34 @@ export async function hydratePosts(sb, posts, viewerId) {
   });
 }
 
-/** Gắn thông tin tác giả (avatar đã ký) cho danh sách bình luận. */
-export async function hydrateComments(sb, comments) {
+/** Gắn thông tin tác giả (avatar đã ký) và thống kê cảm xúc cho danh sách bình luận. */
+export async function hydrateComments(sb, comments, viewerId = null) {
   if (!comments.length) return [];
-  const authorMap = await loadSignedAuthors(sb, comments.map((c) => c.author_id));
-  return comments.map((c) => ({ ...c, author: authorMap.get(c.author_id) ?? null }));
+  const commentIds = comments.map((c) => c.id);
+
+  const [authorMap, reactionsRes] = await Promise.all([
+    loadSignedAuthors(sb, comments.map((c) => c.author_id)),
+    sb.from('comment_reactions').select('comment_id, user_id, reaction').in('comment_id', commentIds),
+  ]);
+  if (reactionsRes.error) throw reactionsRes.error;
+
+  const countsMap = new Map();
+  const totalsMap = new Map();
+  const mineMap = new Map();
+  for (const r of reactionsRes.data ?? []) {
+    totalsMap.set(r.comment_id, (totalsMap.get(r.comment_id) ?? 0) + 1);
+    const byType = countsMap.get(r.comment_id) ?? {};
+    byType[r.reaction] = (byType[r.reaction] ?? 0) + 1;
+    countsMap.set(r.comment_id, byType);
+    if (viewerId && r.user_id === viewerId) mineMap.set(r.comment_id, r.reaction);
+  }
+
+  return comments.map((c) => ({
+    ...c,
+    parent_id: c.parent_id ?? null,
+    author: authorMap.get(c.author_id) ?? null,
+    reaction_count: totalsMap.get(c.id) ?? 0,
+    reaction_counts: countsMap.get(c.id) ?? {},
+    my_reaction: mineMap.get(c.id) ?? null,
+  }));
 }

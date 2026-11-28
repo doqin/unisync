@@ -335,6 +335,14 @@ test('POST /api/posts: tạo bài văn bản và bài kèm 1–4 ảnh, trả av
   assert.equal(withImgs.body.image_urls.length, 3);
   assert.deepEqual(withImgs.body.image_paths, imgs);
   assert.ok(withImgs.body.image_urls.every((u) => u.startsWith('https://sb.test/object/posts/')));
+
+  // Chính tác giả xem lại thì có `image_paths`, còn người xem khác thì không được trả đường dẫn gốc (tránh lộ user_id)
+  const authorView = await req('GET', `/posts/${withImgs.body.id}`, { user: ALICE });
+  assert.deepEqual(authorView.body.image_paths, imgs);
+  const viewerView = await req('GET', `/posts/${withImgs.body.id}`, { user: BOB });
+  assert.equal(viewerView.status, 200);
+  assert.equal(viewerView.body.image_urls.length, 3);
+  assert.equal(viewerView.body.image_paths, undefined);
 });
 
 test('POST /api/posts: từ chối > 4 ảnh, nội dung trống, ảnh trùng, ảnh của người khác, ảnh giả magic bytes', async () => {
@@ -354,10 +362,13 @@ test('POST /api/posts: từ chối > 4 ảnh, nội dung trống, ảnh trùng, 
   assert.equal(steal.status, 403);
   assert.ok(sb.objects[bobsImg], 'không được xóa ảnh của người khác');
 
+  // Nếu có 1 ảnh hợp lệ đi kèm 1 ảnh giả magic bytes → từ chối 400 và xóa sạch cả 2 ảnh khỏi Storage
+  const validSibling = putImage(ALICE, 'jpg');
   const fakeMagic = putImage(ALICE, 'png', { head: HEADS.pdf });
-  const badMagic = await req('POST', '/posts', { body: { content: 'ảnh giả', image_urls: [fakeMagic] } });
+  const badMagic = await req('POST', '/posts', { body: { content: 'ảnh giả', image_urls: [validSibling, fakeMagic] } });
   assert.equal(badMagic.status, 400);
   assert.ok(sb.removed.includes(fakeMagic), 'phải xóa ảnh sai magic bytes khỏi kho');
+  assert.ok(sb.removed.includes(validSibling), 'phải dọn luôn ảnh còn lại để tránh ảnh mồ côi');
 
   // Tạo thành công rồi gửi lại cùng đường dẫn ảnh → 409, không xóa ảnh bài đã lưu
   const ok = await req('POST', '/posts', { body: { content: 'ok', image_urls: [one] } });

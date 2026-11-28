@@ -2,7 +2,7 @@
 //
 // Hợp đồng API:
 //   - POST   /api/posts/upload-url            Cấp signed upload URL cho ảnh bài đăng (bucket `images`, ≤ 1 MB)
-//   - GET    /api/posts                       Danh sách bài đăng (lọc `group_id` hoặc `author_id`, cursor)
+//   - GET    /api/posts                       Danh sách bài đăng (lọc `group_id`/`author_id`, hoặc bài cá nhân công khai; trang chủ dùng `/api/feed`)
 //   - POST   /api/posts                       Tạo bài đăng (văn bản 1–5000 ký tự, 0–4 ảnh đã tải lên)
 //   - GET    /api/posts/:id                   Chi tiết bài đăng kèm tác giả, số thích/bình luận, ảnh đã ký
 //   - PATCH  /api/posts/:id                   Sửa bài đăng (chỉ tác giả)
@@ -137,23 +137,26 @@ async function validateNewImagePaths(sb, userId, allPaths, newPaths, excludePost
   return parsedList;
 }
 
-/** Kiểm tra tệp ảnh thật trên Storage; nếu lỗi kích thước/MIME/magic bytes thì xóa ảnh sai đó. */
+/** Kiểm tra tệp ảnh thật trên Storage; nếu bất kỳ ảnh nào lỗi thì xóa toàn bộ ảnh mới vừa tải lên để tránh ảnh mồ côi. */
 async function verifyStoredImages(sb, readHead, parsedList) {
   if (!parsedList.length) return;
   const bucket = sb.storage.from(IMAGES_BUCKET);
+  const allNewPaths = parsedList.map((i) => i.path);
+  const discardAll = async (err) => {
+    await bucket.remove(allNewPaths).catch(() => {});
+    throw err;
+  };
+
   for (const item of parsedList) {
     const { data: info, error: infoErr } = await bucket.info(item.path);
-    if (infoErr || !info) throw badRequest('Chưa thấy ảnh trên kho lưu trữ, hãy tải lên trước');
+    if (infoErr || !info) await discardAll(badRequest('Chưa thấy ảnh trên kho lưu trữ, hãy tải lên trước'));
 
     // Kiểm tra kích thước + MIME trước để tránh gọi thêm HTTP đọc magic bytes nếu đã sai.
     const metaError = checkStoredPostImageMeta(item.type, {
       size: info.size,
       contentType: info.contentType,
     });
-    if (metaError) {
-      await bucket.remove([item.path]).catch(() => {});
-      throw badRequest(metaError);
-    }
+    if (metaError) await discardAll(badRequest(metaError));
 
     const head = await readHead(sb, item.path);
     const fileError = checkStoredPostImage(item.type, {
@@ -161,10 +164,7 @@ async function verifyStoredImages(sb, readHead, parsedList) {
       contentType: info.contentType,
       head,
     });
-    if (fileError) {
-      await bucket.remove([item.path]).catch(() => {});
-      throw badRequest(fileError);
-    }
+    if (fileError) await discardAll(badRequest(fileError));
   }
 }
 

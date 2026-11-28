@@ -1,32 +1,20 @@
 // Danh sách bình luận 2 cấp giống Facebook (ẩn/hiện bình luận con), trả lời ngay dưới bình luận, cảm xúc, sửa và xóa (FR-SOC-03) – phụ trách: Đức Huy (dhuyy-06).
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Button, Card, Dropdown, Form, Modal } from 'react-bootstrap';
+import { Button, Card, Form, Modal } from 'react-bootstrap';
 import AsyncState from './AsyncState.jsx';
 import Avatar from './Avatar.jsx';
+import CommentItem from './CommentItem.jsx';
 import ErrorAlert from './ErrorAlert.jsx';
 import LoadMore from './LoadMore.jsx';
 import LoadingSpinner from './LoadingSpinner.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import usePagedList from '../hooks/usePagedList.js';
 import { api } from '../lib/api.js';
-import { formatFullDateTime, formatRelativeTime } from '../lib/time.js';
 import '../styles/social.css';
 
 const COMMENTS_LIMIT = 50;
 const MAX_COMMENT = 2000;
 const SKELETON_ROWS = 3;
-
-const REACTIONS = [
-  { type: 'like', emoji: '👍', label: 'Thích', colorClass: 'is-like' },
-  { type: 'love', emoji: '❤️', label: 'Yêu thích', colorClass: 'is-love' },
-  { type: 'haha', emoji: '😂', label: 'Haha', colorClass: 'is-haha' },
-  { type: 'wow', emoji: '😮', label: 'Wow', colorClass: 'is-wow' },
-  { type: 'sad', emoji: '😢', label: 'Buồn', colorClass: 'is-sad' },
-  { type: 'angry', emoji: '😡', label: 'Phẫn nộ', colorClass: 'is-angry' },
-];
-
-const REACTION_MAP = Object.fromEntries(REACTIONS.map((r) => [r.type, r]));
 
 function CommentsSkeleton() {
   return (
@@ -104,16 +92,6 @@ function collectSubtreeIds(items, rootId) {
     }
   }
   return removed;
-}
-
-/** Lấy tối đa 3 emoji phổ biến nhất của bình luận để hiện badge tổng hợp. */
-function topReactionEmojis(reactionCounts = {}) {
-  return Object.entries(reactionCounts)
-    .filter(([, count]) => count > 0)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 3)
-    .map(([type]) => REACTION_MAP[type]?.emoji)
-    .filter(Boolean);
 }
 
 /**
@@ -284,26 +262,12 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
           });
 
       list.setItems((cur) =>
-        cur.map((x) => {
-          if (x.id !== comment.id) return x;
-          if (res.reaction_counts !== null && res.reaction_count !== null) {
-            return {
-              ...x,
-              my_reaction: res.my_reaction,
-              reaction_count: res.reaction_count,
-              reaction_counts: res.reaction_counts,
-            };
-          }
-          // Dự phòng khi CSDL chưa chạy migration 0009: cập nhật tạm trên giao diện
-          const counts = { ...(x.reaction_counts ?? {}) };
-          if (x.my_reaction && counts[x.my_reaction]) {
-            counts[x.my_reaction] -= 1;
-            if (counts[x.my_reaction] <= 0) delete counts[x.my_reaction];
-          }
-          if (res.my_reaction) counts[res.my_reaction] = (counts[res.my_reaction] ?? 0) + 1;
-          const total = Object.values(counts).reduce((a, b) => a + b, 0);
-          return { ...x, my_reaction: res.my_reaction, reaction_count: total, reaction_counts: counts };
-        }),
+        cur.map((x) => (x.id === comment.id ? {
+          ...x,
+          my_reaction: res.my_reaction,
+          reaction_count: res.reaction_count,
+          reaction_counts: res.reaction_counts,
+        } : x)),
       );
     } catch (ex) {
       setReactErr(ex);
@@ -398,173 +362,23 @@ export default function CommentSection({ postId, commentCount, onCountChange, on
   }
 
   function renderCommentItem(comment, isReply = false) {
-    const authorId = comment.author?.id ?? comment.author_id;
-    const authorName = comment.author?.full_name || 'Sinh viên';
-    const isCommentAuthor = user?.id === comment.author_id;
-    const canDelete = isCommentAuthor || isAdmin;
-    const myReaction = comment.my_reaction ? REACTION_MAP[comment.my_reaction] : null;
-    const emojis = topReactionEmojis(comment.reaction_counts);
-    const totalReactions = comment.reaction_count ?? 0;
-    const isPickerOpen = openPickerId === comment.id;
-
     return (
-      <div className={`d-flex align-items-start gap-2${isReply ? ' soc-comment-row--reply' : ''}`}>
-        <Link to={`/u/${authorId}`} className="text-decoration-none flex-shrink-0">
-          <Avatar src={comment.author?.avatar_url} name={authorName} size={isReply ? 28 : 36} decorative />
-        </Link>
-
-        <div className="flex-grow-1" style={{ minWidth: 0 }}>
-          <div className={`soc-comment-bubble${isReply ? ' soc-comment-bubble--reply' : ''}`}>
-            <div className="d-flex justify-content-between align-items-start gap-2">
-              <div style={{ minWidth: 0 }}>
-                <Link to={`/u/${authorId}`} className="fw-semibold text-reset text-decoration-none text-break me-2">
-                  {authorName}
-                </Link>
-                <time
-                  dateTime={comment.created_at}
-                  title={formatFullDateTime(comment.created_at)}
-                  className="small text-body-secondary"
-                >
-                  {formatRelativeTime(comment.created_at)}
-                </time>
-              </div>
-
-              {(isCommentAuthor || canDelete) && (
-                <Dropdown align="end" className="flex-shrink-0">
-                  <Dropdown.Toggle
-                    id={`${menuBaseId}-${comment.id}`}
-                    variant="outline-secondary"
-                    size="sm"
-                    className="soc-more-btn soc-more-btn--sm"
-                    aria-label={`Tùy chọn bình luận của ${authorName}`}
-                  >
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                      <circle cx="5" cy="12" r="2" />
-                      <circle cx="12" cy="12" r="2" />
-                      <circle cx="19" cy="12" r="2" />
-                    </svg>
-                  </Dropdown.Toggle>
-                  <Dropdown.Menu className="soc-more-menu">
-                    {isCommentAuthor && (
-                      <Dropdown.Item className="soc-menu-item" onClick={() => startEditComment(comment)}>
-                        Sửa bình luận
-                      </Dropdown.Item>
-                    )}
-                    {canDelete && (
-                      <Dropdown.Item
-                        className="soc-menu-item soc-menu-item-danger"
-                        onClick={() => { setDeleteErr(''); setTargetDelete(comment); }}
-                      >
-                        Xóa bình luận
-                      </Dropdown.Item>
-                    )}
-                  </Dropdown.Menu>
-                </Dropdown>
-              )}
-            </div>
-
-            <p className="soc-comment-content mt-1 mb-0">{comment.content}</p>
-          </div>
-
-          <div className="soc-comment-footer d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
-            <div className="d-flex align-items-center gap-2">
-              <div
-                className={`soc-react-wrap${isPickerOpen ? ' is-open' : ''}`}
-                onMouseEnter={() => setOpenPickerId(comment.id)}
-                onMouseLeave={() => { if (openPickerId === comment.id) setOpenPickerId(null); }}
-              >
-                {isPickerOpen && (
-                  <div className="soc-react-tray-bridge">
-                    <div className="soc-react-tray" role="group" aria-label="Chọn cảm xúc cho bình luận">
-                      {REACTIONS.map((r) => (
-                        <button
-                          key={r.type}
-                          type="button"
-                          className={`soc-react-choice${comment.my_reaction === r.type ? ' is-selected' : ''}`}
-                          onClick={() => handleReaction(comment, r.type)}
-                          aria-label={r.label}
-                          title={r.label}
-                        >
-                          {r.emoji}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  className={`soc-react-icon-btn${myReaction ? ` is-reacted ${myReaction.colorClass}` : ''}`}
-                  disabled={reactBusyId === comment.id}
-                  aria-label={myReaction ? `Đã thả ${myReaction.label} (bấm để bỏ)` : 'Thả cảm xúc cho bình luận'}
-                  aria-expanded={isPickerOpen}
-                  title={myReaction ? `${myReaction.label} (bấm để bỏ)` : 'Thả cảm xúc'}
-                  onClick={() => {
-                    if (myReaction) {
-                      handleReaction(comment, null);
-                    } else {
-                      setOpenPickerId((cur) => (cur === comment.id ? null : comment.id));
-                    }
-                  }}
-                >
-                  {myReaction ? (
-                    <span className="soc-react-active-emoji" aria-hidden="true">{myReaction.emoji}</span>
-                  ) : (
-                    <svg
-                      width="15"
-                      height="15"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                      focusable="false"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                      <line x1="9" y1="9" x2="9.01" y2="9" />
-                      <line x1="15" y1="9" x2="15.01" y2="9" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-
-              <button
-                type="button"
-                className="soc-cmt-action-btn d-inline-flex align-items-center gap-1"
-                onClick={() => openInlineReply(comment, authorName)}
-                aria-label={`Trả lời bình luận của ${authorName}`}
-              >
-                <svg
-                  width="13"
-                  height="13"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  focusable="false"
-                >
-                  <polyline points="9 14 4 9 9 4" />
-                  <path d="M20 20v-7a4 4 0 0 0-4-4H4" />
-                </svg>
-                <span>Trả lời</span>
-              </button>
-            </div>
-
-            {totalReactions > 0 && (
-              <span className="soc-react-summary" aria-label={`${totalReactions} cảm xúc`}>
-                <span aria-hidden="true">{emojis.join('')}</span>
-                <span>{totalReactions}</span>
-              </span>
-            )}
-          </div>
-        </div>
-      </div>
+      <CommentItem
+        comment={comment}
+        isReply={isReply}
+        currentUserId={user?.id}
+        isAdmin={isAdmin}
+        menuId={`${menuBaseId}-${comment.id}`}
+        isPickerOpen={openPickerId === comment.id}
+        isReactBusy={reactBusyId === comment.id}
+        onOpenPicker={() => setOpenPickerId(comment.id)}
+        onClosePicker={() => setOpenPickerId((cur) => (cur === comment.id ? null : cur))}
+        onTogglePicker={() => setOpenPickerId((cur) => (cur === comment.id ? null : comment.id))}
+        onReaction={handleReaction}
+        onReply={openInlineReply}
+        onEdit={startEditComment}
+        onDelete={(target) => { setDeleteErr(''); setTargetDelete(target); }}
+      />
     );
   }
 

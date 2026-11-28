@@ -1,5 +1,5 @@
--- Hỗ trợ bình luận phản hồi dạng cây (parent_id) cho FR-SOC-03.
--- Chạy trong Supabase SQL Editor (hoặc `supabase db push`).
+-- Hỗ trợ bình luận phản hồi dạng cây 2 cấp (parent_id) cho FR-SOC-03.
+-- Chạy trong Supabase SQL Editor (hoặc `supabase db push`) sau 0008_reports.sql.
 
 alter table public.comments
   add column if not exists parent_id uuid references public.comments(id) on delete cascade;

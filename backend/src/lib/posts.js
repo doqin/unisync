@@ -10,7 +10,6 @@ import { signPostImages } from './postImages.js';
 
 export const POST_SELECT = 'id, author_id, group_id, content, image_urls, created_at';
 export const COMMENT_SELECT = 'id, post_id, author_id, parent_id, content, created_at';
-export const COMMENT_SELECT_LEGACY = 'id, post_id, author_id, content, created_at';
 export const AUTHOR_SELECT = 'id, full_name, avatar_url';
 
 export const DEFAULT_FEED_LIMIT = 10;
@@ -191,10 +190,6 @@ export async function hydratePosts(sb, posts, viewerId) {
   });
 }
 
-/** Lỗi do CSDL chưa chạy migration (bảng hoặc cột chưa tồn tại). */
-export const isMissingSchemaError = (error) =>
-  ['42703', '42P01', 'PGRST204', 'PGRST205'].includes(error?.code);
-
 /** Gắn thông tin tác giả (avatar đã ký) và thống kê cảm xúc cho danh sách bình luận. */
 export async function hydrateComments(sb, comments, viewerId = null) {
   if (!comments.length) return [];
@@ -204,18 +199,12 @@ export async function hydrateComments(sb, comments, viewerId = null) {
     loadSignedAuthors(sb, comments.map((c) => c.author_id)),
     sb.from('comment_reactions').select('comment_id, user_id, reaction').in('comment_id', commentIds),
   ]);
-
-  let reactions = [];
-  if (reactionsRes.error) {
-    if (!isMissingSchemaError(reactionsRes.error)) throw reactionsRes.error;
-  } else {
-    reactions = reactionsRes.data ?? [];
-  }
+  if (reactionsRes.error) throw reactionsRes.error;
 
   const countsMap = new Map();
   const totalsMap = new Map();
   const mineMap = new Map();
-  for (const r of reactions) {
+  for (const r of reactionsRes.data ?? []) {
     totalsMap.set(r.comment_id, (totalsMap.get(r.comment_id) ?? 0) + 1);
     const byType = countsMap.get(r.comment_id) ?? {};
     byType[r.reaction] = (byType[r.reaction] ?? 0) + 1;

@@ -32,7 +32,6 @@ import {
 } from '../lib/postImages.js';
 import {
   COMMENT_SELECT,
-  COMMENT_SELECT_LEGACY,
   DEFAULT_FEED_LIMIT,
   MAX_FEED_LIMIT,
   POST_SELECT,
@@ -42,7 +41,6 @@ import {
   encodeCursor,
   hydrateComments,
   hydratePosts,
-  isMissingSchemaError,
   loadPost,
 } from '../lib/posts.js';
 import { validate } from '../middleware/validate.js';
@@ -116,8 +114,18 @@ const reactionSchema = z.strictObject({
   reaction: z.enum(REACTION_TYPES, { message: 'Loại cảm xúc không hợp lệ' }),
 });
 
-/** Lỗi do CSDL chưa chạy migration 0008 (chưa có cột comments.parent_id). */
-const isMissingParentCol = (error) => isMissingSchemaError(error);
+/** Tải 1 bình luận thuộc bài đăng `postId`; ném 404 nếu không tồn tại hoặc thuộc bài khác. */
+async function loadPostComment(sb, postId, commentId) {
+  const { data, error } = await sb
+    .from('comments')
+    .select('id, post_id, author_id')
+    .eq('id', commentId)
+    .eq('post_id', postId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw notFound('Không tìm thấy bình luận');
+  return data;
+}
 
 /** Tổng hợp số lượng từng loại cảm xúc của 1 bình luận dưới góc nhìn viewerId. */
 async function summarizeCommentReactions(sb, commentId, viewerId) {
@@ -480,7 +488,7 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
     }
   });
 
-  // FR-SOC-03: Danh sách bình luận của bài đăng (cũ trước → mới sau, phân trang theo page).
+  // FR-SOC-03: Danh sách bình luận phân trang theo bình luận gốc (kèm toàn bộ phản hồi cấp 1 của từng gốc).
   r.get('/:id/comments', validate({ params: postIdParam, query: commentsQuerySchema }), async (req, res, next) => {
     try {
       const sb = db();
@@ -491,77 +499,69 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       const limit = Number(req.query.limit ?? 20);
       const from = (page - 1) * limit;
 
-      let { data: rows, error } = await sb
+      const { data: rootRows, error } = await sb
         .from('comments')
         .select(COMMENT_SELECT)
         .eq('post_id', post.id)
+        .is('parent_id', null)
         .order('created_at', { ascending: true })
         .order('id', { ascending: true })
         .range(from, from + limit);
-      if (isMissingParentCol(error)) {
-        const legacy = await sb
-          .from('comments')
-          .select(COMMENT_SELECT_LEGACY)
-          .eq('post_id', post.id)
-          .order('created_at', { ascending: true })
-          .order('id', { ascending: true })
-          .range(from, from + limit);
-        rows = (legacy.data ?? []).map((r) => ({ ...r, parent_id: null }));
-        error = legacy.error;
-      }
       if (error) throw error;
 
-      const list = rows ?? [];
+      const list = rootRows ?? [];
       const hasMore = list.length > limit;
-      const items = await hydrateComments(sb, list.slice(0, limit), req.user.id);
+      const roots = list.slice(0, limit);
+      if (!roots.length) return res.json({ items: [], page, has_more: false });
+
+      const rootIds = roots.map((c) => c.id);
+      const { data: replyRows, error: rErr } = await sb
+        .from('comments')
+        .select(COMMENT_SELECT)
+        .eq('post_id', post.id)
+        .in('parent_id', rootIds)
+        .order('created_at', { ascending: true })
+        .order('id', { ascending: true });
+      if (rErr) throw rErr;
+
+      const items = await hydrateComments(sb, [...roots, ...(replyRows ?? [])], req.user.id);
       res.json({ items, page, has_more: hasMore });
     } catch (e) {
       next(e);
     }
   });
 
-  // FR-SOC-03: Thêm bình luận hoặc phản hồi bình luận (`parent_id`) vào bài đăng.
+  // FR-SOC-03: Thêm bình luận hoặc phản hồi bình luận (`parent_id`) vào bài đăng (ép tối đa 2 cấp).
   r.post('/:id/comments', validate({ params: postIdParam, body: createCommentSchema }), async (req, res, next) => {
     try {
       const sb = db();
       const post = await loadPost(sb, req.params.id);
       await assertPostAccess(sb, post, req.user.id, req.profile);
 
-      const parentId = req.body.parent_id ?? null;
-      if (parentId) {
+      let effectiveParentId = null;
+      if (req.body.parent_id) {
         const { data: parent, error: pErr } = await sb
           .from('comments')
-          .select('id')
-          .eq('id', parentId)
+          .select('id, parent_id')
+          .eq('id', req.body.parent_id)
           .eq('post_id', post.id)
           .maybeSingle();
         if (pErr) throw pErr;
         if (!parent) throw notFound('Không tìm thấy bình luận cần trả lời');
+        // Ép cây luôn đúng 2 cấp: nếu trả lời một bình luận con, quy parent_id về bình luận gốc.
+        effectiveParentId = parent.parent_id ?? parent.id;
       }
 
-      let { data: created, error } = await sb
+      const { data: created, error } = await sb
         .from('comments')
         .insert({
           post_id: post.id,
           author_id: req.user.id,
-          parent_id: parentId,
+          parent_id: effectiveParentId,
           content: req.body.content,
         })
         .select(COMMENT_SELECT)
         .single();
-      if (isMissingParentCol(error)) {
-        const legacy = await sb
-          .from('comments')
-          .insert({
-            post_id: post.id,
-            author_id: req.user.id,
-            content: req.body.content,
-          })
-          .select(COMMENT_SELECT_LEGACY)
-          .single();
-        created = legacy.data ? { ...legacy.data, parent_id: parentId } : null;
-        error = legacy.error;
-      }
       if (error) throw error;
 
       const [hydrated] = await hydrateComments(sb, [created], req.user.id);
@@ -578,35 +578,17 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       const post = await loadPost(sb, req.params.id);
       await assertPostAccess(sb, post, req.user.id, req.profile);
 
-      const { data: comment, error: cErr } = await sb
-        .from('comments')
-        .select('id, post_id, author_id')
-        .eq('id', req.params.commentId)
-        .eq('post_id', post.id)
-        .maybeSingle();
-      if (cErr) throw cErr;
-      if (!comment) throw notFound('Không tìm thấy bình luận');
-
+      const comment = await loadPostComment(sb, post.id, req.params.commentId);
       if (comment.author_id !== req.user.id) {
         throw forbidden('Chỉ tác giả mới được sửa bình luận này');
       }
 
-      let { data: updated, error } = await sb
+      const { data: updated, error } = await sb
         .from('comments')
         .update({ content: req.body.content })
         .eq('id', comment.id)
         .select(COMMENT_SELECT)
         .single();
-      if (isMissingParentCol(error)) {
-        const legacy = await sb
-          .from('comments')
-          .update({ content: req.body.content })
-          .eq('id', comment.id)
-          .select(COMMENT_SELECT_LEGACY)
-          .single();
-        updated = legacy.data ? { ...legacy.data, parent_id: null } : null;
-        error = legacy.error;
-      }
       if (error) throw error;
 
       const [hydrated] = await hydrateComments(sb, [updated], req.user.id);
@@ -623,32 +605,14 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       const post = await loadPost(sb, req.params.id);
       await assertPostAccess(sb, post, req.user.id, req.profile);
 
-      const { data: comment, error: cErr } = await sb
-        .from('comments')
-        .select('id')
-        .eq('id', req.params.commentId)
-        .eq('post_id', post.id)
-        .maybeSingle();
-      if (cErr) throw cErr;
-      if (!comment) throw notFound('Không tìm thấy bình luận');
-
+      const comment = await loadPostComment(sb, post.id, req.params.commentId);
       const { error } = await sb
         .from('comment_reactions')
         .upsert(
           { comment_id: comment.id, user_id: req.user.id, reaction: req.body.reaction },
           { onConflict: 'comment_id,user_id' },
         );
-      if (error) {
-        if (isMissingSchemaError(error)) {
-          return res.json({
-            comment_id: comment.id,
-            my_reaction: req.body.reaction,
-            reaction_count: null,
-            reaction_counts: null,
-          });
-        }
-        throw error;
-      }
+      if (error) throw error;
 
       res.json(await summarizeCommentReactions(sb, comment.id, req.user.id));
     } catch (e) {
@@ -663,31 +627,13 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
       const post = await loadPost(sb, req.params.id);
       await assertPostAccess(sb, post, req.user.id, req.profile);
 
-      const { data: comment, error: cErr } = await sb
-        .from('comments')
-        .select('id')
-        .eq('id', req.params.commentId)
-        .eq('post_id', post.id)
-        .maybeSingle();
-      if (cErr) throw cErr;
-      if (!comment) throw notFound('Không tìm thấy bình luận');
-
+      const comment = await loadPostComment(sb, post.id, req.params.commentId);
       const { error } = await sb
         .from('comment_reactions')
         .delete()
         .eq('comment_id', comment.id)
         .eq('user_id', req.user.id);
-      if (error) {
-        if (isMissingSchemaError(error)) {
-          return res.json({
-            comment_id: comment.id,
-            my_reaction: null,
-            reaction_count: null,
-            reaction_counts: null,
-          });
-        }
-        throw error;
-      }
+      if (error) throw error;
 
       res.json(await summarizeCommentReactions(sb, comment.id, req.user.id));
     } catch (e) {
@@ -700,14 +646,7 @@ export function createPostsRouter({ db = supabaseAdmin, readHead = readImageHead
     try {
       const sb = db();
       const post = await loadPost(sb, req.params.id);
-      const { data: comment, error: cErr } = await sb
-        .from('comments')
-        .select('id, post_id, author_id')
-        .eq('id', req.params.commentId)
-        .eq('post_id', post.id)
-        .maybeSingle();
-      if (cErr) throw cErr;
-      if (!comment) throw notFound('Không tìm thấy bình luận');
+      const comment = await loadPostComment(sb, post.id, req.params.commentId);
 
       if (comment.author_id !== req.user.id && !isAdmin(req.profile)) {
         throw forbidden('Bạn không có quyền xóa bình luận này');

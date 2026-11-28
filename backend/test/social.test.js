@@ -594,7 +594,7 @@ test('Bình luận: thêm, liệt kê phân trang kèm avatar đã ký, xóa ch�
   );
 });
 
-test('Bình luận phản hồi dạng cây (parent_id): trả lời nhiều cấp, chặn parent ở bài khác và xóa cha xóa luôn con', async () => {
+test('Bình luận phản hồi dạng cây (parent_id): ép tối đa 2 cấp, chặn parent ở bài khác và xóa cha xóa luôn con', async () => {
   const post = (await req('POST', '/posts', { user: ALICE, body: { content: 'Bài test reply tree' } })).body;
   const otherPost = (await req('POST', '/posts', { user: ALICE, body: { content: 'Bài khác' } })).body;
 
@@ -603,7 +603,7 @@ test('Bình luận phản hồi dạng cây (parent_id): trả lời nhiều c�
   })).body;
   assert.equal(root.parent_id, null);
 
-  // Trả lời cấp 1 và cấp 2
+  // Trả lời bình luận gốc (cấp 1) và trả lời lại bình luận con (vẫn quy về root.id để giữ 2 cấp)
   const r1 = await req('POST', `/posts/${post.id}/comments`, {
     user: BOB, body: { content: '@Nguyễn Đức Huy đồng ý', parent_id: root.id },
   });
@@ -614,7 +614,7 @@ test('Bình luận phản hồi dạng cây (parent_id): trả lời nhiều c�
     user: CHARLIE, body: { content: '@Trần Văn B chuẩn luôn', parent_id: r1.body.id },
   });
   assert.equal(r2.status, 201);
-  assert.equal(r2.body.parent_id, r1.body.id);
+  assert.equal(r2.body.parent_id, root.id);
 
   // Không cho gắn parent_id thuộc bài đăng khác → 404
   const crossPost = await req('POST', `/posts/${otherPost.id}/comments`, {
@@ -622,16 +622,44 @@ test('Bình luận phản hồi dạng cây (parent_id): trả lời nhiều c�
   });
   assert.equal(crossPost.status, 404);
 
-  // Danh sách bình luận giữ đúng parent_id
+  // Danh sách bình luận giữ đúng parent_id = root.id cho cả 2 phản hồi
   const list = await req('GET', `/posts/${post.id}/comments?page=1&limit=20`);
   assert.equal(list.body.items.length, 3);
   assert.equal(list.body.items.find((x) => x.id === r1.body.id).parent_id, root.id);
-  assert.equal(list.body.items.find((x) => x.id === r2.body.id).parent_id, r1.body.id);
+  assert.equal(list.body.items.find((x) => x.id === r2.body.id).parent_id, root.id);
 
   // Xóa bình luận gốc → cascade xóa cả r1 và r2
   assert.equal((await req('DELETE', `/posts/${post.id}/comments/${root.id}`, { user: ALICE })).status, 204);
   const afterDel = await req('GET', `/posts/${post.id}/comments?page=1&limit=20`);
   assert.equal(afterDel.body.items.length, 0);
+});
+
+test('Phân trang bình luận theo bình luận gốc kèm đầy đủ phản hồi của gốc đó', async () => {
+  const post = (await req('POST', '/posts', { user: ALICE, body: { content: 'Bài test phân trang root' } })).body;
+
+  const root1 = (await req('POST', `/posts/${post.id}/comments`, {
+    user: ALICE, body: { content: 'Bình luận gốc 1' },
+  })).body;
+  await new Promise((resolve) => setTimeout(resolve, 5));
+
+  const root2 = (await req('POST', `/posts/${post.id}/comments`, {
+    user: BOB, body: { content: 'Bình luận gốc 2' },
+  })).body;
+  await new Promise((resolve) => setTimeout(resolve, 5));
+
+  const replyToRoot1 = (await req('POST', `/posts/${post.id}/comments`, {
+    user: CHARLIE, body: { content: 'Phản hồi muộn cho gốc 1', parent_id: root1.id },
+  })).body;
+
+  const page1 = await req('GET', `/posts/${post.id}/comments?page=1&limit=1`);
+  assert.equal(page1.status, 200);
+  assert.equal(page1.body.has_more, true);
+  assert.deepEqual(page1.body.items.map((x) => x.id), [root1.id, replyToRoot1.id]);
+
+  const page2 = await req('GET', `/posts/${post.id}/comments?page=2&limit=1`);
+  assert.equal(page2.status, 200);
+  assert.equal(page2.body.has_more, false);
+  assert.deepEqual(page2.body.items.map((x) => x.id), [root2.id]);
 });
 
 test('Cảm xúc bình luận (PUT/DELETE reaction): thả, đổi loại, bỏ cảm xúc, thống kê và chặn người ngoài nhóm', async () => {
